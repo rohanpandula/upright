@@ -9,7 +9,7 @@ version failed silently in nine different ways, each of which cost hours.
 | thing | value |
 |---|---|
 | menu item | `Library > Plug-in Extras > Import Sweep` (title lives in `Info.lua`) |
-| trace file | `/Users/rohan/Projects/trichroma/research/upright/lrtest/TRACE.txt` |
+| trace file | `lrtest/TRACE.txt` |
 | lock file | `lrtest/.ImportSweep.lock` |
 | scratch dir | `lrtest/.sweep-tmp` |
 

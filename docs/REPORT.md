@@ -749,7 +749,7 @@ Full claim text and per-limitation mapping: `../evidence/patent_map.txt`. Engine
 
 ### 6a. NegPy, measured against this `[MEASURED]`
 
-NegPy (`/Users/rohan/Projects/negpy`, `lab-redesign`) is the closest FOSS analogue in spirit — it auto-corrects geometry from detected film/gate edges rather than picture content. It is solving a different problem (scanned film, where the gate *is* the ground truth), so this compares the models, not the products.
+NegPy (`negpy`, `lab-redesign`) is the closest FOSS analogue in spirit — it auto-corrects geometry from detected film/gate edges rather than picture content. It is solving a different problem (scanned film, where the gate *is* the ground truth), so this compares the models, not the products.
 
 **What its warp actually is.** `keystone_quad` displaces all four unit-square corners by the *same* vector `(cv,ch)·0.005` in a checkerboard sign pattern. That is a genuine homography, but a **2-DOF slice** of PGL(3)'s 8: the centre and all four edge midpoints are fixed, so the principal point is nailed to the frame centre and no asymmetric trapezoid is representable. `|Δx| = |Δy|` at every corner, so the axes are coupled. Measured structurally, one axis alone sends its own VP finite and the other's to infinity — the family can make at most one line family parallel, and only by zeroing the other parameter. Any non-zero `ch` tilts the horizon 31° while the true roll-0 horizon is flat. It carries an *implied* focal (`13397/cv` px) that is never estimated: the shipped `cv = 5` implies 2680 px against a truth of 1600.
 

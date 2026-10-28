@@ -1,0 +1,110 @@
+{
+  "A_clean": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 199,
+      "median_axis_deg": [
+        0.08970608595279117,
+        0.11739909513113146
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 725,
+      "median_axis_deg": [
+        0.018088929873577797,
+        0.01365849458494874
+      ]
+    }
+  },
+  "B_strong": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 92,
+      "median_axis_deg": [
+        0.03999779709217677,
+        0.028217651031839472
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 400,
+      "median_axis_deg": [
+        0.050250922205208326,
+        0.03075210677184264
+      ]
+    }
+  },
+  "C_noisy": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 199,
+      "median_axis_deg": [
+        0.06151495213028113,
+        0.384904136146635
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 725,
+      "median_axis_deg": [
+        0.019953984031921834,
+        0.022318263913761363
+      ]
+    }
+  },
+  "D_roll": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 163,
+      "median_axis_deg": [
+        0.030675812675191594,
+        0.09680924013071233
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 711,
+      "median_axis_deg": [
+        0.013844911409627514,
+        0.0006199585103095783
+      ]
+    }
+  },
+  "01_input_truth": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 107,
+      "median_axis_deg": [
+        0.02326405987084712,
+        0.038063988313039324
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 498,
+      "median_axis_deg": [
+        0.013562707065851498,
+        0.06166841824249325
+      ]
+    }
+  },
+  "01_input_legacy_wrong_focal": {
+    "fixed_segments": {
+      "ok": true,
+      "segments": 107,
+      "median_axis_deg": [
+        0.2051699012794046,
+        0.32722769733355583
+      ]
+    },
+    "image": {
+      "ok": true,
+      "segments": 498,
+      "median_axis_deg": [
+        0.18951290205696125,
+        0.27021265052858123
+      ]
+    }
+  }
+}

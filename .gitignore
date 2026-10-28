@@ -13,9 +13,14 @@ lrtest/sweep/
 lrtest/dg/
 lrtest/limits/
 
-# Large per-round dumps
+# Large per-round dumps, except the few the tests read
 evidence/*.json
 evidence/*.jsonl
+!evidence/round1_before.json
+!evidence/round1_diagnosis.json
+!evidence/round8.json
+!evidence/port_review_pre_fix_accuracy.json
+!evidence/port_review_sensitivity.json
 evidence/round9_sweep.json
 evidence/round10_geometry.json
 evidence/round10_supports/

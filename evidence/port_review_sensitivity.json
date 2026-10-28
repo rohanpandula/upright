@@ -1,0 +1,1515 @@
+{
+  "protocol": "Full, seed=0, true focal except explicit legacy row; frozen detections, independent world lines; degrees",
+  "baseline": {
+    "A_clean": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 199,
+        "median_axis_deg": [
+          0.40593626447122233,
+          0.1628759452868629
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 199,
+        "median_axis_deg": [
+          0.40593626447122233,
+          0.1628759452868629
+        ]
+      }
+    },
+    "B_strong": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 92,
+        "median_axis_deg": [
+          0.3899565480653209,
+          0.18722878358152756
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 92,
+        "median_axis_deg": [
+          0.3899565480653209,
+          0.18722878358152756
+        ]
+      }
+    },
+    "C_noisy": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 199,
+        "median_axis_deg": [
+          0.21175326675206918,
+          0.40324230698661295
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 199,
+        "median_axis_deg": [
+          0.21175326675206918,
+          0.40324230698661295
+        ]
+      }
+    },
+    "D_roll": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 163,
+        "median_axis_deg": [
+          0.08968720601433944,
+          0.33872926958859917
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 163,
+        "median_axis_deg": [
+          0.08968720601433944,
+          0.33872926958859917
+        ]
+      }
+    },
+    "01_input_truth": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 107,
+        "median_axis_deg": [
+          0.1915639917550891,
+          0.16185832857516994
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 107,
+        "median_axis_deg": [
+          0.1915639917550891,
+          0.16185832857516994
+        ]
+      }
+    },
+    "01_input_legacy_wrong_focal": {
+      "fixed_segments": {
+        "ok": true,
+        "segments": 107,
+        "median_axis_deg": [
+          0.43657805708411956,
+          0.223639649708452
+        ]
+      },
+      "image": {
+        "ok": true,
+        "segments": 107,
+        "median_axis_deg": [
+          0.43657805708411956,
+          0.223639649708452
+        ]
+      }
+    }
+  },
+  "variants": {
+    "cauchy_0.5_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.02585467011958542,
+            0.29688444516647267
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.014071324054114598,
+            0.013739231903421627
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.014071324054114598,
+            0.013739231903421627
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.0699559804291141,
+            0.03630274479989726
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.04350432985834374,
+            0.04073050829801047
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.04350432985834374,
+            0.04073050829801047
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.03626487386156185,
+            0.16344847585350686
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.01401985575638065,
+            0.017529076183584215
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.01401985575638065,
+            0.017529076183584215
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.025235396429430068,
+            0.09694267430890911
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.024430016658754994,
+            0.0023230157339987987
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.024430016658754994,
+            0.0023230157339987987
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.016814571867520556,
+            0.03031106532656809
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.02077075708332643,
+            0.06163985591373725
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.02077075708332643,
+            0.06163985591373725
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.20380085921310354,
+            0.35003497249888216
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.19849797513322187,
+            0.2778667015656645
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.19849797513322187,
+            0.2778667015656645
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "cauchy_1_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.08970608595279117,
+            0.11739909513113146
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.018088929873577797,
+            0.01365849458494874
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.018088929873577797,
+            0.01365849458494874
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.03999779709217677,
+            0.028217651031839472
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.050250922205208326,
+            0.03075210677184264
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.050250922205208326,
+            0.03075210677184264
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.06151495213028113,
+            0.384904136146635
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.019953984031921834,
+            0.022318263913761363
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.019953984031921834,
+            0.022318263913761363
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.030675812675191594,
+            0.09680924013071233
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.013844911409627514,
+            0.0006199585103095783
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.013844911409627514,
+            0.0006199585103095783
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.02326405987084712,
+            0.038063988313039324
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.013562707065851498,
+            0.06166841824249325
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.013562707065851498,
+            0.06166841824249325
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.2051699012794046,
+            0.32722769733355583
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.18951290205696125,
+            0.27021265052858123
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.18951290205696125,
+            0.27021265052858123
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "cauchy_2_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.10229060677513502,
+            0.1608462522626502
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.02383911922033377,
+            0.015481500319552899
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.02383911922033377,
+            0.015481500319552899
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.02193656883335393,
+            0.023429369661602185
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.06379467314788911,
+            0.02233928924969306
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.06379467314788911,
+            0.02233928924969306
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.09922735952965667,
+            0.3853492632614901
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.027630737493055335,
+            0.028349236203543796
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.027630737493055335,
+            0.028349236203543796
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.03832944819688322,
+            0.09387180701044447
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.0050055597273086505,
+            0.006635709628385023
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.0050055597273086505,
+            0.006635709628385023
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.02955669871880673,
+            0.04611280522010362
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.01910440977415817,
+            0.06706727190962972
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.01910440977415817,
+            0.06706727190962972
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.22148363425112905,
+            0.3119045620468357
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.18973750290632552,
+            0.26493858051137237
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.18973750290632552,
+            0.26493858051137237
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "huber_0.5_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.10316671050473047,
+            0.13336101590959276
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.01785834047458934,
+            0.012849871693751033
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.01785834047458934,
+            0.012849871693751033
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.05432037540670365,
+            0.02337273153461096
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.05933871486964648,
+            0.026790047674215237
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.05933871486964648,
+            0.026790047674215237
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.07597679513840916,
+            0.3864824024139726
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.019453192728590807,
+            0.022338304387167985
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.019453192728590807,
+            0.022338304387167985
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.02613686958431316,
+            0.10202844634529239
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.006370720569584876,
+            0.0032028503184066406
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.006370720569584876,
+            0.0032028503184066406
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.030709686968087624,
+            0.045163185137989434
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.016190034408339216,
+            0.0628803243180722
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.016190034408339216,
+            0.0628803243180722
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.22092368071173496,
+            0.328608148076722
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.1944244027432518,
+            0.27172263632374727
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.1944244027432518,
+            0.27172263632374727
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "huber_1_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.10376739563952242,
+            0.15419431873423806
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.02251840121849824,
+            0.014150230052244722
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.02251840121849824,
+            0.014150230052244722
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.034587033427222025,
+            0.033340623689213714
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.06783461714300643,
+            0.018932910408043895
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.06783461714300643,
+            0.018932910408043895
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.09975921753672168,
+            0.3903413635582822
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.025225554481920653,
+            0.02681814631241241
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.025225554481920653,
+            0.02681814631241241
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.02704982061158745,
+            0.10201309880359051
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.006636210768682815,
+            0.007428261876549569
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.006636210768682815,
+            0.007428261876549569
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.028198171921395954,
+            0.04504697861354415
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.021309391306637337,
+            0.06849642881313948
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.021309391306637337,
+            0.06849642881313948
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.21910202603459084,
+            0.31419620782546515
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.19115319248682283,
+            0.27196014280566133
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.19115319248682283,
+            0.27196014280566133
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "huber_2_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.11313451285612786,
+            0.1753023616580677
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.02819333207783359,
+            0.019379945877745042
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.02819333207783359,
+            0.019379945877745042
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.042040754414905734,
+            0.04090131957575493
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.07536358891383799,
+            0.020547515420709164
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.07536358891383799,
+            0.020547515420709164
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.11965417030148018,
+            0.3731791579684073
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.03161150662586465,
+            0.03262485521011909
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.03161150662586465,
+            0.03262485521011909
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.03700049571214237,
+            0.09622409165739353
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.018600625864245046,
+            0.011843581301023812
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.018600625864245046,
+            0.011843581301023812
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.036468931225826395,
+            0.05539094466830054
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.03243355378735657,
+            0.07427035860592057
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.03243355378735657,
+            0.07427035860592057
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.23936079631010898,
+            0.3055384334660014
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.19230526449406682,
+            0.2593676580016986
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.19230526449406682,
+            0.2593676580016986
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "least_squares_1_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.11502982658092975,
+            0.16399174117910612
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.0668802424498196,
+            0.05793513350739934
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.0668802424498196,
+            0.05793513350739934
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.119930096919731,
+            0.15157703668304914
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.056331764697979736,
+            0.04110139113422154
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.056331764697979736,
+            0.04110139113422154
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.12742060952173517,
+            0.3869480616770334
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.027292653022279012,
+            0.03562932390042576
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.027292653022279012,
+            0.03562932390042576
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.07482144836453841,
+            0.11801803242198346
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.07847083039526837,
+            0.07081362298628574
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.07847083039526837,
+            0.07081362298628574
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.0340353821653423,
+            0.05379153596606529
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.07252952646657462,
+            0.05917244908304248
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.07252952646657462,
+            0.05917244908304248
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.230136170319156,
+            0.30366343764411813
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.23597169903791837,
+            0.260059235092296
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.23597169903791837,
+            0.260059235092296
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "cauchy_1_uniform": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.0432808940643028,
+            0.22644682957395348
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.02143821171748783,
+            0.018731255520372272
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.02143821171748783,
+            0.018731255520372272
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.050574689511321935,
+            0.005283866161358361
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.09767672576052178,
+            0.02654513061875925
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.09767672576052178,
+            0.02654513061875925
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.045469015618678554,
+            0.35508794160826307
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.025321479752236087,
+            0.024001637419932085
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.025321479752236087,
+            0.024001637419932085
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.019895499015525786,
+            0.07556705487134296
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.023814286618154767,
+            0.013426769984154574
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.023814286618154767,
+            0.013426769984154574
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.039461787310273166,
+            0.06215421644377557
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.0730937254780315,
+            0.09175964153044917
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.0730937254780315,
+            0.09175964153044917
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.18840041951631292,
+            0.26022983171802283
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.23438045554935627,
+            0.27618696538885357
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.23438045554935627,
+            0.27618696538885357
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "cauchy_1_half_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.08970608599999252,
+            0.11739909514383746
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.018721177677086587,
+            0.012342297016169656
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.018721177677086587,
+            0.012342297016169656
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.03999779730793307,
+            0.028217651137507918
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.049633105036534175,
+            0.022184332089048634
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.049633105036534175,
+            0.022184332089048634
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.061514952111210164,
+            0.38490413613645164
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.020083960128978617,
+            0.0231109329403111
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.020083960128978617,
+            0.0231109329403111
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.030673685487968783,
+            0.09681098110057343
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.013844914479939519,
+            0.0006199577337049026
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.013844914479939519,
+            0.0006199577337049026
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.02326405987169977,
+            0.038063988313802574
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.01302248470891243,
+            0.05106865194755472
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.01302248470891243,
+            0.05106865194755472
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.20516988623691645,
+            0.32722769742739966
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.19009028496290625,
+            0.2802661110658719
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.19009028496290625,
+            0.2802661110658719
+          ],
+          "segments": 498
+        }
+      }
+    },
+    "cauchy_1_double_mean": {
+      "A_clean": {
+        "original": {
+          "median_axis_deg": [
+            0.08970608603389962,
+            0.11739909509429969
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.017511438171105453,
+            0.015741710727135528
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.017511438171105453,
+            0.015741710727135528
+          ],
+          "segments": 725
+        }
+      },
+      "B_strong": {
+        "original": {
+          "median_axis_deg": [
+            0.03999745118878906,
+            0.028217663355525002
+          ],
+          "segments": 92
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.05089896044889741,
+            0.03974856353663885
+          ],
+          "segments": 400
+        },
+        "review": {
+          "median_axis_deg": [
+            0.05089896044889741,
+            0.03974856353663885
+          ],
+          "segments": 400
+        }
+      },
+      "C_noisy": {
+        "original": {
+          "median_axis_deg": [
+            0.06151495210912117,
+            0.3849041361317892
+          ],
+          "segments": 199
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.019842088530559465,
+            0.02163893632335678
+          ],
+          "segments": 725
+        },
+        "review": {
+          "median_axis_deg": [
+            0.019842088530559465,
+            0.02163893632335678
+          ],
+          "segments": 725
+        }
+      },
+      "D_roll": {
+        "original": {
+          "median_axis_deg": [
+            0.030673686039726533,
+            0.09681098000197126
+          ],
+          "segments": 163
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.013844919550415113,
+            0.0006199487629518095
+          ],
+          "segments": 711
+        },
+        "review": {
+          "median_axis_deg": [
+            0.013844919550415113,
+            0.0006199487629518095
+          ],
+          "segments": 711
+        }
+      },
+      "01_input_truth": {
+        "original": {
+          "median_axis_deg": [
+            0.023264059865724107,
+            0.03806398830618235
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.014269036777371014,
+            0.07362572991008245
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.014269036777371014,
+            0.07362572991008245
+          ],
+          "segments": 498
+        }
+      },
+      "01_input_legacy_wrong_focal": {
+        "original": {
+          "median_axis_deg": [
+            0.20516989748203684,
+            0.3272276983910844
+          ],
+          "segments": 107
+        },
+        "pre_review": {
+          "median_axis_deg": [
+            0.18880899145366925,
+            0.26231233375111
+          ],
+          "segments": 498
+        },
+        "review": {
+          "median_axis_deg": [
+            0.18880899145366925,
+            0.26231233375111
+          ],
+          "segments": 498
+        }
+      }
+    }
+  }
+}

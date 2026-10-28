@@ -3,8 +3,9 @@ name: test
 on: [push, pull_request]
 
 jobs:
-  port:
-    name: port
+  # The port itself must run on numpy and OpenCV alone.
+  port-only:
+    name: port (no scipy)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,11 +13,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install numpy opencv-python-headless pytest
-      - run: python -m pytest -q
+      - run: python -m pytest -q test_port.py test_round2.py test_round3.py test_round10.py
         working-directory: port
 
-  benchmarks:
-    name: benchmarks
+  # The rest reach the older prototype, which needs scipy and Pillow.
+  full:
+    name: full suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

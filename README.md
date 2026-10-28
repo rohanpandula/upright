@@ -1,107 +1,144 @@
-# Upright
+<div align="center">
+  <img src="icon.svg" width="96" alt="Upright logo: a skewed frame straightened">
 
-A reverse-engineered account of Adobe Lightroom Classic's Upright and keystone correction, plus an
-MIT-licensed Python port of what was recovered.
+  # upright
+  *Reverse-engineered Lightroom Upright, and an MIT port of what it does*
 
-Lightroom's Upright is not a black box. It ships a specific piece of algebra and a specific
-behaviour, and both are measurable from the outside: the algebra from the transforms Lightroom
-writes into its own catalogue, the behaviour by driving the real application on scenes where the
-camera rotation is known exactly. That is what this repository contains.
+  [![test](https://img.shields.io/github/actions/workflow/status/rohanpandula/upright/test.yml?style=flat-square&label=test)](https://github.com/rohanpandula/upright/actions)
+  [![Python](https://img.shields.io/badge/Python-3.10%2B-3c873a?style=flat-square)](https://python.org)
+  [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-**The short version of what was found:** Upright ships `H = s · K₁ · R · K₀⁻¹`, a rotation
-re-projected through a second, different camera rather than the shared-intrinsics form almost
-everyone guesses. That form fits Adobe's own stored transforms to `5.65e-16`; the shared-`K` form
-stalls at `3.19e-01`. The second finding is behavioural: `Auto` deliberately under-corrects, and
-the amount is a smooth function of camera pitch, keyed on a gate that does nothing at all on
-already-parallel verticals.
+  [What it does](#what-it-does) • [Status](#status) • [Install](#install) • [Usage](#usage) • [Repository](#repository) • [Patents](#patents)
+</div>
 
-Read [the write-up](docs/REPORT.md) or [the page](site/index.html).
+Adobe Lightroom Classic ships a perspective correction called Upright. It is not a black box:
+it ships a specific piece of algebra and a specific behaviour, and both can be measured from
+outside the program. The algebra is recoverable from the transforms Lightroom writes into its own
+catalogue. The behaviour is recoverable by driving the real application on scenes where the camera
+rotation is known exactly. This repository does both, and publishes a reference implementation.
+
+## What it does
+
+Upright ships `H = s · K₁ · R · K₀⁻¹`. That is a camera rotation re-projected through a *second,
+different* camera, rather than the shared-intrinsics form `K·R·K⁻¹` that almost everyone reaches
+for first.
+
+The difference is not cosmetic. Fitting Adobe's own stored transforms, the shared-`K` form stalls
+at a leftover error of `3.19e-01` while the two-camera form reaches `5.65e-16`, which is machine
+precision. The two independent intrinsics are what let Adobe make a wall parallel without forcing
+the perspective recovery a physically correct rotation would demand.
+
+The second finding is behavioural. `Auto` deliberately under-corrects, and how far it stops short
+is a smooth function of camera pitch, gated on whether the verticals need fixing at all. On a
+frame with parallel verticals and converging horizontals it does nothing, moving horizontal
+convergence by 0.01° where `Full` removes 96%.
+
+- **Model recovered** from 12,883 harvested transforms, with an orthogonality test that separates
+  the two-camera form from every single-focal alternative
+- **Damping curve measured** over 29 controlled solves and a 4,966-photo corpus, including the
+  `π/12` and `π/15` literals located in the shipping binary
+- **Guided mode cracked**, including its storage format and the digest that gates re-analysis
+- **Port shipped** as MIT Python, with every constant tagged `PROVEN`, `MEASURED` or `CHOICE`
 
 ## Status
 
-Be clear about this before using anything here.
+> [!WARNING]
+> The port works on synthetic scenes and is poor on real photographs. It returns identity on about
+> 90% of real frames and loses to doing nothing on many of the rest. Use it to understand the
+> algorithm, not yet to correct your photos.
 
 | | |
 |---|---|
-| Model recovery | Solid. Fits at machine precision, and disagrees with every single-focal form |
-| Behaviour measurement | Solid. 12,883 transforms harvested, curves fitted against real photos |
+| Model recovery | Solid. Fits at machine precision, disagrees with every single-focal form |
+| Behaviour measurement | Solid. Curves fitted against real photos, not the paper |
 | Port on synthetic scenes | Good. 0.29–1.96% error against Adobe with framing and scaling on |
-| Port on real photographs | **Poor.** Returns identity on about 90% of frames and loses to doing nothing on many of the rest |
+| Port on real photographs | **Poor.** 40.7% loss rate against plain identity |
 
-The port is a reference implementation of the findings, not a finished tool. The dominant
-remaining defect is choosing which detected lines belong to which direction: with oracle selection
-the `Full` median error falls from 3.66% to 0.93%, and the current selector captures none of that.
+The open defect is family selection: choosing which detected lines belong to which direction. With
+oracle selection the `Full` median error falls from 3.66% to 0.93%, and the current selector
+captures none of that. [CONTRIBUTING.md](CONTRIBUTING.md) covers it in detail.
 
 ## Install
 
-```
+```bash
 python3 -m pip install numpy opencv-python-headless
 ```
 
-Only numpy and OpenCV are needed. The test suite needs `pytest`.
+Only numpy and OpenCV are required. The test suite additionally needs `pytest`.
 
-## Use
+## Usage
 
 ```python
 import cv2, upright_port as up
 
 image = cv2.imread("photo.jpg", cv2.IMREAD_GRAYSCALE)
 h, w = image.shape
+
 segments = up.detect_segments(image)
-result = up.solve_ex(segments, w, h, focal_px=1600.0, mode="auto",
-                     framing=True, scaling=True)
+result = up.solve_ex(
+    segments, w, h,
+    focal_px=1600.0,
+    mode="auto",
+    framing=True,
+    scaling=True,
+)
+
 if result["ok"]:
-    warp = result["H"]          # 3x3, normalised frame coordinates
+    warp = result["H"]  # 3x3, normalised frame coordinates
 ```
 
-`mode` is one of `auto`, `full`, `level`, `vertical`, `guided`. Guided takes exactly four segments
-as `"x1,y1,x2,y2"` strings and is the strongest mode, because it does not need the detector.
+`mode` accepts `auto`, `full`, `level`, `vertical` or `guided`. Guided takes exactly four segments
+as `"x1,y1,x2,y2"` strings and is the strongest mode, because it does not depend on the detector.
 
-Framing and scaling are opt-in and off by default. They matter a lot: the same solve scores ~33%
-against Adobe without them and 0.587% with them. Turning them off gives you a centred, unframed
-warp.
+> [!IMPORTANT]
+> Framing and scaling are opt-in and off by default. They are not cosmetic: the same solve scores
+> about 33% against Adobe without them and 0.587% with them. Leaving them off gives you a centred,
+> unframed warp.
 
-Every result carries `ok` and `reason`. Check `ok`. A returned identity with `ok=False` means the
-solver declined, which is usually correct behaviour on a frame with no usable structure.
+Every result carries `ok` and `reason`. Check `ok`. An identity with `ok=False` means the solver
+declined, which is usually the right call on a frame with no usable structure.
 
-## What is here
+> [!NOTE]
+> `benchmark_adobe.py` calls `solve_ex` bare, so it reports the unframed ~31% path. The 0.587%
+> figure is `framing=True, scaling=True`. Never compare the two.
+
+## Repository
 
 | path | |
 |---|---|
-| `port/` | the implementation, tests and benchmarks |
+| `port/` | the implementation, its tests and benchmarks |
 | `docs/REPORT.md` | the full write-up, with provenance on every claim |
-| `site/` | a self-contained page, open `site/index.html` |
-| `evidence/` | the measurements each claim rests on |
+| `docs/index.html` | the same findings as a [browsable page](https://rohanpandula.github.io/upright/) |
+| `evidence/` | the measurements each claim rests on, one file per round |
 | `lrplugin/` | the Lightroom plugin that drives the real application |
-| `heldout/`, `lrtest/in/`, `adobe_truth/` | fixtures used by the tests |
+| `analysis/` | fitting and corpus scripts |
+| `heldout/`, `lrtest/in/`, `adobe_truth/` | fixtures the tests read |
 
-`re/vp/*.bin` and the large per-round JSON dumps are gitignored. They are byte slices of the
-`CameraRaw` binary and per-attempt records; the scripts that produce them are in `evidence/`.
+Binary slices of `CameraRaw` and the large per-attempt dumps are gitignored. The scripts that
+produce them are in `evidence/`.
 
 ## Tests
 
-```
+```bash
 cd port && python3 -m pytest -q
 ```
 
-102 tests. They cover the focal conversion, round-trip recovery, the model orthogonality gap,
-guided convergence, the horizon and degenerate-input cases, and the recovered framing and scaling
-rules.
+102 tests, covering the focal conversion, round-trip recovery, the orthogonality gap, guided
+convergence, the horizon and degenerate-input cases, and the recovered framing and scaling rules.
 
 ## Patents
 
-MIT covers the copyright in this code. It does not grant patent rights, and Adobe has a patent
-family on this behaviour (US 9,008,460, 9,582,855, 9,098,885, 9,519,954, 9,727,787, expiring from
-2033). The adaptive weights are unclaimed across all 100 claims, so the numbers can be changed
-freely. `Auto` is the exposed mode, because the broadest claim covers a transform chosen
-"according to human perception-based criteria". `Guided` clears four of the five independent
-claims and is the safer mode to build on.
+MIT covers the copyright in this code and grants no patent rights. Adobe holds a family on this
+behaviour (US 9,008,460, 9,582,855, 9,098,885, 9,519,954, 9,727,787), expiring from 2033.
 
-Nothing here is legal advice, and if you are shipping commercially you should get some.
+The adaptive weights are unclaimed across all 100 claims, so the numbers can be changed freely.
+`Auto` is the exposed mode, because the broadest claim covers a transform chosen "according to
+human perception-based criteria". `Guided` clears four of the five independent claims and is the
+safer mode to build a product on.
 
-## Licence
+Nothing here is legal advice.
 
-MIT. See [LICENSE](LICENSE).
+---
 
-No Adobe source was used. The port is a clean-room implementation of measured behaviour; the
-binary was read only for constants and control flow.
+No Adobe source was used. The port is clean-room; the binary was read only for constants and
+control flow. Licensed under [MIT](LICENSE).

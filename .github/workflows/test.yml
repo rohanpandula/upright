@@ -3,7 +3,8 @@ name: test
 on: [push, pull_request]
 
 jobs:
-  test:
+  port:
+    name: port
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,5 +12,17 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install numpy opencv-python-headless pytest
+      - run: python -m pytest -q
+        working-directory: port
+
+  benchmarks:
+    name: benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy opencv-python-headless scipy pillow pytest
       - run: python -m pytest -q
         working-directory: port

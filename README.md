@@ -64,7 +64,12 @@ captures none of that. [CONTRIBUTING.md](CONTRIBUTING.md) covers it in detail.
 python3 -m pip install numpy opencv-python-headless
 ```
 
-Only numpy and OpenCV are required. The test suite additionally needs `pytest`.
+The port needs only numpy and OpenCV. The benchmarks and the full test suite also reach the
+older prototype in `upright_core.py`, which uses scipy and Pillow:
+
+```bash
+python3 -m pip install numpy opencv-python-headless scipy pillow pytest
+```
 
 ## Usage
 

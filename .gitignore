@@ -37,3 +37,21 @@ evidence/*_snapshot/
 
 # OS
 .DS_Store
+
+# Personal-photo research assets stay local, including generated previews.
+evidence/round11_inputs.jpg
+evidence/round11_adobe_example.jpg
+evidence/round9_sample_contact.png
+evidence/*.jpg
+evidence/*.jpeg
+evidence/*contact*.png
+evidence/geocalib_predictions/
+evidence/local_selector_study/
+evidence/round10_supports
+evidence/round11_supports
+*.dng
+*.arw
+*.nef
+*.raf
+*.cr2
+*.cr3

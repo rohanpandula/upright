@@ -1,0 +1,1 @@
+Scope verified ['estimate_vanishing_points', '_classify', '_base_solve'] ['_manhattan_margin']

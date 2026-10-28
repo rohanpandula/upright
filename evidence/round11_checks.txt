@@ -1,0 +1,7 @@
+/Users/rohan/Projects/trichroma/research/upright/evidence/round11_checks.py:38: RuntimeWarning: divide by zero encountered in matmul
+  pts=seg.reshape(-1,2)/[w,h];pts=np.column_stack([pts,np.ones(len(pts))])@J.T
+/Users/rohan/Projects/trichroma/research/upright/evidence/round11_checks.py:38: RuntimeWarning: overflow encountered in matmul
+  pts=seg.reshape(-1,2)/[w,h];pts=np.column_stack([pts,np.ones(len(pts))])@J.T
+/Users/rohan/Projects/trichroma/research/upright/evidence/round11_checks.py:38: RuntimeWarning: invalid value encountered in matmul
+  pts=seg.reshape(-1,2)/[w,h];pts=np.column_stack([pts,np.ones(len(pts))])@J.T
+PASS: production hash unchanged; 80 raw control maps and decisions exact; 3 Adobe backmap round trips; all 387 failures/fallbacks retained.

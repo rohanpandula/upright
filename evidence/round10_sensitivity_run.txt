@@ -1,0 +1,10 @@
+cauchy_0.5_mean candidate mean {'pre_review': 0.021157, 'review': 0.021157, 'original': 0.200954} rejected 3
+cauchy_1_mean candidate mean {'pre_review': 0.021747, 'review': 0.021747, 'original': 0.193575} rejected 3
+cauchy_2_mean candidate mean {'pre_review': 0.025723, 'review': 0.025723, 'original': 0.191878} rejected 3
+huber_0.5_mean candidate mean {'pre_review': 0.021487, 'review': 0.021487, 'original': 0.194933} rejected 3
+huber_1_mean candidate mean {'pre_review': 0.025879, 'review': 0.025879, 'original': 0.191179} rejected 3
+huber_2_mean candidate mean {'pre_review': 0.031972, 'review': 0.031972, 'original': 0.198009} rejected 4
+least_squares_1_mean candidate mean {'pre_review': 0.356394, 'review': 0.356394, 'original': 0.248197} rejected 5
+cauchy_1_uniform candidate mean {'pre_review': 0.033272, 'review': 0.033272, 'original': 0.167609} rejected 3
+cauchy_1_half_mean candidate mean {'pre_review': 0.021172, 'review': 0.021172, 'original': 0.193575} rejected 3
+cauchy_1_double_mean candidate mean {'pre_review': 0.022287, 'review': 0.022287, 'original': 0.193575} rejected 3

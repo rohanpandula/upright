@@ -1,0 +1,452 @@
+ADVERSARIAL PORT REVIEW — 2026-10-28
+===================================
+Scope: research/upright/port, detector + energy changes behind the 92% claim,
+and the requested short-line repair. Python 3.12; MIT; numpy/OpenCV production
+dependencies unchanged. No Adobe source copied. The frozen report was READ,
+not edited: ../UPRIGHT-REVERSE-ENGINEERING.md, especially sections 3.5e and 3.6.
+The directory has no .git, so this is a source/evidence review, not a git diff.
+
+Verdict: a useful approximation with known divergences. Do not call it a
+faithful reimplementation or infer production reliability from 50 green tests.
+The strongest open defect is a successful-looking, catastrophically wrong
+D_roll solve at seed=4. The 92% result measures default-seed accuracy on related
+synthetic scenes; it does not measure correspondence with Adobe's outputs.
+
+1. WHAT I AM LEAST CONFIDENT IN, RANKED
+======================================
+Ranking is likelihood of a wrong generalization or an unrecovered algorithm,
+not just whether a constant's bytes were read correctly. None is a probability
+estimate. "Overturn" means evidence that would falsify the current choice or
+its claimed scope. Existing VP/solver weaknesses are distinguished from changes.
+
+1) HIGHEST: reconstructed detector supports and their interaction with the
+   unchanged VP estimator. Connected components, TLS halving, Sobel/NMS,
+   percentile threshold, sigma=1.2 blur, subpixel interpolation, traversal and
+   1200px working policy are our algorithms/policies, not recovered helpers.
+   Shorter/more numerous chains also change the randomized VP search.
+   Concrete counterexample: D_roll seed 4 gives 5.626297 / 22.713280 degrees
+   with ok=True. With the frozen OLD detector segments and the same NEW energy,
+   that seed gives 0.052250 / 0.105294. Default new-detector seed 0 instead gives
+   0.013845 / 0.000620. These are not all equivalent detector improvements.
+   Overturn: oracle segment outputs, or new raster families / seed or ordering
+   changes that substantially worsen accuracy. The seed counterexample already
+   overturns any blanket claim of reliable improvement.
+   Cheap check: run seeds 0..9 on cached D_roll detections; see the seed repro
+   below. Also rotate/transpose the short-line tests and vary contrast/spacing.
+
+2) HIGH: Cauchy and s=4/(maxdim-1). The literal inspired the scale, but neither
+   the Cauchy loss nor its use of that literal was recovered. At M=1400 this is
+   about 0.164 degrees of sine-angle residual. Resolution changes the balance
+   between picture-frame errors, horizon error and the destination-focal term.
+   Cauchy's influence shrinks on large errors: a misclassified family can get
+   ignored rather than corrected. The original f32 camera tolerance does not
+   prove any of these objective semantics.
+   Overturn: held-out images where this scale rejects true structural lines,
+   a scale/loss change destroys the gain, or a traced native evaluator disagrees.
+   Cheap check: the full 0.5x/1x/2x Cauchy/Huber and least-squares experiment in
+   section 3. Also resize one raster and focal together while keeping its pose.
+   Result: the exact 92% does not survive least squares, but a large gain does.
+
+3) HIGH: mean-normalized source lengths IN THE ENERGY. Recovered detector
+   weights do not prove their transfer into this objective. My old PROVEN
+   annotation was too strong; the code and README now say this is our choice.
+   Algebra: (1/N) * (length_i/mean_all_lengths) = length_i/sum_all_lengths.
+   The denominator includes depth lines, outliers and other unused segments.
+   Adding unassigned clutter can therefore reduce E_pic relative to E_eye/E_f
+   without adding a single scored structural constraint. Long bad lines also
+   get extra weight. This is not harmless normalization.
+   Overturn: objective stability changes when irrelevant supports are appended,
+   or uniform/assigned-family normalization wins on held-out scenes.
+   Cheap check: freeze families and evaluate the same theta after doubling the
+   total length with unassigned supports; E_pic halves, the other terms do not.
+   Uniform weights and 0.5x/2x normalizers are measured in section 3.
+
+4) MEDIUM-HIGH: removing the pseudo-Perkins term improves an objective by
+   deleting a wrong term, but leaves genuine three-ray junctions unconstrained.
+   A two-line crossing is not a fork; that domain correction is sound. It does
+   not establish that omitting the real inequality/barrier is safe in photos.
+   E_img is also absent, so low axis error says nothing about distorted curves.
+   Overturn: a real fork with a rectified angle <=90 degrees, or severe shape
+   distortion despite small axis residuals.
+   Cheap check: construct one labeled three-ray fork and measure all three
+   output angles, plus circle/conic aspect on a curved fixture. There is no
+   port-level fork/shape oracle today. The extra structure probe below measures
+   straight-line axes only, not circle preservation.
+
+5) MEDIUM-HIGH: the new unsmoothed FALLBACK is a clean-room repair, not a native
+   stage. It preserves the previous smoothed pass and only runs if it is empty.
+   That avoids changing large-scene candidates, but can miss a short line in an
+   image where an unrelated long line is already detected. Each pass uses the
+   recovered NFA<1 rule; the combined nominal false-alarm budget is <=2, NOT 1.
+   Independence/calibration of preselected, correlated Sobel supports is itself
+   unproven. Exact binomial arithmetic is not a detector calibration proof.
+   Overturn: unacceptable extra false detections, mixed-content short-line loss,
+   or an oracle showing smoothing should have been handled differently.
+   Cheap check: 30 fixed noise seeds at four sizes (results below), and a 32x32
+   image with a long line at y=8 plus the short line at y=24. Only the long line
+   survives in that mixed image. This limitation is explicit, not solved here.
+
+6) MEDIUM: refinement/merge reconstruction. Float32 1.0 and perpendicular 6px
+   correct earlier interpretations, but treating argument 10 as a support gap,
+   halving bent TLS supports, longest-first merge order and Euclidean projected
+   intervals remain guesses. A native signature is not the native algorithm.
+   Overturn: parallel nearby structures or bent/rasterized supports whose
+   grouping differs from native outputs, or order-dependent missing segments.
+   Cheap check: the merge strict-boundary/unsorted-gap/bend tests, then reverse
+   input order and sweep line separation 5.9/6/6.1 px. Exact native ordering
+   cannot be checked without a detector oracle.
+
+7) LOWER: observed H^-T support lines instead of VP-through-midpoint virtual
+   lines. This follows the paper's picture-frame geometry and avoids erasing
+   within-family disagreement. Native evaluator equivalence remains unproven.
+   Overturn: a recovered native evaluator explicitly scoring virtual supports,
+   or independently labeled line families consistently scoring worse this way.
+   Cheap check: supply two imperfectly convergent lines sharing one fitted VP;
+   observed-line errors must retain their disagreement. Frozen OLD segments
+   isolate this whole energy change from detector changes (section 3).
+
+8) LOWEST mathematical risk: pixel-angle conversion for E_pic, log-space
+   binomial-tail arithmetic, corrected 1.0f/6px call constants, and the quadratic
+   interpolation formula. Aspect-ratio invariance and independent small-tail
+   sums test the algebra. Their insertion into Adobe's pipeline is not proven.
+   Overturn: an aspect-ratio round trip changes E_pic, an independent tail sum
+   disagrees, or raw call-site evidence contradicts detector_corrections.txt.
+   Cheap check: existing pixel-angle/binomial tests and the scalar-width audit
+   commands in detector_corrections.txt. This review relies on that prior byte
+   audit; it did not re-disassemble the binary or run Adobe.
+
+Two additional confirmed weaknesses in the current energy path:
+* The pixel-angle fix is INCOMPLETE: E_eye still normalizes [-l_y,l_x] directly
+  in normalized coordinates. A physical 45-degree horizon gives squared
+  residual 0.8 at 1000x500 and 0.2 at 500x1000; a pixel-angle term gives 0.5 in
+  both. Cheap check: cross([0,0,1],[500/w,500/h,1]), then use the exact horizon
+  direction expression at upright_port.py:_energy_residuals. This is unchanged
+  horizon code, but contradicts a blanket statement that the energy now uses
+  pixel angles throughout. It was not repaired as part of this detector fix.
+* VP classification also mixes conventions: estimate_vanishing_points uses
+  pixel dx/dy, _classify uses normalized dx/dy. A 100x80px direction at 1400x1000
+  changes from horizontal to vertical under the second rule. Families near the
+  divider, large rolls and unusual aspect ratios remain vulnerable. This
+  predates this review's changes and is not covered by the five-scene metric.
+
+2. SHORT-LINE FAILURE: REPRODUCTION, CAUSE, REPAIR
+=================================================
+Original public call returned: 12->1, 16->1, 20->0, 24->0, 32->0.
+The regression was written first and failed at 20/24/32, both orientations.
+Instrumentation inspected the chain, refinement and NFA boundaries separately.
+
+  canvas M  nearest bins  smoothed n=k  NFA=M^4/8^6  raw n=k  raw NFA
+  12        5             6             0.079102      8        0.001236
+  16        5             6             0.250000      8        0.003906
+  20        6             6             0.610352      8        0.009537
+  24        6             6             1.265625      8        0.019775
+  32        7             6             4.000000      8        0.062500
+
+The 8 raster samples x=3..10 produce only six aligned smoothed samples x=4..9
+on each edge. Gaussian smoothing rounds the line ends enough to fail angular
+alignment there. At M=20, strict len>round(4log(M)/ln8) drops these six samples
+BEFORE NFA, although NFA<1. At M=24/32, removing only that filter does NOT fix
+the failure: six samples genuinely fail the M^4 NFA. Disabling only NFA also
+does not fix the original because the bin gate runs first. A floor bin formula
+would fix 20, still not 24/32. A maxdim-scaled geometric tolerance is not the
+cause; the only such VP gate occurs downstream and detect_segments never calls
+it. _chain_points' 3-sample representation minimum is not hit in this repro.
+
+Final repair:
+* Extract the existing smoothed pass into _detect_gradient_segments, retaining
+  its nearest-bin gate, preprocessing and NFA<1 criterion exactly.
+* If that pass returns nothing, run it without Gaussian blur and without the
+  rounded-bin proxy. Those eight real support samples pass the same exact NFA.
+* Merge and rescale exactly as before. No special casing of canvas dimensions,
+  line orientation, or the five fixture names; no NFA bypass or invented count.
+* This adds a possible second search, so nominal combined expected false alarms
+  are bounded by 2 only if each pass's null-model assumptions hold. The raw
+  fallback and this budget are explicit additional divergences from native.
+
+Final public repro: 12->1, 16->1, 20->1, 24->1, 32->1. At M=64 the same short
+line is still rejected: even eight perfect samples have NFA=1. This is a proper
+negative control, not a guarantee that a fixed short line survives all padding.
+The fallback is deliberately limited to empty detections; see rank 5.
+
+Why the repair was narrowed:
+Removing both bin filters globally and doubling the NFA test count changed only
+eight D_roll supports, yet seed 9 went to 4.551903 / 22.723167 degrees, ok=True.
+Tightening even the unchanged smoothed pass's NFA budget also changed candidates
+and broke accuracy. Those attempts were rejected, not shipped. The final first
+pass produces arrays identical to the pre-review detector on the bundled
+scenes. The rejected trial is preserved in port_review_trial_seed_comparison.json
+solely to substantiate detector/VP sensitivity. Preserving the old candidate
+policy is a compatibility decision, not a claim that its bin proxy is exact.
+
+Added regressions (original 47 tests retained):
+* short line at all five requested sizes, horizontal and transposed vertical;
+* 64px negative NFA control;
+* D_roll at seeds 0 and 9, to reject the regression seen during the repair.
+Result: 50 tests pass. The broader seed sweep's existing seed-4 failure remains
+OPEN. There is no passing regression assertion pretending that case is fixed.
+
+3. LOSS / SCALE / LENGTH SENSITIVITY
+====================================
+Protocol: Full mode, seed=0, default 1200px detection working side, true focal.
+Five original rasters are never regenerated. Cache detections BEFORE swapping
+the loss; keep VP estimation, starting point, mode weights, camera parameters,
+optimizer and evaluation lines unchanged. The evaluator uses known wall-A
+geometry independently of detector inliers: two extreme verticals and two
+extreme lateral horizontals per scene. It does not score depth, crop or shape.
+
+r = dot(pixel-normalized transformed observed direction, perpendicular axis).
+Cauchy rho = s^2*log(1+(r/s)^2).
+Huber rho = r^2 for |r|<=s, otherwise 2*s*|r|-s^2.
+Least squares rho = r^2; scale has no effect, so do not fabricate three LS rows.
+The solver receives sign(r)*sqrt(rho), preserving small-error curvature.
+s = factor*4/(max(w,h)-1); both robust losses use the SAME scale convention.
+
+The re-expressed default residual is checked against the implementation. The
+pre-review default outputs are also checked against the saved historical JSON.
+Final review and pre-review detector outputs/scores coincide on all five scenes.
+Thus the table tests the ORIGINAL 92% claim as well as the delivered repair.
+
+Full table and normalization controls follow in the generated numeric appendix.
+
+Conclusion: the gain is not a narrow optimum at exactly s=4/(M-1) or uniquely
+Cauchy. Huber at 0.5s is slightly better on this metric; no new default was
+selected from that result. Robust variants retain 89.1-92.3% reduction. Plain
+least squares retains 80.2%, so the precise 92% is NOT loss-independent. Uniform
+length weights retain 88.5%; scaling the mean denominator 0.5x/2x gives
+92.7%/91.8%. On OLD detector segments, the same loss variants retain only
+42.6-65.7% improvement: detector/VP changes materially contribute to the result.
+Sensitivity on these same fixtures cannot prove absence of overfitting.
+
+Generalization checks beyond this loss table:
+* All five main scenes are synthetic. A/C/D share a pose or scene; B is a
+  stronger pose of the same corner; 01_input is another synthetic corner.
+  These are not five independent photographs. Knowing the true focal removes
+  a major real-world source of error.
+* Wrong-focal legacy diagnostic is kept in the JSON: 01_input horizontal error
+  goes from 0.223640 to 0.270213 degrees at 1200px focal, despite the headline
+  improvement measured with its correct 1400px focal. It gets worse.
+* Existing non-Manhattan research fixtures give some structural variety but
+  are still synthetic and share a 15deg/6deg pose and renderer. Their independent
+  straight-line scores are listed below. They are not a new real-photo holdout,
+  nor a measurement of curved-feature preservation.
+* Seed sweep: A/B/C seeds 0..9, D_roll seeds 0..49. D_roll seed 4 is catastrophic
+  and still reports ok=True; every other tested D_roll seed stays below 0.1deg
+  in both families. This one observed failure is not a statistical rate claim.
+
+4. WHAT THE FROZEN REPORT MUST DISTINGUISH OR CORRECT
+====================================================
+The report literally names upright_matched.py in section 3.6. That artifact was
+not edited by this task. Its historical measurements are not retroactively
+false because port/upright_port.py changed. They must not be relabeled as tests
+of this port. The following is the complete detector/energy discrepancy ledger
+from the named sections, including inherited omissions that prevent fidelity.
+This ledger separates prior byte-audit corrections from our implementation
+choices. Values/addresses come from detector_corrections.txt unless noted.
+
+Section 3.5e, detector:
+D1. "No binomial NFA" is contradicted by the earlier byte audit. The port uses
+    M^4*P(Binomial(n,1/8)>=k), in log space. +0x34=.125 is a null probability,
+    not interpolation. Log-space computation is ours; native integer arithmetic
+    and any overflow behavior are not intentionally reproduced.
+D2. "round(...), 16 at 4000" is a report/native-byte conflict. ROUNDSS imm=9
+    floors: native count=15 at 4000. The port retains nearest=16 for the original
+    acceptance tests. It uses strict len>bins in the SMOOTHED pass only; the
+    new raw fallback uses NFA directly. It does not reproduce native length-bin
+    histograms/traversal. A bin count alone is not the full a-contrario test.
+D3. "(obj,10,1/2048)" is a float-width error. The loaded float32 is 1.0; the
+    port uses distance=1px. Reading adjacent floats as one double caused the
+    earlier 1/2048 interpretation. The port uses 10 as a gap bound, not ten
+    proved native inner iterations, and 99 as a cap on its own TLS split passes.
+D4. "12px perpendicular and +/-10 along-gap" is wrong according to the branch
+    audit. The port uses <=6px perpendicular, strict start>-10/end<+10 interval
+    containment, and does not extend the survivor or bridge arbitrary gaps.
+    Longest-first order and Euclidean intervals are independently chosen.
+D5. Native gradient preprocessing and exact support tracing were never recovered
+    in full. Our sigma=1.2 Gaussian, 85th percentile, Sobel, four-way NMS,
+    eight-connected components, quadratic subpixel shift clipped to half a pixel,
+    and recursive TLS halving are choices. Eight scans/cos22.5 are shared facts,
+    not evidence for all these other steps. The new raw fallback is also ours.
+D6. Mean-normalized lengths were observed in a detector weight block. Their use
+    as source-length weights in E_pic, and normalization over ALL source lines,
+    are our choices. The previous PROVEN energy annotation was an overclaim.
+D7. The camera tolerance is (4/(M-1))^2, not (4/M)^2. Other tolerance literals
+    belong to a separate camera block, not invented detector gates. Assigning
+    its four-pixel scale to a Cauchy loss is not a recovered native operation.
+D8. The port has a default 1200px working side and no calibration stage, native
+    coarse curve payload/pass B, estimate_MKR sequence, opt_H5 barrier stage or
+    handle_degen_case retry pipeline. Those named report stages are not present
+    just because the public API returns a homography.
+
+Section 3.5e, VP (unchanged approximate implementation, not newly recovered):
+D9. Native is explicitly NOT pair RANSAC in the report. Port samples segment
+    pairs, uses 2000 as a trial budget and further caps candidates at 1200.
+    It does not implement the described native per-segment candidate mechanism.
+D10. Native sqrt(3) is a fixed vote clamp, not a binary inlier threshold. Port
+     treats it as an inlier gate, floors it at .002*maxdim, and even uses the
+     unscaled TAU at initial reassignment before later refitting with scaled tau.
+D11. Port uses fresh-inlier coverage, Jaccard>0.6 deduplication, majority pixel
+     orientation filtering, TLS refits and weight sorting. This is not the
+     native count-ratio/residual tie-break/tournament stage or exact vote-set
+     deduplication described by sections 3.5e/3.5g.
+D12. Native two-VP/margin/degeneracy logic and one-VP horizon-only retry are not
+     implemented. Port requires a classified vertical AND horizontal family,
+     uses heuristic lateral-family ordering, otherwise returns identity/failure.
+
+Section 3.6, objective / solver / evaluation:
+E1. Reference artifact: section names upright_matched.py (scipy prototype);
+    this task changes the separate numpy/OpenCV MIT port. A round trip in the
+    two-camera algebra does not establish matching detectors or energies.
+E2. E_pic now transforms actual observed supports by H^-T. The previous port
+    scored VP-through-midpoint virtual lines, hiding within-family scatter.
+E3. E_pic directions now use pixel angles, not normalized x/y angles. E_eye
+    still uses normalized angles: do not describe this as a complete correction
+    of all objective geometry. Only one selected lateral horizontal family
+    receives picture-frame alignment; depth contributes through the horizon.
+E4. Cauchy replaces squared picture-frame error. Its resolution scale and its
+    insertion point are our decisions; neither is a recovered Adobe loss.
+E5. Source lengths divided by their global mean and the total segment count
+    replace equal chain weighting. Priors/horizon are not normalized the same
+    way. This changes their relative strength when support composition changes.
+E6. The arbitrary two-line-intersection pseudo-Perkins penalty was removed.
+    No detected three-ray forks, Perkins inequality, log barrier or interior-point
+    optimization replaces it. E_img/curved-edge anisotropy is also absent.
+E7. Destination focal residual (f1/f0-1)^2 remains, with SOURCE K0 fixed. This
+    is distinct from a recovered source-focal selector/prior. Metadata/geometry
+    source switching, source-center estimation and native camera fitting are
+    not implemented here. The free K1 center/focal cannot fix every wrong K0.
+E8. Mode-specific scalar weights and adaptive schedules are chosen approximations
+    and are still used INSIDE separate per-mode solves, then rotation damping
+    is applied. Do not infer a shared cached full solve across modes from the
+    section 3.6 description (or the stronger measurement in section 3.5h).
+    Existing Auto SIGMA_V=14.58deg/L0_V=3.56 also differ from matched.py's
+    13.33deg/2.64; pitch-versus-keystone units remain unresolved. This review did
+    not tune damping or claim to resolve the units.
+E9. Bounded finite-difference Levenberg-Marquardt is our optimizer. No native
+    constrained evaluator/gradient, barrier, retry logic or convergence/status
+    test is recovered. ok=True means a finite homography was returned, not
+    reliable correction, as D_roll seed 4 demonstrates.
+E10. The section's 0.49/0.38, 0.96/0.31 etc. are older matched.py convergence
+     scores/crop measurements. The new 92.3% uses mean absolute AXIS scores
+     from independent truth, eight family medians on four TIFFs; the fifth scene
+     makes the reduction 90.4%. These quantities are not interchangeable.
+     There is no new Adobe solve or crop/shape comparison supporting "matches
+     Adobe within .25deg" for this port. Greater rectification accuracy than
+     Adobe on synthetic truth would not itself establish Adobe fidelity.
+E11. "Fixes all three defects" and a single fixed % Auto overcorrection cannot
+     be carried over to this port. Missing objectives, VP failures, focal error,
+     crop/output policy, seed variation and the wrong-focal counterexample
+     remain. Historical measured tables should keep their actual artifact and
+     protocol; new port claims need separate tables and the above limitations.
+
+5. HONEST BOTTOM LINE
+======================
+This port is a good clean-room approximation with known divergences. It has
+correct two-camera algebra and useful default-seed accuracy on a narrow synthetic
+benchmark, but its detector, VP selection, robust objective, normalization,
+fallback and optimizer are independently chosen algorithms, and major native
+constraints/stages are absent. A catastrophic seed-dependent solve and confirmed
+aspect-ratio errors rule out calling it a faithful reimplementation. The robust
+gain survives reasonable loss/scale perturbations on these fixtures; that is
+evidence of local usefulness, not evidence of Adobe equivalence or broad accuracy.
+
+REPRODUCTION / ARTIFACTS
+=========================
+From research/upright/:
+  (cd port && python3.12 -m unittest test_port -v)
+  python3.12 port/benchmark_sensitivity.py
+
+The benchmark script only writes port_review_sensitivity.json, never the frozen
+baseline or the historical pre-fix accuracy snapshot. It verifies the default
+against port_review_pre_fix_accuracy.json. Production imports remain numpy/cv2.
+JSON records every scene and both families for every loss/scale/length variant,
+with original/pre-review/final detector outputs. All solves in that experiment
+must report ok; any failure aborts rather than silently dropping a scene.
+
+Open seed-4 failure, cheap direct reproduction:
+  import sys, cv2
+  sys.path.insert(0, 'port')
+  import upright_port as u, benchmark_accuracy as b
+  import numpy as np
+  im = cv2.imread('lrtest/in/D_roll.tif', 0)
+  h, w = im.shape
+  out = u.solve_ex(image=im, focal_px=1600, mode='full', seed=4)
+  truth = b.ground_truth(b.CASES['D_roll'], 1600, w, h, 9, -5, 20)
+  print(out['ok'], b.deviation(out['H'], truth, np.array([0,0,1,1]), w, h))
+  # True [5.626297086142891, 22.713279822417537]
+
+Other evidence:
+  port_review_seeds.json: per-seed scores (A/B/C 10 each, D 50).
+  port_review_seed_comparison.json: old/pre-review/final D_roll, seeds 0/4/9.
+  port_review_trial_seed_comparison.json: rejected global-gate-removal trial.
+  port_review_structure.json: four extra existing synthetic structure fixtures;
+    known straight world lines, projected at PITCH15/YAW6, analytically clipped
+    to the raster, clipped lengths >=20px, curves/depth excluded, true f=1600.
+  port_review_noise.json: uniform uint8 white-noise images, rng seeds 0..29 at
+    each of 32/64/128/256, detect_segments defaults; counts include both passes.
+  port_review_pre_fix_accuracy.json: untouched historical 92% output snapshot.
+
+Not checked: new Adobe runs, native per-stage outputs, real-photo holdout,
+fork/shape/crop equivalence, lens distortion, or a calibrated false-alarm proof.
+No frozen report, source-camera model, damping constants or VP code was changed.
+
+NUMERIC APPENDIX
+================
+Baseline mean4=0.273676199 deg; mean5=0.254283191 deg.
+mean4 = arithmetic mean of 8 per-family median axis errors, four TIFFs.
+mean5 = arithmetic mean of 10 per-family medians including 01_input_truth.
+All results degrees; reductions are relative to the OLD port, same metric.
+
+Loss / scale / length controls (final detector; pre-review is identical):
+variant                            mean4     drop4      mean5     drop5  old-det mean4     drop4
+cauchy_0.5_mean                 0.021293    92.22%   0.025276    90.06%       0.093861    65.70%
+cauchy_1_mean                   0.021186    92.26%   0.024472    90.38%       0.106153    61.21%
+cauchy_2_mean                   0.024134    91.18%   0.027925    89.02%       0.115660    57.74%
+huber_0.5_mean                  0.021025    92.32%   0.024727    90.28%       0.113106    58.67%
+huber_1_mean                    0.023693    91.34%   0.027935    89.01%       0.118132    56.84%
+huber_2_mean                    0.029771    89.12%   0.034487    86.44%       0.124680    54.44%
+least_squares_1_mean            0.054307    80.16%   0.056616    77.74%       0.157217    42.55%
+cauchy_1_uniform                0.031369    88.54%   0.041581    83.65%       0.102701    62.47%
+cauchy_1_half_mean              0.020068    92.67%   0.022463    91.17%       0.106153    61.21%
+cauchy_1_double_mean            0.022481    91.79%   0.026774    89.47%       0.106153    61.21%
+
+mean = source lengths / mean_all_lengths; uniform = equal chain weights.
+half_mean/double_mean change the denominator only, not the relative length ratios.
+
+Per-scene vertical/horizontal medians, final detector (pre-review identical):
+variant                                 A_clean          B_strong           C_noisy            D_roll    01_input truth
+cauchy_0.5_mean               0.014071/0.013739 0.043504/0.040731 0.014020/0.017529 0.024430/0.002323 0.020771/0.061640
+cauchy_1_mean                 0.018089/0.013658 0.050251/0.030752 0.019954/0.022318 0.013845/0.000620 0.013563/0.061668
+cauchy_2_mean                 0.023839/0.015482 0.063795/0.022339 0.027631/0.028349 0.005006/0.006636 0.019104/0.067067
+huber_0.5_mean                0.017858/0.012850 0.059339/0.026790 0.019453/0.022338 0.006371/0.003203 0.016190/0.062880
+huber_1_mean                  0.022518/0.014150 0.067835/0.018933 0.025226/0.026818 0.006636/0.007428 0.021309/0.068496
+huber_2_mean                  0.028193/0.019380 0.075364/0.020548 0.031612/0.032625 0.018601/0.011844 0.032434/0.074270
+least_squares_1_mean          0.066880/0.057935 0.056332/0.041101 0.027293/0.035629 0.078471/0.070814 0.072530/0.059172
+cauchy_1_uniform              0.021438/0.018731 0.097677/0.026545 0.025321/0.024002 0.023814/0.013427 0.073094/0.091760
+cauchy_1_half_mean            0.018721/0.012342 0.049633/0.022184 0.020084/0.023111 0.013845/0.000620 0.013022/0.051069
+cauchy_1_double_mean          0.017511/0.015742 0.050899/0.039749 0.019842/0.021639 0.013845/0.000620 0.014269/0.073626
+
+Additional structure probes (true focal, Full, seed 0):
+scene                 supports   truth V/H            axis V/H deg
+NM_single_wall             614       20/17       0.001441/0.010093
+NM_railing                 738       28/17       0.068244/0.119535
+NM_curves                  446        26/9       0.042564/0.040543
+NM_three_plane             626       22/28       0.009263/0.005367
+
+Noise probe (30 deterministic seeds each; detections are not necessarily errors
+relative to a labeled oracle, and this sample does not prove NFA calibration):
+size       mean count   max count   nonempty
+32           0.300000           1          9
+64           0.433333           2         11
+128          0.900000           4         14
+256          1.066667           4         19
+
+Seed sweep worst cases (finite homography => ok=True in every tested solve):
+scene          seeds  worst seed             axis V/H deg
+A_clean           10           4        0.021311/0.040681
+B_strong          10           0        0.050251/0.030752
+C_noisy           10           1        0.021816/0.044566
+D_roll            50           4       5.626297/22.713280
+
+Final validation: python3.12 -m unittest test_port -v: 50 tests, OK (2.248s).
+All 34 original tests and the 13 prior additions remain; this review adds 3.
+The open seed-4 and aspect-ratio findings are review results, not fixed assertions.

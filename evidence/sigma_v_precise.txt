@@ -1,0 +1,145 @@
+sigma_v from a DENSE pure-pitch Auto sweep -- measured on a real Lightroom Classic 15.5
+=========================================================================================
+
+Date            2026-10-27 23:01-23:19 local
+Host            macOS, Adobe Lightroom Classic 15.5 (build 202607291506)
+Catalog         /Volumes/SSD/Lightroom/Lightroom Catalog.lrcat  (sqlite, mode=ro)
+Harness         lrplugin/uprightprobe.lrdevplugin/ImportSweep.lua
+                (imports a directory, adds to a collection, makes it the active
+                source, applies PerspectiveUpright=1 inside catalog:withWriteAccessDo)
+Scene           make_test_images.py :: render(rx, 0, 0), 1400x1000, f = 1600 px
+Images          lrtest/abstain/V{02..40}S{1..4}.tif   (80 images, 20 angles x 4 seeds)
+Ground truth    rx = -angle exactly; ry = rz = 0 (pure pitch).  Seeds only add
+                +-4 px framing jitter and gaussian grain (sigma 3.5), never rotation.
+
+ANSWER
+------
+    sigma_v = 22.26 deg      95% CI [16.67, 39.58] deg
+    L0      = 2.638          95% CI [1.462, 4.646]      asymptote L0/(1+L0) = 0.725
+    max residual = 0.475 (fraction units)   rms = 0.210   n = 76 solved images
+
+    binary literal 0.2618 rad = 15.000 deg
+    fitted sigma / literal = 1.484x ; the CI excludes 15.00
+    angle where lam falls to L0/2 = 26.2 deg (literal: 17.7 deg)
+
+In the literal's own units the data are NOT inconsistent: the same fit with the
+x-axis taken as the keystone angle actually visible in the frame gives
+sigma = 13.33 deg [9.94, 22.72], i.e. 0.888x the literal, CI includes 15.00.
+Both numbers are reported because the renderer compresses the visible keystone
+(see "angle units" below); 22.26 deg is the value for the requested definition
+(corrected angle / true camera pitch).
+
+
+METHOD
+------
+For each image the known world verticals are projected through the true camera,
+the Auto homography (UprightTransform_1, row-major, normalised coords) is applied
+in pixel space, and the signed vertical tilt is measured before and after:
+
+    init   = mean signed tilt of the visible verticals from image vertical (deg)
+    resid  = the same after warping
+    frac   = 1 - resid/init  ==  corrected angle / true angle
+
+Fraction is therefore measured geometrically, not inferred from the focal
+estimate.  Model fitted by robust (soft_l1) least squares:
+
+    frac(theta) = lam/(lam+1),  lam = L0 * exp(-theta^2 / (2 sigma^2))
+
+95% CI is a cluster bootstrap that resamples the 20 ANGLES (2000 replicates),
+which is the honest error bar for a curve that is bimodal image-to-image.
+Robustness: fitting per-angle medians gives sigma 21.90, per-angle means 21.78,
+leave-one-angle-out range 19.1..23.8 -- all consistent with 22.3.
+
+
+DATA (per angle)
+----------------
+ theta    n   mean frac    sd    mean full   mean conv0   n focal-clamped
+     2    4       0.277   0.029        0.602         1.09        0
+     4    4       0.660   0.070        0.891         2.18        0
+     6    4       0.804   0.011        0.911         3.26        0
+     8    4       0.807   0.024        0.940         4.34        0
+    10    4       0.823   0.031        0.946         5.41        0
+    12    4       0.802   0.014        0.943         6.48        1
+    14    4       0.824   0.032        0.960         7.53        0
+    16    4       0.804   0.054        0.957         8.58        0
+    18    4       0.737   0.050        0.957         9.61        3
+    20    4       0.738   0.095        0.953        10.63        1
+    22    4       0.623   0.113        0.952        11.64        1
+    24    4       0.575   0.134        0.963        12.63        2
+    26    4       0.544   0.137        0.950        13.60        2
+    28    4       0.491   0.174        0.947        14.55        2
+    30    4       0.552   0.250        0.958        16.48        1
+    32    4       0.241   0.013        0.962        18.28        2
+    34    4       0.599   0.313        0.955        19.90        1
+    36    4       0.246   0.347        0.952        21.42        2
+    38    2       0.404   0.532        0.961        22.96        1
+    40    2       0.378   0.494        0.973        24.26        1
+
+4 further images (V38S3, V38S4, V40S3, V40S4) produced no Auto transform at all
+-- Lightroom abstained outright -- so 80 exposed, 76 solved.  Full mode (slot 2)
+was measured too and is near-complete at every angle (mean frac 0.60 at 2 deg, 0.89-0.97 elsewhere), so
+Auto is deliberately weak, not incapable.
+
+
+FITS
+----
+A  fraction vs camera pitch (REQUESTED DEFINITION)   n=76
+   L0 2.638 [1.462,4.646]   sigma 22.26 [16.67,39.58]   maxres 0.475  rms 0.210
+B  fraction vs initial visible tilt (solver-internal units)   n=76
+   L0 2.749 [1.430,5.682]   sigma  2.79 [2.02,5.94]     maxres 0.553  rms 0.214
+C  fraction vs initial convergence (keystone actually in frame)  n=76
+   L0 2.474 [1.444,4.068]   sigma 13.33 [9.94,22.72]    maxres 0.462  rms 0.210
+D  auto/full ratio vs pitch (corpus-comparable)   n=76
+   L0 3.658 [2.162,6.403]   sigma 19.84 [15.55,27.83]   maxres 0.436  rms 0.200
+
+
+ANGLE UNITS -- why three sigmas
+-------------------------------
+The walls are at z=25..80 with |u|/f ~ 0.36, so at pitch theta the verticals in
+frame are only ~0.15*theta off vertical and the extreme-vertical convergence is
+~0.6*theta.  The solver's internal angle estimate lives on the visible-keystone
+scale, not on the camera-pitch scale.  Consequences:
+
+  * 22.26 deg is sigma per degree of camera pitch (the task's definition);
+  * 13.33 deg is sigma per degree of visible keystone -- the apples-to-apples
+    comparison with an internal binary literal, and it brackets 15.00 deg;
+  * 2.79 deg is sigma per degree of the solver's own tilt estimate.
+
+The literal's curve, if it were the shipped one, would fall far too fast at the
+top end.  With the fitted L0 held fixed and sigma forced to 15.00 deg:
+
+    theta        fitted frac     literal-sigma frac     observed mean
+      15            0.678              0.615               ~0.80 (14-16 deg)
+      30            0.516              0.263               0.552
+      40            0.344              0.070               0.378
+
+So the shipped curve sits ~2x above the literal prediction at 30 deg and ~5x at 40 deg, and lam
+falls to L0/2 at 17.7 deg for the literal versus 26.2 deg for the measurement.  The shipped constant is not pi/12.
+
+
+CAVEATS
+-------
+1. Bimodality.  Above ~30 deg the solver sometimes clamps its focal estimate at
+   the 40 mm ceiling and returns a near-identity transform (frac ~0.03), and
+   sometimes keeps a free estimate (~25 mm) and corrects ~0.75.  The branch is
+   random across seeds (e.g. 38 deg: 0.028 and 0.780).  24/80 images (30%) had a
+   degenerate focal estimate (20 clamped at 40 mm, 4 left at the 35 mm default),
+   and all 4 total abstentions were at 38-40 deg.  This is why the residual is
+   large and the CI wide; a smooth curve through the branch mixture is still the
+   right estimand for an adaptive weight.
+2. Pure pitch keeps verticals vertical in a pinhole model only at the principal
+   point; off-centre verticals tilt by |u|/f * theta, which is what is measured.
+3. The same sweep at 2 deg under-corrects (0.277), so the fitted asymptote 0.725
+   is approached only over 6-28 deg -- there is a low-angle shoulder the two-
+   parameter model does not represent.
+4. UprightTransform_N is the cached Auto slot; each image was reset to
+   PerspectiveUpright=0 before Auto so no stale slot could be read.
+
+FILES
+-----
+  gen_sigma_sweep.py            scene generation (seeds 1,2) + seed-3/4 batch
+  measure_sigma_v.py            per-image physical measurement + fits
+  analyze_sigma_final.py        final fits A-D, cluster bootstrap, branch table
+  evidence/sigma_v_precise.json raw per-image rows and fit results
+  evidence/sigma_v_precise_trace.txt  plugin trace of the clean 80-image run
+  lrtest/abstain/               80 source TIFFs

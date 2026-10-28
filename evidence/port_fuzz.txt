@@ -1,0 +1,332 @@
+# Fuzz report: research/upright/port/upright_port.py (solve / solve_ex)
+
+Target: `research/upright/port/upright_port.py`, MIT, read-only.
+Live file at report time: 1422 lines, sha256 `a17428a91a109d089560544927a67e178a0b57aa17bfd1bd0753943e44772c8d`.
+Frozen copy used for the bulk run: `evidence/port_fuzz_snapshot.py`
+(1395 lines, sha256 `f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342`).
+The file was being rewritten by another agent during the run (09:22-10:05); every
+finding below was re-confirmed against the live head. Line numbers refer to the
+frozen copy; the live file differs by a few lines.
+
+Runners: `evidence/port_fuzz_harness.py` (243 cases: segments, sizes, focal,
+modes, framing/scale helpers, detector), `evidence/port_fuzz2.py` (invariants,
+crash probes, 400-case natural hunt, 3000-case guided scan).
+Raw results: `evidence/port_fuzz_raw.json`, `evidence/port_fuzz_raw2.json`.
+The harness labels `detect_segments` output `SILENT_BAD` because it is an (N,4)
+segment array rather than a 3x3 homography; those rows are excluded from the
+tables below.
+
+Every `ok=True` result was validated independently: H finite, H22 nonzero,
+not rank-deficient, and all four frame corners finite with `w` nonzero and of
+one sign (no corner on or across the projective horizon).
+
+Of 163 `ok=True` homography results in the case matrix, **7 are unusable**
+(2 damping overrides, 1 guided with f=1e12, 2 `frame_output` underflow, 1
+`frame_output` on a singular H, 1 `scale_output` with a 1e6 translation). The
+matrix's natural-mode scenes are benign; the *rate* of unusable results on
+natural input comes from the two randomised sweeps in F1 (24/320 scenes,
+96/500 realistic guided quartets). No hangs, no uncaught NaN/inf H, no
+segfaults, no memory blowups at default settings.
+
+---
+
+## F1 (HIGH) `ok=True` while the mapped frame crosses the projective horizon
+
+Automatic and guided modes return a homography that puts 1-3 frame corners at
+`w <= 0`. The corners then divide into a wrapped/inverted quad; the output
+cannot be sampled as a frame. `solve()` returns the same H with no signal at all.
+
+`solve_ex` validates finiteness (`port_fuzz_snapshot.py:1322`) but never checks
+corner `w`. `frame_output` does exactly that test at `:1176`, so the check is
+already written, just not applied unless `framing=True`. With `framing=True`
+these inputs correctly return `ok=False, reason="framing crosses the projective
+horizon"`.
+
+Reproducer (focal is irrelevant here; 900 px = 83 deg hfov, nothing exotic):
+
+```python
+import numpy as np, upright_port as up
+W, H = 1600, 1200
+seg = np.array([[564.31,685.56,351.83,1548.71],[718.24,677.62,719.95,1368.26],
+                [847.02,670.98,970.79,1245.29],[353.63,738.6,967.66,693.59],
+                [258.88,914.01,1009.01,796.95],[97.22,1213.29,1066.68,941.1]])
+for mode in ("vertical", "full"):
+    out = up.solve_ex(seg, w=W, h=H, focal_px=900., mode=mode)
+    C = np.array([[0.,0.,1.],[1.,0.,1.],[1.,1.,1.],[0.,1.,1.]])
+    print(mode, out["ok"], (C @ out["H"].T)[:, 2])   # ok True, z = [1, 1, -11.7, -11.7]
+up.solve(seg, w=W, h=H, focal_px=900., mode="full")  # silently the bad H
+```
+
+More reproducers, same class:
+
+```python
+# auto, 6 segments, f=200: z = [1, -0.199, -0.199, 1]
+seg = np.array([[636.24,637.27,56.52,1437.51],[727.54,659.68,518.78,1263.44],
+                [802.61,678.1,764.94,1170.74],[494.83,631.01,867.81,712.69],
+                [368.11,728.78,877.11,787.18],[84.11,947.91,891.69,903.93]])
+up.solve_ex(seg, w=W, h=H, focal_px=200., mode="auto")   # ok=True, straddles
+
+# full, 6 segments, f=200: z = [1, -0.198, -1.588, -0.39]
+seg = np.array([[790.08,678.34,844.28,1162.92],[863.3,656.24,1073.6,1208.66],
+                [948.8,630.44,1439.5,1281.65],[724.9,717.11,1074.98,619.05],
+                [717.93,793.56,1184.21,702.75],[706.95,913.97,1407.28,873.67]])
+up.solve_ex(seg, w=W, h=H, focal_px=200., mode="full")   # ok=True, straddles
+```
+
+Rates: random exact scenes, 400 trials -> 24/320 ok=True results straddled
+(16 `full`, 7 `vertical`, 1 `auto`). Realistic guided quartets (2 verticals +
+2 horizontals from a true scene, 2 px noise), 500 trials -> **96 ok=True
+results straddled (19 %)**.
+
+Suggested fix: run the `frame_output` corner test (or an equivalent inline
+check) before `ok=True`; report `"output crosses the projective horizon"`.
+
+## F2 (HIGH) 1x1 image: uncaught `ZeroDivisionError`
+
+`max(w, h) - 1` is a divisor in three places and is 0 when both sides are 1:
+`:651` (`_refine_vp`), `:688` (`_family_terms`), `:915` (`_alignment_quality`).
+`solve_ex`'s handler at `:1298` catches only `RuntimeError`/`LinAlgError`, so the
+exception escapes `solve_ex` and `solve`.
+
+```python
+import numpy as np, upright_port as up
+seg = np.array([[x,10.,x,90.] for x in (20.,40.,60.,80.)] +
+               [[10.,y,90.,y] for y in (30.,50.,70.,85.)])
+up.solve_ex(seg, w=1, h=1, focal_px=1., mode="auto")
+# ZeroDivisionError: division by zero  (line 651)
+```
+
+Traceback frame: `solve_ex` -> `_base_solve:1008` -> `_refine_vp:651`.
+2x2 is fine. A 1x1 image whose segments are given in normalised [0,1]
+coordinates does *not* crash - it fails earlier with "insufficient line
+structure" (the `TAU = 1.732 px` floor is 1.7x the image size, so the two
+families merge). So the 1x1 crash needs pixel coordinates spanning more than
+one pixel.
+
+## F3 (HIGH) Orientation classification ignores aspect ratio; aspect >~20:1 always fails
+
+`_classify:669` and `_guided_solve:1118` decide vertical-vs-horizontal from
+`|dy|` vs `|dx|` in *normalised* coordinates, where y is divided by `h` and x by
+`w`. For wide frames the compressed y axis makes every segment look vertical.
+
+At 10000x3 the mean normalised `|dy|` of true horizontal segments is 24.8
+against `|dx|` 0.13, so `_classify` returns zero horizontal families and
+`_base_solve` gives up with `"insufficient line structure"`. Guided mode instead
+raises the misleading `"needs at least one vertical and one horizontal guide
+segment"` although two of each were supplied.
+
+```python
+import numpy as np, upright_port as up
+seg = np.array([[564.31,685.56,351.83,1548.71],[718.24,677.62,719.95,1368.26],
+                [353.63,738.6,967.66,693.59],[258.88,914.01,1009.01,796.95]])
+up.solve_ex(seg, w=10000, h=3, focal_px=900., mode="guided")
+# ValueError: guided mode needs at least one vertical and one horizontal ...
+up.solve_ex(seg, w=10000, h=3, focal_px=900., mode="auto")
+# ok=False, "insufficient line structure"
+```
+
+Even an exactly projected synthetic scene fails from 20:1 upward
+(3000x300 ok; 3000x150, 3000x75, 3000x40, 3000x20, 3000x10, 3000x5 all fail).
+Pixel-space comparison, or scaling `dy` by `h/w`, fixes it.
+
+## F4 (MEDIUM) `scale_output` does not commute with `frame_output`; input translation is left in place
+
+The scale is applied to the *unframed* input and the translation is recomputed
+from `centre = 0.5 - (framed[:2,2] - H[:2,2])` (`:1208-1210`), so the input
+translation survives instead of being consumed. Documented as "Preserve the
+90/10 bounds centre; this commutes with frame_output".
+
+```python
+import numpy as np, upright_port as up
+H = np.array([[1.,0.,1e6],[0.,1.,-1e6],[0.,0.,1.]])
+up.scale_output(H)
+# [[1,0,1e6],[0,1,-1e6],[0,0,1]]  -- the 1e6 translation is untouched, cond 2e12
+```
+
+Not just a huge-translation artefact: for a mild rotation
+`R = up._rotation(0.35,0.25,0.15)` the commutation error is
+`max|scale_output(R) - scale_output(frame_output(R))| = 0.355` normalised units.
+`scale_output(frame_output(H))` is correct, so callers must frame first; the
+docstring says they need not.
+
+## F5 (MEDIUM) `scale_output` rejects any mirrored quad; `frame_output` accepts singular input silently
+
+`scale_output:1202` requires all edge distances `> 0`. A reflected quad has
+reversed winding, so every distance is negative and it raises
+`"scaling needs a convex quad enclosing its bounds centre"`, even though
+`frame_output` accepts the same H.
+
+```python
+import numpy as np, upright_port as up
+up.scale_output(np.diag([-1., 1., 1.]))   # ValueError: scaling needs a convex quad ...
+up.scale_output(np.diag([1., -1., 1.]))   # same
+up.frame_output(np.diag([-1., 1., 1.]))   # fine
+```
+
+Conversely `frame_output` never checks rank:
+`up.frame_output(np.array([[1.,0.,0.],[2.,0.,0.],[0.,1.,1.]]))` returns a
+determinant-0 matrix whose corner quad has area 0. `scale_output` then catches
+it (same ValueError), but the singular H has already been returned once.
+
+## F6 (MEDIUM) `frame_output` / `scale_output` return an all-NaN matrix on H22 underflow
+
+Finiteness is tested at `:1171` and normalisation happens afterwards at `:1173`,
+so the overflow is never seen.
+
+```python
+import numpy as np, upright_port as up
+up.frame_output(np.diag([1., 1., 1e-320]))
+# [[nan,nan,nan],[nan,nan,nan],[nan,nan,1.]] with only a RuntimeWarning
+up.scale_output(np.diag([1., 1., 1e-320]))   # same
+```
+
+## F7 (MEDIUM) `guided` + large focal returns a rank-deficient H with `ok=True`
+
+With `focal_px=1e12` the guided solve stalls at a 0.66 deg guide residual but
+reports success; `H[2,1]` collapses to 4.9e-13, condition number 1.7e17, corners
+displaced by 6.1e8 normalised units. `ok=True`, `H` finite, so nothing in the
+dict flags it.
+
+```python
+import numpy as np, upright_port as up
+seg = np.array([[700.,200.,700.,1000.],[900.,250.,900.,1050.],
+                [200.,400.,1400.,420.],[150.,800.,1450.,780.]])
+out = up.solve_ex(seg, w=1600, h=1200, focal_px=1e12, mode="guided")
+out["ok"], np.linalg.cond(out["H"])   # True, 1.7e17
+```
+
+`focal_px=1e9` auto also degrades (ok=False, 120 ms). Guided has no quality or
+conditioning gate at all, so it reports success for any finite H.
+
+## F8 (MEDIUM) `damping=` override is applied with no validation, can cross the horizon
+
+```python
+import numpy as np, upright_port as up
+seg = ...  # the F1 "full" 6-segment reproducer
+up.solve_ex(seg, w=1600, h=1200, focal_px=200., mode="full", damping=100.)
+# ok=True, z = [1, -36.0, 15.7, 52.8]
+up.solve_ex(seg, w=1600, h=1200, focal_px=200., mode="full", damping=1e6)  # same
+```
+
+`damping=100` multiplies the Euler angles by 100 rad with no wrap or bound, so
+`H22` and the corner `w` signs are whatever falls out. `damping=(nan,)*3` is
+handled (ok=False, "non-finite homography"); `damping=(1.,2.)` raises
+`ValueError`; `damping=[...]` is fine. Only the geometric consequence is
+unchecked.
+
+## F9 (MEDIUM) Detector: no output for any image up to 4x4; 1.0-3.4 GB and multi-second runs at high resolution
+
+`_significance_bins` returns 0 bins at `maxdim == 1` and 1 at `maxdim == 2`, so
+the smoothed pass (`:436`, `:443`) can never keep a chain there; the raw
+fallback (`n_bins = 0`) then fails the NFA gate. Every size from 1x1 to 4x4
+returns `shape (0,4)` for a clean step edge or checkerboard. 1x1 returns empty
+rather than raising.
+
+Memory/time at full resolution (no downscale, `max_side >= long side`):
+
+| image | segs | time | peak RSS |
+|---|---|---|---|
+| 3840x2160 noise, default `max_side=1200` | 0-2 | 0.08-0.96 s | 205 MB |
+| 3840x2160 noise, `max_side=10**9` | 0 | 6.5-12.7 s | 1.0-1.3 GB |
+| 7680x4320 noise, `max_side=10**5` | 3 | 4.1 s | **3.4 GB** |
+
+That is ~102 bytes per pixel (~10 GB for 100 Mpx), driven by the ~10 full-size
+float32 temporaries in `_detect_gradient_segments`. Time is not a hang: profiling
+a 6.5 s 4K case gives 409 561 `_fit_chain`/SVD calls from the
+`_refine_chains` -> `_split_gaps` Python loop (`:352`, up to 99 passes x 8
+directions), 5.8 s of the total. Flat grey 4K is 9-22 ms, a striped 4K image
+37-88 ms.
+
+## F10 (LOW) 100k segments: no vanishing point found, 1.8 s
+
+Only `min(RANSAC_ITERS, n(n-1)/2) = 2000` random pairs are drawn regardless of
+`n` (`:547`), so with 100k short random segments the 2000 samples rarely hit two
+segments of the same family; the run burns 1.8 s and ends `ok=False,
+"poor undamped family alignment"` (a 20-segment version of the same scene
+succeeds).
+
+```python
+rng = np.random.default_rng(11)
+s = rng.uniform(0, 1600, (100000, 4)); s[:,2] += 200; s[:,3] += 200
+up.solve_ex(s, w=1600, h=1200, focal_px=900., mode="auto")   # ok=False, 1.8 s
+```
+
+## F11 (LOW) Inconsistent error surface: `solve_ex` raises where it usually returns `ok=False`
+
+Documented preconditions do raise (`ValueError`) and that is defensible, but the
+mix means a caller cannot rely on the dict:
+
+- `mode` not in `MODES` (incl. `None`, `""`, `"AUTO"`, `" auto"`, `0`): ValueError
+- guided with n != 4: ValueError - so guided 0-8 is "raise, raise, raise, raise, ok, raise, raise, raise, raise"
+- guided with 4 segments of one orientation: ValueError
+- guided on a 20:1 frame with 2+2 valid guides: ValueError (F3)
+- `focal_px=[900.0]`: `TypeError: float() argument must be ... not 'list'`
+- `solve_ex(segments=seg, mode=...)` without `w`/`h` and without `image`: ValueError
+
+`guided` is the only mode that raises instead of returning `ok=False`, and it
+never returns `ok=False` for a bad fit (F7). Conversely `solve()` turns every
+`ok=False` outcome into identity, which is indistinguishable from a legitimate
+no-op - 17 `ok=False` cases in this run exercised `solve()` and got a silent
+identity.
+
+## F12 (LOW) NaN/Inf segments are silently dropped, with three RuntimeWarnings
+
+One NaN or Inf endpoint among 20 segments yields `ok=True` and a result within
+0.002 of the clean solve (the segment is excluded by the `norms > _EPS` filter),
+but `lines[good] /= norms[good,None]` (`:536`), the `weights` line (`:542`) and
+`_vp_residual` (`:507`) emit `RuntimeWarning: invalid value encountered in
+divide`. A fully NaN segment array returns `ok=False`. `w=0` or `h=0` gives
+`ok=False` without crashing; negative `w,h` passes the arithmetic and is then
+rejected by the quality gate.
+
+## F13 (LOW) `mode="off"` runs the detector before returning identity
+
+`off` short-circuits only at `:1267`; segment detection already ran at `:1256`.
+On a 4K noise image that is 83-780 ms to return `np.eye(3)`. `mode="off"` with
+neither `segments` nor `image` raises.
+
+---
+
+## ok=True corner validation summary
+
+| group | ok=True homographies | unusable |
+|---|---|---|
+| auto | 16 | 0 |
+| level | 16 | 0 |
+| full | 4 | 0 |
+| vertical | 4 | 0 |
+| guided | 6 | 1 (rank-deficient, f=1e12) |
+| damping override | 10 | 2 (straddle) |
+| framing/scale helpers | 53 | 4 (2 all-NaN, 1 singular, 1 cond 2e12) |
+| focal/size/dtype probes | 54 | 0 |
+| **total** | **163** | **7** |
+
+No `ok=True` case produced a non-finite H from `solve_ex`, and no `ok=True` case
+threw downstream of the `isfinite` gate; `framing=True, scaling=True` always
+produced a finite, non-singular, same-side quad. `level` never straddled in any
+test (roll only, horizon row untouched); `auto`, `full`, `vertical` and `guided`
+all did on natural scenes (F1).
+
+## Held up cleanly
+
+All-identical segments (4 and 8), all-collinear horizontal or vertical (4 and 8),
+duplicate two-point sets, zero-length segments, 1/2/3 segments, 0x0 size,
+1x1200 and 1200x1, integer and string and object segment dtypes, wrong shapes
+(`(N,3)`, `(1d)`, empty), focal 0 / -1 / -900 / NaN / +-Inf / 1e-9 / 1e-3 / 0.5 /
+1.0 / 1e6, `mode="off"`, guided with 4 valid guides, `shared_k`, `damping=0`,
+`0.5`, `1.0`, `2.0`, `-1.0`, `(0,0,0)`, `(1,1,1)`, `(nan,nan,nan)`; helpers on
+identity, huge zoom, pure rotation, `H22 = 0`, horizon through a corner, horizon
+straddle, bowtie, wrong shape, NaN/Inf entries (all raise `ValueError`); detector
+on flat grey, 64x64 noise, one-pixel, NaN image, empty image, BGR/RGBA/bool/
+uint16/float64/list input; and every `framing`/`scaling` pipeline case on a real
+solve.
+
+## Notes
+
+- `frame_output` is sign-robust (`-I` normalises to `I`), and
+  `inner = 0.5 / max(...)` cannot raise: a 45-degree rotated quad gives
+  `inner = inf` and the `cover <= 1.10*inner` branch simply takes `cover`.
+- Everything above is deterministic under the default `seed=0`.
+- The port was mid-edit (a temporary bottom-of-file `from round12_geometry
+  import ...` at 09:22-09:32) and was unimportable for ~10 minutes while
+  `round12_geometry.py` was absent. Worth an import smoke test in CI.

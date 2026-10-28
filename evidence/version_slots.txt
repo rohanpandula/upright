@@ -1,0 +1,185 @@
+UPRIGHT VERSION FIELD AND THE SIX TRANSFORM SLOTS
+=================================================
+Binary: CameraRaw (Lightroom Classic), x86_64 slice (fat offset 0x4000).
+All addresses below are x86_64-slice vmaddr == file offset (__TEXT vmaddr 0).
+RTTI 0x90b8150 (type_info) / vtable 0x90b8188 identify class ura::UprightData;
+its dtor/clone/virtuals are 0xb6d9f0..0xb6da80. Deserializer 0xb65b60,
+serializer 0xb66140, ctor 0xb62d70, reset 0xb62ee0, solver 0xb635a0.
+
+Tag: PROOF = read directly out of instructions. INFERENCE = reasoned, not
+directly observed. Everything unlabelled is PROOF.
+
+
+1. DECODE OF 151388160
+-----------------------
+PROOF  151388160 = 0x09060000.
+PROOF  It is a 32-bit integer field at offset 0x00 of ura::UprightData:
+       ctor       0xb62d81  mov dword ptr [rdi], 0x9060000
+       reader     0xb65ef9  mov dword ptr [rbp-0xa0], 0x9060000   (default)
+       writer     0xb66176  mov edx, dword ptr [rdi]  -> key "UprightVersion"
+       commit     0xb65199  mov dword ptr [rbp-0x3d00], 0x9060000
+       digest     0xb5f21a  mov esi, 0x9060000 -> key "Version"
+PROOF  Field is read/written as int32 (not a float, not a string).
+
+Byte split, big-endian (i.e. the natural MMmmppbb packing):
+       0x09 = 9   major
+       0x06 = 6   minor
+       0x00 = 0   patch
+       0x00 = 0   build
+INFERENCE  Reading = schema version 9.6.0.0. Two zero low bytes and a single
+observed value are consistent with major<<24|minor<<16|patch<<8|build, with
+patch/build simply never bumped. Alternative reading: high 16 bits as one
+monotonic counter (0x0906 = 2310) with the low half unused. Not separable from
+one sample.
+PROOF  No corroborating sibling constant exists: a scan of the whole slice for
+       any other dword with high half 0x0906 finds only 0x9060000 (17x) plus
+       scattered byte-stream hits (0x9060001, 0x9060006) that are not code
+       immediates. So the layout cannot be pinned by comparing to a 9.5/9.7
+       constant -- there is none.
+
+Related field defaults in the same ctor (for completeness):
+  +0x00 version = 0x09060000 | +0x08 centerMode = 0 | +0x10/+0x18 centerNorm
+  = 0.5/0.5 | +0x20 focalMode = 0 | +0x28 focalLength35mm = 35.0 |
+  +0x30 preview = 0 | +0x38 transforms | +0x50/+0x60 digest strings.
+
+
+2. IS THERE A VERSION COMPARISON?  -- NO COMPARISON ANYWHERE
+-----------------------------------------------------------
+PROOF  The constant 0x09060000 occurs exactly 4 times in __text, and all four
+       are stores or value-argument loads, never a cmp:
+         0xb62d81 store (ctor default)
+         0xb65ef9 store (reader default)
+         0xb65199 store (commit stamp)
+         0xb5f21a value for the digest string
+PROOF  No `cmp`/`sub` against any 0x09xxxxxx version constant exists in the
+       slice (sweep of every immediate in 0x08000000..0x0AFFFFFF).
+PROOF  The reader 0xb65b60 stores the loaded value verbatim into +0x00 and
+       returns success. It never inspects it. A stale-version document loads
+       and is used as-is.
+PROOF  Every solve stamps the *current* constant unconditionally (0xb65199)
+       before committing, so the field is write-only metadata.
+
+So how is staleness actually decided? By a dependency-digest, not by version:
+PROOF  Function 0xb5f170 builds a digest string. It appends, in order:
+       "Version" = 0x09060000 (current, hardcoded), "Profile", "Distort", plus
+       camera/profile fields off the analysis object (+0x164, +0x420...), then
+       hashes it (0x1352270).
+PROOF  Comparison site 0xb68791..0xb687ff recomputes that digest and compares
+       it (0x13c6d50, string ==) against the *stored* digest at UprightData
+       +0x50 ("UprightDependentDigest"), or against +0x60
+       ("UprightGuidedDependentDigest") on the guided path. It returns 1 when
+       the strings differ.
+PROOF  Because the current version constant is baked into the digest, a version
+       bump changes the digest for every photo and marks every cached result
+       stale.
+
+ANSWER: version mismatch does NOT migrate and does NOT branch. It forces a full
+recompute indirectly, via the digest. There is no per-version upgrade code and
+no "if version < X" path -- the only reactions to a bad/absent record are
+(a) digest mismatch -> recompute, (b) unreadable record -> reset (0xb62ee0).
+INFERENCE  This is why no version constant other than the current one exists:
+       old values never need to be interpreted, only invalidated.
+
+
+3. WHY SIX SLOTS / IS SLOT 0 RESERVED / IS THE COUNT FIXED
+----------------------------------------------------------
+PROOF  Slot count is fixed at six *by construction*, not by data:
+       ctor 0xb62d70 allocates 0x360 bytes = 6 x 0x90 (0xb62dc5) and constructs
+       six transform objects at +0x00, 0x90, 0x120, 0x1b0, 0x240, 0x2d0
+       (0xb62de8..0xb62e3d), then sets begin=+0x38, end=+0x360, cap=+0x360.
+PROOF  The solver asserts the array is exactly six: 0xb64e78 cmp rax,0x360;
+       jne -> assertion string "Bad transforms array size" (0x8f45001).
+PROOF  Element size is 0x90 (144). Layout: kind @0x00, rows @0x08, cols @0x0C,
+       nine doubles @0x10. Row-major, 3x3 in normalized [0,1] coords.
+PROOF  The count is *derived*, never chosen: the writer computes
+       count = min(size(), 6) (0xb66261..0xb66278) and writes it to
+       "UprightTransformCount" (0xb6627f).
+PROOF  The reader clamps to 16 instead (0xb65d39 cmp ecx,0x10 / cmovb) and
+       defaults to the 6-slot identity fill when the count is 0 (0xb65ef9).
+INFERENCE  So the count is nominally dynamic (0..16 on read) but is a constant 6
+       in practice: the only producer always emits 6, and the writer truncates
+       anything longer. Read tolerance > write cap is asymmetric legacy slack.
+
+SLOT 0
+PROOF  Slot 0 is written on every solve with a 3x3 identity: the loop's i==0
+       branch at 0xb645f7 (test r14d,r14d / je 0xb64664) goes straight to
+       0x142aeb0 (3x3 ctor) + 0x142a330 (set 3) and pushes. It is never solved.
+INFERENCE  Slot 0 is the Off slot and simultaneously the array base, so it must
+       always exist and always be identity. It is "reserved" in the sense of
+       never computed, but it is a real, written, serialized slot -- not a
+       scratch buffer.
+
+SLOT 5
+PROOF  Slot 5 is also identity from the loop: 0xb6457b cmp r14d,5 / setne /
+       0xb64588 jne -> the i==5 iteration falls into the same identity path.
+PROOF  But slot 5 is first *preserved*: before the vector is cleared and
+       resized, the old slot 5 is copied to the stack (0xb64455..0xb6447c,
+       guarded on it being 3x3), and after the loop it is copied back
+       (0xb64e84..0xb64e97). So a solve never overwrites the guided transform.
+PROOF  "UprightTransform_5" exists as a literal string (0x8ebb8b8) and is
+       registered as a named property (0x12cb23) -- the only slot given a name,
+       alongside "UprightTransformCount".
+INFERENCE  Slot 5 is the Guided slot: its content comes from the user's guide
+       lines (the separate UprightFourSegments_0..3 object at +0x518), not from
+       the automatic solver, which is why the solver restores rather than
+       computes it.
+
+MODE -> SLOT BINDING
+PROOF  The solve loop variable *is* the mode: it is tested against literal mode
+       values (cmp r14d,1 at 0xb646c6 -> Auto scaling branch; cmp r14d,3 at
+       0xb64708 -> Level axis-zeroing branch) and against 0 and 5 for the
+       identity cases, and results are appended in index order.
+PROOF  The serializer keys each element by its index: snprintf
+       "UprightTransform_%u" with the loop counter (0xb6633a r8d = r15d).
+PROOF  The outer entry gate only solves for modes 1..5: 0xb68903
+       mov eax,[rdx+0x198] / dec eax / cmp eax,5 / jb -> call solver; mode 0
+       (Off) skips the solver entirely.
+
+
+4. ARE ALL SLOTS WRITTEN ON EVERY SOLVE?  -- YES, ALL SIX
+---------------------------------------------------------
+PROOF  The vector is resized to exactly 6 unconditionally before the loop
+       (0xb644de mov esi,6 / 0xb644f1 call resize).
+PROOF  The loop runs i = 0..5 with `cmp r14d,6 / je` at 0xb64563, and every
+       iteration pushes exactly one element (0xb645b9 or 0xb64c9d).
+PROOF  The commit copies the whole vector wholesale into the settings object
+       (0xb65208..0xb65235 memcpy of (end-begin)/0x90 elements into the
+       destination at +0x4e0).
+PROOF  The writer then emits every slot 0..count-1 (loop 0xb662eb..0xb66497)
+       plus the count. There is no per-mode selection at write time.
+
+REFINEMENT of the earlier "one analysis cached into every slot" claim:
+PROOF  One *analysis* (line detection, focal, center, digest) is shared, but
+       each mode derives its own homography -- the per-mode branches above make
+       slots 1..4 genuinely different, which is why Auto/Full magnitudes differ
+       by 0.58-0.90 in the corpus.
+PROOF  After the loop a repair pass (0xb64e67..0xb650fc) validates each matrix
+       with 0x142a590 (square, non-empty, no degenerate row) and, when a slot
+       fails, copies a donor slot over it:
+         slot 1 <- slot 3   (0xb64f9f)
+         slot 4 <- slot 3   (0xb6503e)
+         slot 2 <- slot 4   (0xb650dd)
+INFERENCE  This donor fallback is the real source of the "all slots identical"
+       observation: on weakly-structured photos the per-mode results go
+       degenerate and are overwritten with one donor, and on already-upright
+       photos all six are identity from the start. The slots are not
+       independently cached copies, but they frequently end up equal.
+
+
+5. CORRECTIONS TO PRIOR NOTES
+-----------------------------
+- "a single analysis is cached into every slot" -> the analysis is shared, the
+  per-mode homographies are not; a donor-repair pass is what collapses them.
+- "slot 0 is scratch" -> slot 0 is Off and is always written as identity.
+- The version is not consulted at load; invalidation rides on the digest.
+
+
+6. ADDRESS INDEX
+----------------
+0x8eb18e5 "UprightVersion"   0x8eb18f4 "UprightTransformCount"
+0x8eb190a "UprightTransform_%u"   0x8ebb8b8 "UprightTransform_5"
+0x8eb18bf "UprightDependentDigest"   0x8eb191e "UprightGuidedDependentDigest"
+0x8eb18d6 "UprightPreview"   0x8eb193b "UprightFourSegmentsCount"
+0xb62d70 ctor   0xb62ee0 reset   0xb65b60 read   0xb66140 write
+0xb635a0 solve  0xb68320 validity check   0xb5f170 digest build
+0xb68791 digest compare   0xb6d9f0 dtor   vtable 0x90b8188

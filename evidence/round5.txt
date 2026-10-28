@@ -1,0 +1,209 @@
+ROUND 5 — AUTO OVER-CORRECTION — 2026-10-28
+========================================================================================
+RESULT: NOT FIXED. No production change was retained. The requested semantic targets
+and B_strong raw <=25.38 were NOT achieved. This report records a failed fix attempt,
+not an improvement claim. Changing the angle units alone is insufficient. Framing is
+a large raw-metric limitation, but missing native branch behavior is a separate
+damping limitation; the failure cannot honestly be attributed to framing alone.
+
+1. AXIS AUDIT — CURRENT CODE, NOT AN ASSUMPTION
+port/upright_port.py correction_fraction_vertical applies:
+  lambda=2.64*exp(-keystone^2/(2*13.33deg^2)); fraction=lambda/(1+lambda).
+The input is P95-P5 signed detected vertical-support directions in pixel angles.
+It is evaluated BEFORE correction. It is not camera pitch, mean vertical tilt,
+or corrected/residual pitch. _auto_pitch_scale then numerically converts requested
+convergence removal to an Euler rx scale while yaw/roll are held at their schedules.
+Thus the current 13.33deg/2.64 pair uses matching KEYSTONE units. Round 4 already
+fixed the suspected pitch/keystone mismatch. Keeping 13.33 on camera pitch would
+be an error, not the Round 5 fix. That negative control is measured below.
+Horizontal falloff: exp(-ry^2/(2*11.64deg^2)), gated by initial camera rx using
+1-exp(-rx^2/(2*22.10deg^2)); LAMBDA0_H=76.73. Roll scales: Auto=.928, Level=.87.
+All constants remain unchanged. A matching camera-pitch experiment used 22.26deg
+with 2.64, with the same physical-removal conversion and the same solver supports.
+
+2. REPRODUCTION AND RANKED HYPOTHESES
+1) Wrong angle/stage or response transfer: falsified as a units bug; tested matching
+   camera-pitch response and direct Euler scaling separately.
+2) Coupled yaw/pitch/roll cannot be represented by independent Euler damping:
+   tested four-start bounded fits of all three damping scales and a horizon-roll
+   diagnostic during investigation. No evidenced replacement roll model emerged.
+3) Pooled Gaussian misses the low-angle shoulder and strong-angle branch mixture:
+   tested interpolation of per-angle mean fractions from all solved dense-sweep
+   observations, without reading target-scene Adobe matrices into the solver.
+The sweep interpolation fixes the mild response, but makes B_strong worse.
+No target-H lookup, deterministic >30deg identity veto, per-scene framing fit,
+new branch threshold, or knowingly mismatched sigma was put in production.
+
+3. CANDIDATE AUTO RESPONSES — ACTUAL SOLVER, ALL FIVE SEEDS
+Every candidate receives identical detected segments/focal/seed. Same four native
+cache files as Round 4; primary focal=1600px. Fractions are physical convergence
+removal on independent world verticals. Mapping distances are % of source diagonal.
+camera22_physical substitutes the matching camera-pitch 22.26deg/2.64 response
+but retains scalar inversion on detected supports. Direct Euler candidates are
+explicitly diagnostic: Euler rotation fraction is not physical line-angle removal.
+Empirical sweep uses linear interpolation of the measured per-angle MEAN physical
+fractions, including the high-angle mixture. It is diagnostic, not shipped.
+scene      candidate                    raw       shape      removed
+A_clean    round4                      29.310565   0.251394   0.687896
+A_clean    camera22_physical           28.761683   0.252486   0.672836
+A_clean    keystone_euler              27.020361   0.309243   0.624385
+A_clean    camera22_euler              26.525377   0.336177   0.610415
+A_clean    wrong_sigma_camera_euler    19.376903   0.886020   0.395499
+A_clean    empirical_sweep_physical    28.962306   0.251033   0.678352
+B_strong   round4                      42.367262   1.907538   0.561334
+B_strong   camera22_physical           36.605380   1.508652   0.455881
+B_strong   keystone_euler              40.636852   1.772048   0.530813
+B_strong   camera22_euler              35.390363   1.449169   0.432040
+B_strong   wrong_sigma_camera_euler    23.471712   1.948337   0.097243
+B_strong   empirical_sweep_physical    42.918971   1.952810   0.570883
+C_noisy    round4                      28.710747   0.280713   0.672062
+C_noisy    camera22_physical           28.193752   0.287445   0.657781
+C_noisy    keystone_euler              26.955978   0.328823   0.623216
+C_noisy    camera22_euler              26.496000   0.351362   0.610230
+C_noisy    wrong_sigma_camera_euler    19.358296   0.882268   0.395616
+C_noisy    empirical_sweep_physical    28.417330   0.283682   0.663968
+D_roll     round4                      29.029224   0.368845   0.672734
+D_roll     camera22_physical           29.336471   0.367398   0.681275
+D_roll     keystone_euler              26.692636   0.440284   0.606519
+D_roll     camera22_euler              26.951276   0.427931   0.613964
+D_roll     wrong_sigma_camera_euler    20.060527   0.925715   0.401734
+D_roll     empirical_sweep_physical    29.639103   0.367993   0.689653
+
+The wrong-sigma negative control meets the B raw threshold by driving pitch almost
+off, but damages A/C/D shape badly and uses the explicitly forbidden units mismatch.
+It was rejected. Matching camera units improves B shape but still misses raw<=25.38.
+
+4. CHECK THE TWO REQUESTED REGIMES USING THE REPORT'S EXACT METRIC
+The non-Manhattan report uses nm_analyze.sim_residual: maximum point distance after
+best output similarity, over the 9x7 interior grid. It chooses whichever of FULL
+ideal or PITCH-ONLY ideal has smaller residual, then normalizes against the identity
+baseline for that selected ideal. This is different from Round 4 raw/shape RMS
+and different from physical convergence removal. Negative fractions are retained.
+scene              native_report  round4     camera22_physical   empirical_sweep
+NM_single_wall        0.870       0.706101   0.732830             0.833193
+NM_railing            0.830       0.701842   0.729859             0.831404
+NM_curves             0.910       0.707256   0.724111             0.830696
+NM_three_plane        0.890       0.701314   0.732346             0.833147
+CT_manhattan2         0.870       0.725601   0.726458             0.844001
+Mild 15/6 target: FAIL for current port and matching camera Gaussian; empirical
+sweep reaches .831-.844, inside the requested .83-.91 band for all five families.
+Full on the same rasters remains .991-.998 of ideal (seed 0), with all solves valid.
+
+For B_strong the same native cached H gives:
+  against FULL ideal: residual=343.089950px, identity=440.271895px, fraction=.220732;
+  against PITCH-ONLY: residual=196.460486px, identity=195.776308px, fraction=-.003495.
+The report selects PITCH-ONLY, hence its approximately 0.00. The native matrix is
+not literally identity: it removes .264781 of independent visible convergence.
+This does not excuse port over-correction. It prevents confusing three metrics.
+B_strong port report-metric fractions (mean over seeds):
+  round4                      +0.548370
+  camera22_physical           -0.168006
+  keystone_euler              +0.523241
+  camera22_euler              -0.175414
+  wrong_sigma_camera_euler    -0.282390
+  empirical_sweep_physical    +0.556335
+Strong 34/12 target: FAIL. Current port=.548370; the matching camera curve overshoots
+in the opposite direction on the selected pitch-only metric (-.168006). The empirical
+sweep=.556335 and fails to select the observed weak branch. None meets both regimes.
+The smooth curve has maximum physical fraction 2.64/3.64=.725275. Its low-angle
+shoulder error and high-angle branch residual are documented in sigma_v_precise.txt.
+This alone is NOT a mathematical bound on the differently defined ideal-shape metric.
+
+5. RAW/SHAPE BEFORE-AFTER — RE-RUN ROUND 4 PROTOCOL
+Before below is ROUND 4 FINAL, i.e. the actual start of Round 5. The historical
+Round 4 START value for B was 25.379550 raw / 1.645814 shape. The unchanged legacy
+benchmark still writes its internal before field against round4_original_port.py;
+Round 5 comparisons here correctly use round4_adobe.json after vs round5 after.
+No row omitted: 4 scenes x 4 modes x 5 seeds x 2 focal protocols x 2 solver versions.
+Primary focal; Auto per-scene means:
+scene       raw_before raw_after  shape_before shape_after
+A_clean      29.310565   29.310565    0.251394    0.251394
+B_strong     42.367262   42.367262    1.907538    1.907538
+C_noisy      28.710747   28.710747    0.280713    0.280713
+D_roll       29.029224   29.029224    0.368845    0.368845
+Aggregate by mode, Round 4 final -> Round 5 (raw / shape):
+  all      33.266029 / 0.403312 -> 33.266029 / 0.403312
+  auto     32.354450 / 0.702123 -> 32.354450 / 0.702123
+  full     50.189040 / 0.161123 -> 50.189040 / 0.161123
+  level    1.416363 / 0.593272 -> 1.416363 / 0.593272
+  vertical 49.104266 / 0.156729 -> 49.104266 / 0.156729
+B_strong <=25.38: FAIL, remains 42.367262. No improvement is claimed.
+Stored-focal sensitivity: also exactly unchanged; all 160 final H/score records
+across both protocols are identical to Round 4 final, with zero rejections.
+
+6. FRAMING VERSUS DAMPING — CONTROLLED COUNTERFACTUALS
+Use frozen seed-0 undamped cameras reconstructed from Round 4, checked by rebuilding
+the original returned H. Adobe H enters OFFLINE SCORING ONLY, never production.
+Bounded damping fits use four starts, scales [0,1], same K0/K1, and optimize either
+raw RMS or shape RMS. These are local multi-start counterfactuals, not global proofs.
+scene       variant                           raw       shape   removed-or-n/a
+A_clean    round4                           29.306814   0.251343 0.687900
+A_clean    best_raw                          3.600320   2.027559 0.000000
+A_clean    best_shape                       29.137721   0.248569 0.680745
+A_clean    oracle_native_convergence_only   28.020182   0.267725 n/a
+A_clean    diagnostic_center_anchor          2.546369   0.251343 n/a
+B_strong   round4                           42.374011   1.908269 0.561333
+B_strong   best_raw                          3.906587   2.262681 0.003272
+B_strong   best_shape                       28.512597   1.245457 0.359431
+B_strong   oracle_native_convergence_only   27.986337   1.427334 n/a
+B_strong   diagnostic_center_anchor          4.866809   1.908269 n/a
+C_noisy    round4                           28.706226   0.280692 0.672064
+C_noisy    best_raw                          3.568388   2.018705 0.000000
+C_noisy    best_shape                       29.011953   0.275226 0.676002
+C_noisy    oracle_native_convergence_only   27.665134   0.301029 n/a
+C_noisy    diagnostic_center_anchor          2.538056   0.280692 n/a
+D_roll     round4                           29.029101   0.368787 0.672734
+D_roll     best_raw                          4.291361   1.993992 -0.000000
+D_roll     best_shape                       28.991106   0.262194 0.673252
+D_roll     oracle_native_convergence_only   27.892569   0.391337 n/a
+D_roll     diagnostic_center_anchor          3.573847   0.368787 n/a
+
+B_strong findings:
+* With yaw/roll schedules unchanged, an ORACLE pitch scale=.272814 matches native
+  vertical-convergence removal exactly. Raw still=27.986337, shape=1.427334.
+* Best shape among the tried independent scale fits: scales .373722/.745924/1.0;
+  shape=1.245457 but raw=28.512597. Damping can improve shape; it does not remove
+  the output displacement with this fixed destination camera.
+* Best raw instead drives pitch/yaw almost off: scales .003839/0/1, raw=3.906587
+  but shape=2.262681, worse than the starting port. Raw-only tuning is misleading.
+* A diagnostic, CACHE-INDEPENDENT source-centre anchor alone reduces B raw
+  42.374011 ->4.866809 while shape remains 1.908269. It changes no damping and
+  cannot fix the mild/strong semantic targets. It is not shipped as Adobe framing.
+
+Quantify removable framing using the same positive scale+translation projection
+as Round 4: raw_MSE = shape_MSE + (raw_MSE-shape_MSE). The fit residual is orthogonal
+action-by-action to output scale and translation, so this is an exact least-squares
+decomposition for these sample points, not a causal recovery of Adobe K1.
+B variant                           raw_RMS   shape_RMS framing_RMS removable_MSE_pct
+round4                             42.374011   1.908269   42.331021    99.797194
+best_raw                            3.906587   2.262681    3.184603    66.453151
+best_shape                         28.512597   1.245457   28.485383    99.809197
+oracle_native_convergence_only     27.986337   1.427334   27.949915    99.739889
+diagnostic_center_anchor            4.866809   1.908269    4.477090    84.625862
+Thus 99.797% of current B raw squared discrepancy is removable by output scale
+and translation; after matching native convergence, 99.740% is still removable.
+This quantifies the residual raw framing component. It does NOT establish that
+99.797% of solver modeling error is framing: wrong damping itself moves the output
+centre, and best-fit framing is an oracle. Shape residual and branch error remain.
+
+7. REGRESSIONS, SCOPE AND REPRODUCTION
+python3.12 -m pytest -q: 75 passed in 47.56s (round5_pytest.txt). Existing warning only.
+This includes all 700 held-out full-mode seeds, focal/seed combinations and gate tests.
+Full/Level/Vertical: maximum H coefficient change=0 for every paired Adobe-protocol
+row. Production source is byte-identical to round5_original_port.py. Held-out tails
+cannot regress from unchanged code; the existing full suite was still rerun.
+Only files inside research/upright were written. No dependency added. No Lightroom
+GUI/catalog mutation or new native solve was performed; cached Adobe data is reused.
+New diagnostics use already-installed scipy offline; production retains numpy/OpenCV.
+Reproduce:
+  python3.12 port/benchmark_adobe.py --seeds 5 --output evidence/round5_adobe.json
+  python3.12 evidence/round5_ablations.py > evidence/round5_ablations_run.txt
+  python3.12 evidence/round5_limits.py > evidence/round5_limits_run.txt
+  python3.12 -m pytest -q
+
+UNRESOLVED: A supported Auto response needs the measured low-angle shoulder AND a
+predictor/model for native focal-branch selection, plus destination framing to make
+raw H distance meaningful alongside shape. The supplied pooled constants are already
+used in the correct units; they do not specify those missing behaviors. No invented
+branch rule was substituted for a successful fix. Task 2 and the Task 3 target remain
+open. The important Auto over-correction gap is explicitly NOT closed.

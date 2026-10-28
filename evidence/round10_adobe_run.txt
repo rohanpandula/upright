@@ -1,0 +1,7 @@
+fresh paired solves A_clean
+fresh paired solves B_strong
+fresh paired solves C_noisy
+fresh paired solves D_roll
+Adobe framing+scale scores unchanged
+scene_focal {'n': 80, 'mean': 0.5870915722824638, 'median': 0.3165476444819332, 'p90': 2.2122654852696764, 'p99': 2.6051705759848973, 'max': 2.6054882738792786, 'over1': 10, 'over5': 0, 'over20': 0}
+adobe_stored_focal {'n': 80, 'mean': 0.5843569959243731, 'median': 0.3194871892869027, 'p90': 2.207364771719602, 'p99': 2.6065367608839587, 'max': 2.606536761524644, 'over1': 10, 'over5': 0, 'over20': 0}

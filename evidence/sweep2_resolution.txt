@@ -1,0 +1,28 @@
+Controlled-angle sweep #2: pitch-biased yaw series (RESOLVES the open question)
+
+pitch=10deg + yaw N (X series) and pitch=25deg + yaw N (Z series)
+img   pitch  yaw vert_orig vert_auto horiz_orig horiz_auto     kh
+X00      10    0      7.15      1.16       0.00       0.18-178037261.207
+X04      10    4      7.19      0.93       3.69       0.44  0.949
+X08      10    8      7.31      1.39       7.34       1.61  0.806
+X12      10   12      7.51      1.48      10.95       2.56  0.798
+X16      10   16      7.80      1.33      14.47       4.54  0.724
+X20      10   20      8.20      1.65      17.89       5.70  0.716
+X24      10   24      8.72      2.20      21.19      12.90  0.413
+Z00      25    0     17.30      7.99       0.00       0.13-125510955.064
+Z08      25    0     17.61      7.34       7.06       1.06  0.892
+Z16      25    0     18.56      6.24      13.98       2.17  0.880
+Z24      25    0     20.28      5.27      20.59       3.83  0.851
+
+FITTED kh model (n=16, maxerr 0.09 excluding the Y15 anomaly):
+  kh = saturate( L0h * exp(-yaw^2/2 sigma_yaw^2) * (1 - exp(-pitch^2/2 sigma_gate^2)) )
+  L0h=76.73  sigma_yaw=11.64 deg  sigma_gate=22.05 deg
+
+KEY RESULT: sigma_yaw = 11.60 deg vs the paper's sigma_h = pi/15 = 12.00 deg (3.3% match),
+and vs the float32 literal 1/(2 sigma_h^2)=11.3986332 compiled into CameraRaw.
+
+CONCLUSION: Auto is gated on PITCH. With pitch present it corrects horizontals at
+0.4-0.95; with pitch=0 (pure yaw) it is a no-op (0.001). A single theta = total tilt
+cannot express this; the two weights key on different axes.
+ANOMALIES: Y06 and Y15 -- even Full fails to fix horizontals there (5.98 and 14.55 deg
+left vs 0.48 deg for neighbours). Worth a repeat run.

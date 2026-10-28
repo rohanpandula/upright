@@ -1,0 +1,31 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+..F..                                                                    [100%]
+=================================== FAILURES ===================================
+__________ TestRound3.test_gate_rejects_original_h09_tail_candidates ___________
+
+self = <test_round3.TestRound3 testMethod=test_gate_rejects_original_h09_tail_candidates>
+
+    def test_gate_rejects_original_h09_tail_candidates(self):
+        image,_,_,_=heldout.render(heldout.CASES[8])
+        segments=up.detect_segments(image)
+        optimizer=up._levenberg_marquardt
+        # Actual pre-fix bad undamped rotations, not an invented catastrophic fit.
+        rotations=[(-.3101752936256536,.4399098759421401,.2608512822771301),
+                   (-.31060776195229217,.4394460087806279,.26097880940477064)]
+        for seed,rotation in enumerate(rotations):
+            def replay(fun,x0,lo,hi,**kwargs):
+                if len(x0)==4:return optimizer(fun,x0,lo,hi,**kwargs)
+                return np.r_[rotation,x0[3:]],0.
+            with self.subTest(seed=seed),patch.object(up,'_levenberg_marquardt',side_effect=replay):
+                out=up.solve_ex(segments,1024,576,heldout.camera(heldout.CASES[8])[1][0,0],
+                                'full',seed=seed)
+>           self.assertFalse(out['ok'])
+E           AssertionError: True is not false
+
+port/test_round3.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_round3.py::TestRound3::test_gate_rejects_original_h09_tail_candidates
+1 failed, 4 passed in 1.20s

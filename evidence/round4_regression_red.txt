@@ -1,0 +1,65 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____ TestRound4.test_auto_removes_measured_fraction_of_visible_convergence _____
+
+self = <test_round4.TestRound4 testMethod=test_auto_removes_measured_fraction_of_visible_convergence>
+
+    def test_auto_removes_measured_fraction_of_visible_convergence(self):
+        # The fit describes removed line convergence, not a fraction of Euler pitch.
+        for pitch in (-34, -20, 12, 28):
+            seg, _, kind = project_scene(pitch, 0, 0, 1800)
+            out = up.solve_ex(seg, W, H, 1800, 'auto')
+            self.assertTrue(out['ok'], out['reason'])
+            vertical = seg[kind == 0] / [W, H, W, H]
+>           before = up._vertical_convergence(vertical, W, H)
+E           AttributeError: module 'upright_port' has no attribute '_vertical_convergence'
+
+port/test_round4.py:29: AttributeError
+______________ TestRound4.test_measured_curve_uses_keystone_units ______________
+
+self = <test_round4.TestRound4 testMethod=test_measured_curve_uses_keystone_units>
+
+    def test_measured_curve_uses_keystone_units(self):
+        for angle in (0, 5, 15, 30, 40):
+            lam = 2.64 * math.exp(-angle**2 / (2 * 13.33**2))
+>           self.assertAlmostEqual(up.correction_fraction_vertical(math.radians(angle)),
+                                   lam / (1 + lam), places=12)
+E           AssertionError: 0.7807017543859648 != 0.7252747252747253 within 12 places (0.055427029111239534 difference)
+
+port/test_round4.py:17: AssertionError
+_________ TestRound4.test_modes_share_the_undamped_candidate_and_gate __________
+
+self = <test_round4.TestRound4 testMethod=test_modes_share_the_undamped_candidate_and_gate>
+
+    def test_modes_share_the_undamped_candidate_and_gate(self):
+        for name, f35 in (('A_clean', 38.9696), ('C_noisy', 39.7882)):
+            image = cv2.imread(str(ROOT / 'lrtest' / 'in' / (name + '.tif')), 0)
+            h, w = image.shape
+            segments = up.detect_segments(image)
+            focal = up.focal_px_from_35mm(f35, w, h)
+            full = up.solve_ex(segments, w, h, focal, 'full')
+            self.assertTrue(full['ok'], full['reason'])
+            for mode in ('auto', 'level', 'vertical'):
+                with self.subTest(scene=name, mode=mode):
+                    out = up.solve_ex(segments, w, h, focal, mode)
+                    self.assertTrue(out['ok'], out['reason'])
+>                   np.testing.assert_array_equal(out['rotation'], full['rotation'])
+E                   AssertionError: 
+E                   Arrays are not equal
+E                   
+E                   Mismatched elements: 3 / 3 (100%)
+E                   Max absolute difference among violations: 0.00103919
+E                   Max relative difference among violations: 0.74375441
+E                    ACTUAL: array([-0.372985,  0.103243,  0.001175])
+E                    DESIRED: array([-0.372739,  0.104282,  0.000674])
+
+port/test_round4.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_round4.py::TestRound4::test_auto_removes_measured_fraction_of_visible_convergence
+FAILED port/test_round4.py::TestRound4::test_measured_curve_uses_keystone_units
+FAILED port/test_round4.py::TestRound4::test_modes_share_the_undamped_candidate_and_gate
+3 failed in 0.61s

@@ -1,0 +1,16 @@
+variant        statistic (degrees, all scenes x seeds 0..4)
+baseline       mean 0.006216 worst 0.018802 over0.1 0/140 rejects 0 minseg 80
+jpeg75         mean 0.007276 worst 0.019793 over0.1 0/140 rejects 0 minseg 78
+blur0.8        mean 0.006873 worst 0.016489 over0.1 0/140 rejects 0 minseg 80
+contrast0.85   mean 0.006325 worst 0.017781 over0.1 0/140 rejects 0 minseg 80
+contrast1.20   mean 0.006365 worst 0.018398 over0.1 0/140 rejects 0 minseg 80
+resize0.75     mean 0.010328 worst 0.027044 over0.1 0/140 rejects 0 minseg 73
+resize1.5      mean 0.005907 worst 0.016671 over0.1 0/140 rejects 0 minseg 78
+
+per-scene worst:
+jpeg75 H01:0.0063 H02:0.0081 H03:0.0101 H04:0.0097 H05:0.0127 H06:0.0117 H07:0.0060 H08:0.0122 H09:0.0124 H10:0.0152 H11:0.0198 H12:0.0021 H13_single_wall:0.0056 H14_near_frontal:0.0088
+blur0.8 H01:0.0060 H02:0.0085 H03:0.0094 H04:0.0077 H05:0.0128 H06:0.0105 H07:0.0038 H08:0.0087 H09:0.0165 H10:0.0125 H11:0.0162 H12:0.0048 H13_single_wall:0.0069 H14_near_frontal:0.0018
+contrast0.85 H01:0.0063 H02:0.0077 H03:0.0131 H04:0.0090 H05:0.0086 H06:0.0089 H07:0.0064 H08:0.0092 H09:0.0126 H10:0.0104 H11:0.0178 H12:0.0046 H13_single_wall:0.0046 H14_near_frontal:0.0071
+contrast1.20 H01:0.0059 H02:0.0066 H03:0.0127 H04:0.0077 H05:0.0087 H06:0.0089 H07:0.0061 H08:0.0100 H09:0.0112 H10:0.0105 H11:0.0184 H12:0.0052 H13_single_wall:0.0052 H14_near_frontal:0.0072
+resize0.75 H01:0.0204 H02:0.0096 H03:0.0125 H04:0.0143 H05:0.0270 H06:0.0069 H07:0.0130 H08:0.0118 H09:0.0210 H10:0.0037 H11:0.0173 H12:0.0083 H13_single_wall:0.0163 H14_near_frontal:0.0071
+resize1.5 H01:0.0055 H02:0.0090 H03:0.0142 H04:0.0114 H05:0.0167 H06:0.0058 H07:0.0019 H08:0.0066 H09:0.0135 H10:0.0107 H11:0.0128 H12:0.0029 H13_single_wall:0.0019 H14_near_frontal:0.0011

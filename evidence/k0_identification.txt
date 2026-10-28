@@ -1,0 +1,25 @@
+WHICH CAMERA DO THE STORED INTRINSICS DESCRIBE?  — RESOLVED: K0 (source)
+
+The decomposition H = s*K1*R*K0^-1 has 10 unknowns against 8 DOF, so individual
+f0/f1/centre values are not unique. But UprightFocalLength35mm and
+UprightCenterNormX/Y are stored, so the question is which camera they describe.
+
+Test: all 29 synthetic scenes share ONE true focal (1600 px = 41.14 mm).
+A source-camera estimate should track that constant with estimation noise.
+A destination-camera value would instead drift with the mode and with how hard
+the correction is -- it is the focal that makes the OUTPUT look natural.
+
+  n = 29
+  median f35 = 39.70 mm   (0.965 x truth)
+  median |err| = 1.54 mm = 3.8%
+  sd = 3.40 mm, range 29.43 - 42.68
+
+The estimate stays clustered on the true value across every pitch, yaw and
+mode. It is the SOURCE camera.
+
+Consequence: K0 is directly readable from the settings, which removes the
+2-parameter freedom in practice -- pick f0 and c0 from UprightFocalLength35mm
+and UprightCenterNormX/Y, then solve only f1, c1, R, s.
+
+Corollary: the widest outliers (29.43, 42.68 mm) are all pure-yaw frames,
+independently confirming the estimator degeneracy identified in the sweep.

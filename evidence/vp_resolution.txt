@@ -1,0 +1,31 @@
+RESOLUTION: two agents disagreed on the VP stage. Disassembly settles it.
+
+CONFLICT
+  detector.txt:     "RANSAC 0x22d8f20", 2-line minimal sample, 2000 iterations, tau=sqrt(3)
+  vp_clustering.txt: NOT RANSAC; candidates are per-segment line duals; no angular
+                     tolerance exists; min votes 3; Jaccard==1.0 dedup
+
+VERIFIED FROM THE BYTES (lipo -thin x86_64, objdump)
+1. Candidate generation 0x22d7df2..0x22d7e3f strides %rax by 0x18 and reads a 3-double
+   record at (%rdx,%rax)/+8/+0x10, writing one 3-double output at (%r12,%rax). It is a
+   cross product of two endpoints, applied ONE PER SEGMENT, 1:1. Not pair sampling.
+   => per-segment line dual. The vp_clustering agent is correct.
+2. Min-votes gate 0x22d92b9: `cmpl %eax, 0x8(%rcx)` / `jg` with params[+8] == 3 keeps a
+   candidate only if vote count >= 3. Confirmed.
+3. VP-count gate 0x22ecc71: `cmpq $0x4, %rax` on (end-begin) of an index list, `jne`
+   full solve, `jmp` degenerate. Elements are 4 bytes, so 4 == exactly ONE VP. One VP
+   takes the horizon-only fallback; two or more take the full solve.
+4. Manhattan/ambiguity test at 0x22d6ee1-0x22d6f29: keep iff runner_up/best <= 0.75 AND
+   best - runner_up > 1.5, plus non-zero checks on all three rotation-matrix columns.
+
+VERDICT
+The stage is: per-segment line-dual candidates -> signed perpendicular vote counting ->
+>=3 votes required -> greedy agglomeration merging only identical vote sets (Jaccard
+exactly 1.0, a de-dup not a radius) -> pairwise tournament ranking -> >=2 VPs gate ->
+0.75 ratio AND 1.5 absolute margin test. "RANSAC with 2000 iterations" in detector.txt
+should be read as loose; 2000 is the candidate cap at params+0x00, not an iteration count,
+and there is no tau=sqrt(3) inlier threshold in this stage (tau belongs to the vote kernel
+where it clamps a residual, not to an inlier decision).
+
+Both agents' numeric facts agree; only the label was wrong. detector.txt is still sound on
+the detector itself, which is the part it owned.

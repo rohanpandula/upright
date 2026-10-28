@@ -1,0 +1,52 @@
+H = s * K1 * R * K0^-1  orthogonality residual  (0 => model exact)
+
+file                 slot variant                  f0       f1      resid  rot_deg
+----------------------------------------------------------------------------------
+img_6727297.lua         1 f1=f35 centre=stored   1515.5   1515.5   2.44e-01   10.432
+img_6727297.lua         1 f1=f35 centre=image   1515.5   1515.5   2.53e-01   10.469
+img_6727297.lua         1 f1=f35 centre=free   1515.5   1515.5   5.00e-02   14.658
+img_6727297.lua         1 f1=f35 c=free f0=free   1454.1   1515.5   9.23e-03   14.090
+img_6727297.lua         2 f1=f35 centre=stored   1515.5   1515.5   3.78e-01   15.217
+img_6727297.lua         2 f1=f35 centre=image   1515.5   1515.5   3.88e-01   15.245
+img_6727297.lua         2 f1=f35 centre=free   1515.5   1515.5   1.30e-01   21.119
+img_6727297.lua         2 f1=f35 c=free f0=free   1706.4   1515.5   3.64e-03   23.016
+img_6727297.lua         4 f1=f35 centre=stored   1515.5   1515.5   3.96e-01   15.215
+img_6727297.lua         4 f1=f35 centre=image   1515.5   1515.5   4.06e-01   15.245
+img_6727297.lua         4 f1=f35 centre=free   1515.5   1515.5   1.97e-01   20.789
+img_6727297.lua         4 f1=f35 c=free f0=free   1806.6   1515.5   1.34e-02   23.391
+img_6727497.lua         1 f1=f35 centre=stored   1555.4   1555.4   1.56e-01    8.420
+img_6727497.lua         1 f1=f35 centre=image   1555.4   1555.4   1.67e-01    8.436
+img_6727497.lua         1 f1=f35 centre=free   1555.4   1555.4   6.24e-02   11.361
+img_6727497.lua         1 f1=f35 c=free f0=free   1479.6   1555.4   4.58e-03   10.794
+img_6727497.lua         2 f1=f35 centre=stored   1555.4   1555.4   6.32e-01   26.175
+img_6727497.lua         2 f1=f35 centre=image   1555.4   1555.4   6.43e-01   26.201
+img_6727497.lua         2 f1=f35 centre=free   1555.4   1555.4   3.23e-01   35.811
+img_6727497.lua         2 f1=f35 c=free f0=free   2152.2   1555.4   1.36e-01   43.195
+img_6727497.lua         4 f1=f35 centre=stored   1555.4   1555.4   6.77e-01   27.234
+img_6727497.lua         4 f1=f35 centre=image   1555.4   1555.4   6.89e-01   27.237
+img_6727497.lua         4 f1=f35 centre=free   1555.4   1555.4   5.64e-01   35.894
+img_6727497.lua         4 f1=f35 c=free f0=free   2575.5   1555.4   2.78e-01   46.578
+img_6727693.lua         1 f1=f35 centre=stored   1547.3   1547.3   2.47e-01   10.506
+img_6727693.lua         1 f1=f35 centre=image   1547.3   1547.3   2.54e-01   10.537
+img_6727693.lua         1 f1=f35 centre=free   1547.3   1547.3   4.77e-02   14.763
+img_6727693.lua         1 f1=f35 c=free f0=free   1487.5   1547.3   8.55e-03   14.220
+img_6727693.lua         2 f1=f35 centre=stored   1547.3   1547.3   3.84e-01   15.406
+img_6727693.lua         2 f1=f35 centre=image   1547.3   1547.3   3.92e-01   15.429
+img_6727693.lua         2 f1=f35 centre=free   1547.3   1547.3   1.32e-01   21.379
+img_6727693.lua         2 f1=f35 c=free f0=free   1746.1   1547.3   5.09e-03   23.334
+img_6727693.lua         4 f1=f35 centre=stored   1547.3   1547.3   4.02e-01   15.410
+img_6727693.lua         4 f1=f35 centre=image   1547.3   1547.3   4.10e-01   15.432
+img_6727693.lua         4 f1=f35 centre=free   1547.3   1547.3   2.00e-01   21.050
+img_6727693.lua         4 f1=f35 c=free f0=free   1851.1   1547.3   1.53e-02   23.741
+img_6727887.lua         1 f1=f35 centre=stored   1550.7   1550.7   2.49e-01   11.172
+img_6727887.lua         1 f1=f35 centre=image   1550.7   1550.7   2.55e-01   11.202
+img_6727887.lua         1 f1=f35 centre=free   1550.7   1550.7   5.95e-02   15.189
+img_6727887.lua         1 f1=f35 c=free f0=free   1476.0   1550.7   9.59e-03   14.519
+img_6727887.lua         2 f1=f35 centre=stored   1550.7   1550.7   3.75e-01   15.552
+img_6727887.lua         2 f1=f35 centre=image   1550.7   1550.7   3.82e-01   15.587
+img_6727887.lua         2 f1=f35 centre=free   1550.7   1550.7   4.35e-02   21.556
+img_6727887.lua         2 f1=f35 c=free f0=free   1492.0   1550.7   1.70e-02   20.875
+img_6727887.lua         4 f1=f35 centre=stored   1550.7   1550.7   4.03e-01   15.427
+img_6727887.lua         4 f1=f35 centre=image   1550.7   1550.7   4.11e-01   15.455
+img_6727887.lua         4 f1=f35 centre=free   1550.7   1550.7   1.16e-01   21.279
+img_6727887.lua         4 f1=f35 c=free f0=free   1724.5   1550.7   3.01e-03   22.987

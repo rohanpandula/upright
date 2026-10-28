@@ -1,0 +1,4 @@
+40 seeds A_clean
+40 seeds B_strong
+40 seeds C_noisy
+40 seeds D_roll

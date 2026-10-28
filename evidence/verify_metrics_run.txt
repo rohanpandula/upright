@@ -1,0 +1,128 @@
+/Users/rohan/Projects/trichroma/research/upright/evidence/verify_metrics.py:45: RuntimeWarning: divide by zero encountered in matmul
+  q = (H @ p.T).T
+/Users/rohan/Projects/trichroma/research/upright/evidence/verify_metrics.py:45: RuntimeWarning: overflow encountered in matmul
+  q = (H @ p.T).T
+/Users/rohan/Projects/trichroma/research/upright/evidence/verify_metrics.py:45: RuntimeWarning: invalid value encountered in matmul
+  q = (H @ p.T).T
+A_clean auto 0 0.308880
+A_clean auto 1 0.308312
+A_clean auto 2 0.308437
+A_clean auto 3 0.308252
+A_clean auto 4 0.308217
+A_clean full 0 0.142109
+A_clean full 1 0.142265
+A_clean full 2 0.142231
+A_clean full 3 0.142285
+A_clean full 4 0.142294
+A_clean level 0 0.431742
+A_clean level 1 0.432068
+A_clean level 2 0.432059
+A_clean level 3 0.432070
+A_clean level 4 0.432066
+A_clean vertical 0 0.199563
+A_clean vertical 1 0.199701
+A_clean vertical 2 0.199698
+A_clean vertical 3 0.199706
+A_clean vertical 4 0.199704
+B_strong auto 0 2.605488
+B_strong auto 1 2.604524
+B_strong auto 2 2.604524
+B_strong auto 3 2.605086
+B_strong auto 4 2.604524
+B_strong full 0 0.254496
+B_strong full 1 0.253203
+B_strong full 2 0.253203
+B_strong full 3 0.253987
+B_strong full 4 0.253203
+B_strong level 0 2.213055
+B_strong level 1 2.212265
+B_strong level 2 2.212265
+B_strong level 3 2.212599
+B_strong level 4 2.212265
+B_strong vertical 0 0.248111
+B_strong vertical 1 0.248268
+B_strong vertical 2 0.248268
+B_strong vertical 3 0.248201
+B_strong vertical 4 0.248268
+C_noisy auto 0 0.325174
+C_noisy auto 1 0.324215
+C_noisy auto 2 0.324315
+C_noisy auto 3 0.324315
+C_noisy auto 4 0.325165
+C_noisy full 0 0.161344
+C_noisy full 1 0.160743
+C_noisy full 2 0.160783
+C_noisy full 3 0.160783
+C_noisy full 4 0.161333
+C_noisy level 0 0.463131
+C_noisy level 1 0.463777
+C_noisy level 2 0.463782
+C_noisy level 3 0.463782
+C_noisy level 4 0.463151
+C_noisy vertical 0 0.213145
+C_noisy vertical 1 0.213404
+C_noisy vertical 2 0.213406
+C_noisy vertical 3 0.213406
+C_noisy vertical 4 0.213153
+D_roll auto 0 0.451727
+D_roll auto 1 0.451727
+D_roll auto 2 0.451727
+D_roll auto 3 0.451727
+D_roll auto 4 0.452021
+D_roll full 0 0.237637
+D_roll full 1 0.237637
+D_roll full 2 0.237637
+D_roll full 3 0.237637
+D_roll full 4 0.237724
+D_roll level 0 0.768783
+D_roll level 1 0.768783
+D_roll level 2 0.768783
+D_roll level 3 0.768783
+D_roll level 4 0.769292
+D_roll vertical 0 0.371070
+D_roll vertical 1 0.371070
+D_roll vertical 2 0.371070
+D_roll vertical 3 0.371070
+D_roll vertical 4 0.371651
+{
+ "n": 80,
+ "port": 0.5870915722824634,
+ "framed": 3.562254945295608,
+ "unframed": 33.266029488335946,
+ "shape": 0.40331155449516326,
+ "centre_lb": 0.4301356705964281,
+ "naive": 50.297450855517454,
+ "naive_shape": 1.9957331729190586,
+ "naive_pol": 3.107135127266496,
+ "oracle_mode": 0.6009177009911371,
+ "by_mode": {
+  "auto": {
+   "port": 0.9224179715579736,
+   "shape": 0.7021225907995874,
+   "naive_pol": 3.2890780987703954,
+   "naive_shape": 2.1499808701275374,
+   "oracle_mode": 0.9331265929630737
+  },
+  "full": {
+   "port": 0.1986265429165079,
+   "shape": 0.16112330562314703,
+   "naive_pol": 0.21026988259427734,
+   "naive_shape": 0.1722463165546783,
+   "oracle_mode": 0.21026988259428228
+  },
+  "level": {
+   "port": 0.9692252170898149,
+   "shape": 0.5932715097088337,
+   "naive_pol": 4.396319296072116,
+   "naive_shape": 3.6974092541506303,
+   "oracle_mode": 0.9847899738630682
+  },
+  "vertical": {
+   "port": 0.25809655756555805,
+   "shape": 0.15672881184908521,
+   "naive_pol": 4.532873231629194,
+   "naive_shape": 1.9632962508433878,
+   "oracle_mode": 0.2754843545441241
+  }
+ }
+}

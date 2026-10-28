@@ -1,0 +1,156 @@
+[
+  {
+    "name": "H01",
+    "w": 960,
+    "h": 640,
+    "focal_mm": 24,
+    "pitch": 5,
+    "yaw": 0,
+    "roll": 0,
+    "single_wall": false,
+    "seed": 810
+  },
+  {
+    "name": "H02",
+    "w": 960,
+    "h": 640,
+    "focal_mm": 35,
+    "pitch": 15,
+    "yaw": 8,
+    "roll": 5,
+    "single_wall": false,
+    "seed": 811
+  },
+  {
+    "name": "H03",
+    "w": 960,
+    "h": 640,
+    "focal_mm": 50,
+    "pitch": 28,
+    "yaw": 17,
+    "roll": 10,
+    "single_wall": false,
+    "seed": 812
+  },
+  {
+    "name": "H04",
+    "w": 960,
+    "h": 640,
+    "focal_mm": 85,
+    "pitch": 40,
+    "yaw": 25,
+    "roll": 15,
+    "single_wall": false,
+    "seed": 813
+  },
+  {
+    "name": "H05",
+    "w": 960,
+    "h": 720,
+    "focal_mm": 24,
+    "pitch": 35,
+    "yaw": 20,
+    "roll": 12,
+    "single_wall": false,
+    "seed": 814
+  },
+  {
+    "name": "H06",
+    "w": 960,
+    "h": 720,
+    "focal_mm": 35,
+    "pitch": 22,
+    "yaw": 12,
+    "roll": 3,
+    "single_wall": false,
+    "seed": 815
+  },
+  {
+    "name": "H07",
+    "w": 960,
+    "h": 720,
+    "focal_mm": 50,
+    "pitch": 10,
+    "yaw": 4,
+    "roll": 8,
+    "single_wall": false,
+    "seed": 816
+  },
+  {
+    "name": "H08",
+    "w": 960,
+    "h": 720,
+    "focal_mm": 85,
+    "pitch": 32,
+    "yaw": 22,
+    "roll": 14,
+    "single_wall": false,
+    "seed": 817
+  },
+  {
+    "name": "H09",
+    "w": 1024,
+    "h": 576,
+    "focal_mm": 24,
+    "pitch": 18,
+    "yaw": 25,
+    "roll": 15,
+    "single_wall": false,
+    "seed": 818
+  },
+  {
+    "name": "H10",
+    "w": 1024,
+    "h": 576,
+    "focal_mm": 35,
+    "pitch": 40,
+    "yaw": 6,
+    "roll": 6,
+    "single_wall": false,
+    "seed": 819
+  },
+  {
+    "name": "H11",
+    "w": 1024,
+    "h": 576,
+    "focal_mm": 50,
+    "pitch": 25,
+    "yaw": 15,
+    "roll": 0,
+    "single_wall": false,
+    "seed": 820
+  },
+  {
+    "name": "H12",
+    "w": 1024,
+    "h": 576,
+    "focal_mm": 85,
+    "pitch": 5,
+    "yaw": 2,
+    "roll": 10,
+    "single_wall": false,
+    "seed": 821
+  },
+  {
+    "name": "H13_single_wall",
+    "w": 960,
+    "h": 720,
+    "focal_mm": 35,
+    "pitch": 23,
+    "yaw": 13,
+    "roll": 7,
+    "single_wall": true,
+    "seed": 822
+  },
+  {
+    "name": "H14_near_frontal",
+    "w": 1024,
+    "h": 576,
+    "focal_mm": 50,
+    "pitch": 5,
+    "yaw": 0.25,
+    "roll": 0.5,
+    "single_wall": false,
+    "seed": 823
+  }
+]

@@ -1,0 +1,29 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+......F...                                                               [100%]
+=================================== FAILURES ===================================
+___________ TestRound3.test_gate_rejects_small_systematic_axis_bias ____________
+
+self = <test_round3.TestRound3 testMethod=test_gate_rejects_small_systematic_axis_bias>
+
+    def test_gate_rejects_small_systematic_axis_bias(self):
+        # The old gate accepts .11/.13 deg at these sizes; neither is a
+        # four-pixel-scale optimizer catastrophe. Test both axes and aspects.
+        for w,h in ((1200,800),(1024,576),(640,960)):
+            vertical=np.array([[x,40,x,h-40] for x in (100,200,300,400)],float)
+            horizontal=np.array([[40,y,w-40,y] for y in (100,200,300,400)],float)
+            for angle in (.11,.13):
+                a=np.radians(angle)
+                H=np.array([[np.cos(a),-np.sin(a),0],[np.sin(a),np.cos(a),0],[0,0,1]])
+                N=np.diag([1/w,1/h,1])
+                q=up._alignment_quality(N@H@np.linalg.inv(N),vertical/[w,h,w,h],
+                                         horizontal/[w,h,w,h],w,h)
+>               self.assertFalse(q['passed'],(w,h,angle,q))
+E               AssertionError: True is not false : (1200, 800, 0.11, {'family_median_deg': [0.11, 0.11], 'limit_deg': 1.0, 'worst_scale': 0.575478334090549, 'family_signed_median_deg': [-0.11, 0.11], 'family_median_margin_deg': [0.0, 0.0], 'family_bias_bound_deg': [0.11, 0.11], 'bias_limit_deg': 0.1, 'family_bias_limit_deg': [0.11, 0.11], 'scatter_passed': True, 'bias_passed': True, 'passed': True})
+
+port/test_round3.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_round3.py::TestRound3::test_gate_rejects_small_systematic_axis_bias
+1 failed, 9 passed in 38.26s

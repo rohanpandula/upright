@@ -1,0 +1,199 @@
+RED-TEAM: §3.1 "H = s·K1·R·K0⁻¹, two different intrinsics, proven exactly"
+=====================================================================
+Verdict: the *residual* is real and reproduces. The *interpretation* is
+substantially overstated. The test cannot tell "two cameras" from "one
+camera with translation" (or any realistic homography), and "K0 is the
+stored values" is false for the exact fit.
+
+Independent reimplementation: redteam/core.py + redteam/analyze2.py.
+Data: live catalog, mode=ro, Adobe_imageDevelopSettings, UprightTransform_*.
+n=400 random photos, slot 2 (Full). All coordinates in pixels.
+
+---------------------------------------------------------------------
+1. THE RESIDUAL CLAIM REPRODUCES (confirm)
+---------------------------------------------------------------------
+Reimplementation from the description alone, synthetic corpus first:
+  median 1.28e-16, max 1.129e-09  (report: 5.65e-16 / 1.13e-09)
+Same max to 3 digits. Real corpus, slot 2, n=400:
+  median 2.163e-16, p90 6.207e-16, max 1.346e-09, 99.0% < 1e-9
+So the arithmetic is correct and the report is not fabricating numbers.
+It holds across slots (median residual, 99% band):
+
+  slot 2 Full (n=400)   2.16e-16   99.0% <1e-9
+  slot 1 Auto (n=200)   2.22e-16   94.5% <1e-9
+  slot 4 Vertical (n=200) 2.05e-16 98.5% <1e-9
+
+But note where the 1e-9 tail comes from: it is the *Level* slot and
+near-level/affine transforms, not random noise. Slot 3 alone: median
+5.8e-10, max 1.08e-9. On genuinely projective transforms the floor is
+~1e-16. The published "max 1.13e-09" is a Level artifact.
+
+---------------------------------------------------------------------
+2. THE OVER-PARAMETERISATION CONFOUND (task 2) — single-K does NOT
+   recover, but the framing "10 vs 8" is miscounted
+---------------------------------------------------------------------
+The claim's model has 10 unknowns, but 6 of them are intrinsic and only 5
+orthogonality equations are independent (trace(M - s²I) ≡ 0). 6 > 5, so
+an exact solution is generic: there is a 1-parameter family, and the
+residual Jacobian has exactly one zero singular value at every fitted
+solution tested. f0 can be driven over at least 0.25×–4× the stored f35
+while c0 compensates (see §4). The model is not literally "any H" — pure
+affine transforms fail — but every realistic perspective warp passes
+(§3).
+
+"Single-K with a free principal point" is not 10 unknowns. It is
+f(1) + c(2) + R(3) + s(1) = 7. Results (n=400, median residual):
+
+  model                                    median    p90      pass<1e-9
+  two-K, f0,f1,c0,c1 free (report)         2.16e-16  6.2e-16  99.0%
+  single-K, f + shared free c (3 intr.)    1.056e-01 5.5e-01   5.8%
+  single-K, general K: fx,fy,skew,c (5)    9.878e-02 4.7e-01   5.8%
+  shared f + both centres free (5 intr.)   1.030e-01 6.3e-01  10.8% (n=120)
+  conventional shared f, fixed centre      1.060e-01 6.5e-01   8.3%
+  single-K + output anisotropy (6 intr.)   5.936e-02 3.1e-01  17.7%
+
+The ~6-18% "passes" are the identity/abstention photos, where everything
+fits trivially. So freeing the principal point does not rescue single-K;
+neither does freeing aspect and skew. The two-focal model is genuinely
+distinguished from every single-focal model tested. That part survives.
+Same on other slots: single-K + free pp gives 4.8e-2 median on Auto and
+5.3e-2 on Vertical (both 6% pass), against 2.2e-16 / 2.1e-16 for the
+two-focal model.
+
+Caveat on §3.1's "32%": on the real corpus the conventional model is
+10.6% off, not 32%. 32% is a synthetic-scene figure.
+
+---------------------------------------------------------------------
+3. IS 5.65e-16 SUSPICIOUS? (task 3) — yes, largely
+---------------------------------------------------------------------
+The condition is satisfiable by construction once both K's are free.
+Set P = K0K0ᵀ, Q = K1K1ᵀ. The condition is H P Hᵀ = s² Q. Pick any SPD P;
+Q = H P Hᵀ/s² is SPD automatically; factor it (upper Cholesky) to get K1.
+There is no residual equation left. That construction uses a general
+upper-triangular K; the shipped parameterisation is isotropic, which is
+6 intrinsic parameters against 5 equations, so a solution is still
+generic. Machine-precision agreement is therefore the expected outcome,
+not a discovery.
+
+Decisive control — homographies from models that have nothing to do with
+the shipped solver:
+
+  input                                      median residual
+  10 random "realistic perspective warps"    1.5e-16  (10/10 < 1e-9)
+  single camera, rotation + translation     1.5e-16 - 1.9e-16 (all t)
+     (K(R+t nᵀ)K⁻¹, |t| = 0 … 0.3)
+  pure translation homography                0.0
+  pure affine (random 2x2 + translation)     0.13 - 0.74  (0/5)
+  pure shear / anisotropic scale             0.28 / 0.59
+  random projective (h20,h21 ~ 1)            ~0.7 - 1.0
+
+The rotation+translation row matters most. A single camera with a
+translation is the ordinary alternative to "two cameras, rotation only",
+and the two-focal model absorbs it exactly at every translation magnitude
+tested. So the exactness test does not even establish that the shipped
+transform is translation-free, let alone that it came from two cameras.
+
+A shear needs only h20 ≥ 1e-5 added before it fits at 1e-16. Every real
+photo homography is of the form K·A·K⁻¹ with A arbitrary, and that class
+passes. So the orthogonality test is a consistency check that almost any
+plausible photo homography passes. It does not identify the algorithm.
+
+---------------------------------------------------------------------
+4. THE REAL DAMAGE: the decomposition is not identifiable (task 3/5)
+---------------------------------------------------------------------
+The report says "2-parameter family" and "the ambiguity is resolved in
+practice — the stored values are the source camera". Both are wrong.
+
+(a) The family is 1-dimensional, not 2. Fixing f0 and letting c0 float
+    fits exactly; fixing c0 (either coordinate) and letting f0 float does
+    not (residual 1e-3 to 1e-1). f0 and c0 slide together, so neither is
+    measured.
+(b) f0 is free over a wide range. Pinning f0 to a multiple of the stored
+    f35 and fitting the rest (n=400):
+
+      f0 pinned at      median residual   pass<1e-9
+      0.25 × f35        2.457e-16         99.0%
+      0.5  × f35        3.082e-16         99.0%
+      1.0  × f35        4.281e-16         99.0%
+      2.0  × f35        4.953e-16         86.0%
+      4.0  × f35        8.158e-16         62.0%
+
+    A factor-4 range of source focal is exact. f0 is not measured. On the
+    Auto slot (n=200) even 0.25× to 4× all pass at 94.5% — identical to
+    the unconstrained fit, i.e. the pinned f0 is completely inert there.
+    Vertical (n=200): 0.25×–2× pass at 98.5%, 4× at 90.5%.
+(c) Same H, three different inits, all 1e-16:
+      img 3005: f0 = 4923 / 12565 / 8785 ; c0 x = 1702 / 3437 / 2380
+      img 3090: f0 = 10746 / 20616 / 13986 ; c0 x = -4128 / 617 / -2963
+    Recovered c1 lands outside the image in 13% of cases. c0 never does
+    only because the optimiser is initialised at the stored value.
+(d) K0 fixed to the *stored* f35 and stored centre, fitting only f1,c1
+    (n=400): median 5.1e-7, p90 1.5e-2, max 8.6e-2, exact for 14.7%
+    (and 23 of the 59 passes are identity photos). So the stored pair is
+    close but not exact. Pin f0 at f35 and free only c0: exact, but c0
+    moves away from the stored centre by up to 0.68 × image width
+    (img 3090: stored x 4298 → fitted −1664). K1 fixed to stored instead:
+    median 8.5e-2 (n=15). The stored focal is roughly right; the stored
+    centre is not K0's centre.
+
+Consequence: "K0 is directly readable from the settings" and "take f0 and
+c0 from the stored values and solve only f1,c1,R,s" describe a *different,
+inexact* model (5e-7 to 1e-2 residual, exact for 15%), not the one that
+reaches 1e-16. The exact fit only works because c0 is free, and f0 can
+additionally slide over 0.25–4×.
+
+---------------------------------------------------------------------
+5. DEGRADATION (task 4)
+---------------------------------------------------------------------
+  subset                     n     median      max
+  all slot 2                 400   2.16e-16    1.35e-9
+  |roll| > 20°                4    8.59e-11    2.96e-10
+  |pitch| > 35°               6    1.86e-16    4.62e-16
+  abstention (Full identity)  -    0.0         0.0
+  Level slot (slot 3)         15   5.77e-10    1.08e-9
+  Auto slot (slot 1), n=200   200  2.22e-16    4.5e-3
+
+Extreme pitch and abstention are clean. Strong roll degrades by ~6 orders
+(still 1e-10, far below the 1e-1 single-K floor). Level/affine is the
+weak spot at 1e-9. Auto degrades badly on near-identity transforms: all 8
+of 200 failures have |H-I| between 1e-3 and 1.4e-2, i.e. a ~10% relative
+error on tiny corrections. No subset breaks the model outright.
+
+---------------------------------------------------------------------
+6. WHAT SURVIVES, AND WHAT TO SOFTEN (task 5)
+---------------------------------------------------------------------
+Strongest surviving claim:
+  "Adobe's stored transforms are consistent, to float noise, with a
+   rotation-only homography carrying two independently free focal
+   lengths. Within the rotation-only family they are inconsistent (median
+   ~0.10) with every single-focal model tested, including one with a free
+   principal point, free aspect and skew. Two focal lengths are therefore
+   a real algebraic requirement of the output — but not proof of two
+   cameras, because a single camera with translation also fits exactly."
+
+Soften or cut:
+  1. "proven exactly" / "not a guess — the shipped algebra, recovered to
+     15 digits" → *consistent with*, not identified. Any realistic warp
+     passes (10/10). The test is necessary, not sufficient.
+  2. "distinguished ... by an orthogonality test" → it is distinguished
+     from K·R·K⁻¹ and from free-principal-point single-K, but not from a
+     general homography.
+  3. "2-parameter family" → 1-parameter family. Say the intrinsics are
+     not identifiable.
+  4. "K0 is directly readable from the settings", "the ambiguity
+     collapses in practice" → false for the exact model. Stored K0 gives
+     5e-7 median and is exact for only 15% of photos; f0 is free over
+     0.25-4×. Keep the stored-focal-as-K0 story only for the *inexact*
+     3-parameter variant, and label it approximate.
+  5. "median 0.32" for single-K → 0.106 on the real corpus; 0.32 is
+     synthetic-only.
+  6. Replace "two cameras" with "two focal lengths" until a camera can be
+     identified. The recovered K1 has no independent evidence of being a
+     real camera; its centre is often off-image.
+
+The §3.1 equation is a good description of the output's algebraic shape.
+It is not proof that the solver has two cameras, and the §3.5c corollary
+is the part most in need of rewrite.
+
+Repro: redteam/harvest.py, redteam/core.py, redteam/analyze2.py.
+Raw: redteam/res2_400_2.json.

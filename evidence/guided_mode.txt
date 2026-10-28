@@ -1,0 +1,66 @@
+GUIDED MODE (slot 5) — resolved
+
+TRIGGER MECHANICS (the part nobody would guess)
+  * applyDevelopSettings CAN write the inputs: PerspectiveUpright=5,
+    UprightFourSegmentsCount=4, UprightFourSegments_0..3 = "x1,y1,x2,y2" (9 dp).
+  * Writing them does NOT run the solver. No UprightTransform_5 is produced and
+    UprightFocalLength35mm stays at the default 35.
+  * The solve fires only when the panel's "Update" button is pressed
+    (addUprightGuide -> _uprightGuidesDirty -> flushDirtyUprightGuides).
+  * So: settings via plugin, then ONE GUI click on Update.
+  * Segments must lie inside [0,1] and be long enough to be usable.
+
+RESULT — A_clean (true pitch 22, yaw 6), 4 guides on true world edges
+  mode        vertical   horizontal   p99 stretch
+  original      15.52        5.32         1.000
+  Auto           5.35        0.73         1.111
+  Full           0.73        0.36         1.486
+  GUIDED         0.00        0.00         1.476
+
+  Guided is the only mode that reaches ZERO on both families. It is strictly
+  stronger than Full, at slightly LOWER distortion than Full (1.476 vs 1.486).
+  It writes slot 5 only and leaves slots 1-4 untouched.
+
+  Emitted homography (normalized), max|H-I| = 0.215:
+    [ 0.79537 -0.10295  0.06145]
+    [ 0.01028  0.78583 -0.01028]
+    [-0.08457 -0.21474  1.00000]
+
+CONCLUSION: Guided does not use the perceptual objective at all. It takes the
+user's lines as hard constraints and solves the same s*K1*R*K0^-1 family to
+satisfy them exactly. This is the mode to port first: it needs no energy model,
+no line detector and no weights -- only the homography algebra and a solver.
+
+--------------------------------------------------------------------
+UPDATE — GUIDED IS NOW FULLY DRIVABLE FROM THE PLUGIN (no line drawing)
+
+The original conclusion "needs GUI line-drawing because flushDirtyUprightGuides is
+internal" was too pessimistic. It needs one click, not four drags.
+
+Mechanism (from digest.txt): the host calls enableUprightReanalyze, which returns
+"must recompute" iff mode != 0 AND digest(now) != stored_digest, and for guided
+additionally requires the guide vector non-empty. Writing settings from a plugin
+does NOT by itself invoke that check — so a bare settings write is silent.
+But if the digest is zeroed, a subsequent explicit re-analyse (the panel's Update
+button) always finds a mismatch and always solves.
+
+VERIFIED RECIPE
+  1. plugin: set PerspectiveUpright=5, UprightFourSegmentsCount=4,
+     UprightFourSegments_0..3, and UprightGuidedDependentDigest = 32 zeros
+  2. one GUI click on Update  (no drags)
+  3. slot 5 is written
+
+Test on DG_fresh (fresh photo, pitch 20 / yaw 8, segments never hand-drawn):
+  before: slot5 absent, f35 = 35
+  after one Update click: slot5 max|H-I| = 0.21474
+  matrix identical to the hand-drawn A_clean result to 4 dp:
+    [ 0.7954 -0.1030  0.0615]
+    [ 0.0103  0.7858 -0.0103]
+    [-0.0846 -0.2147  1.0000]
+
+So the segments stored via applyDevelopSettings ARE honoured as real constraints; the
+only thing the GUI provided was the re-analyse trigger, which the zeroed digest
+substitutes for.
+
+NOTE: guided does not write UprightFocalLength35mm (stays 35) — consistent with the
+guides determining the solution directly rather than via a focal estimate.

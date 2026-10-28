@@ -1,0 +1,207 @@
+SENSOR CONSTANT IN LIGHTROOM CLASSIC "UPRIGHT"  —  cr_upright_params::Calculate
+=============================================================================
+Binary : /Applications/Adobe Lightroom Classic/Adobe Lightroom Classic.app/
+         Contents/Frameworks/CameraRaw.lrtoolkit/Versions/A/CameraRaw
+Slice  : x86_64 (FAT slice file offset 0x4000, size 0x9579c30). arm64 slice
+         (file 0x9580000) NOT analysed — all offsets below are x86_64 only.
+Version: build path in image says release/15.5.
+ADDR CONVENTION: all offsets are FILE offsets in the FAT file (the same
+convention as the supplied RTTI offsets 140,163,336 / 140,163,356).
+Mach-O vmaddr = file offset − 0x4000 for this slice. Sections used:
+  __text    file 0x1730 .. 0x2c503a0
+  __const   file 0x2da2e00 .. 0x8ea5304   (huge read-only constant blob)
+  __cstring file 0x8ea5310 .. 0x8fea907
+  __DATA_CONST __const  file 0x9070f00 .. 0x916f560
+
+VERDICT
+-------
+The stated empirical formula  focal_px = f35 / 36 * max(W,H)  is a
+COINCIDENTAL special case. The real conversion is DIAGONAL based:
+
+    focal_px = f35 * hypot(W, H) / hypot(24.0, 36.0)
+             = f35 * diag_px / 43.2666153
+
+i.e. a 36x24 mm full-frame sensor used via its 43.2666 mm diagonal — NOT the
+36 mm long edge, and NOT the width. 43.2666 is never a literal: it is always
+computed at runtime as hypot(24,36) (PROOF: zero 43.266 literals exist).
+
+The two formulas agree exactly at 3:2 because 43.2666153/36 == sqrt(13)/3 ==
+1.2018504251546631 (PROOF, computed). They diverge for every other ratio:
+    aspect   effective long-edge divisor   error vs /36
+    3:2      36.000                        0.0 %
+    4:3      34.613                       -3.9 %
+    5:4      33.786                       -6.2 %
+    16:9     37.710                       +4.8 %
+    2:1      38.699                       +7.5 %
+    1:1      30.594                      -15.0 %
+So: keep the long-edge form only if the pipeline is guaranteed exactly 3:2.
+
+FUNCTION IDENTIFIED (PROOF)
+---------------------------
+cr_upright_params::Calculate. Anchor strings in __cstring:
+  file 0x8f48fe4 "cr_upright_params::Calculate"   (assert __PRETTY_FUNCTION__)
+  file 0x8f49085 ".../cr_sdk/source/cr_upright.cpp" (assert __FILE__)
+  file 0x8f49171 "UprightFourSegments", 0x8f4918c "Wrong number of points"
+Assert sites referencing them via rip-relative lea: file 0xb67603, 0xb6218c,
+0xb61d29, 0xb62033. Function body spans ~0xb61xxx-0xb693xx.
+Static string xrefs were found only by resolving RIP-relative disp32 in
+__text; the binary stores no absolute pointer to any of these strings.
+
+1. EVERY CONSTANT CANDIDATE NEAR THE FOCAL CODE
+-----------------------------------------------
+PROOF — f64 36.0 (bytes 00 00 00 00 00 00 42 40) at FILE 0x321ec88
+(vm 0x321ac88), in __const. The ONLY f64 36.0 in the entire x86_64 slice
+(1 occurrence image-wide). 42 code refs image-wide; exactly 4 of them are
+inside cr_upright_params::Calculate and ALL FOUR feed the 2nd argument of
+_hypot — none is a divisor.
+
+PROOF — f64 24.0 at FILE 0x2da95f0 (vm 0x2da55f0), in __const. Always the
+1st argument of the same _hypot, i.e. the short edge of the sensor.
+
+PROOF — no 43.266 literal exists. Zero hits image-wide for f64 43.266,
+43.2666, 43.267, 1/43.266, and f32 43.266 (0x422D1088 and the correctly
+rounded f32 0x422D1062). The 43.2666 divisor is only ever produced by
+_hypot(24.0, 36.0).
+
+PROOF — _hypot resolution. Callee is file 0x2c55174 = vm 0x2c51174, a
+6-byte jmp stub (ff 25 9e 00 52 06) whose slot otool itself labels:
+  otool -arch x86_64 -Iv  ->  0x2c51174  778 _hypot
+  nm -arch x86_64 -m      ->  (undefined) external _hypot (from libSystem)
+All six call sites verified to target it: 0xb62383, 0xb623a0, 0xb6245e,
+0xb624f0, 0xb6800a, 0xb68027 (bytes e8 <rel32> each time).
+
+f32 36.0 (0x42100000) — 25 hits, NONE is the sensor constant:
+  0x8e7b210  real float array 34,35,36,37,38 — a focal-length list
+  0x8d3e8a8  isolated real float (neighbours -0.107, 0.17453)
+  0x8df350a  unaligned, between 20224.0 and 784.0
+  0x940fa36  unaligned, between sentinel 2300 and 70.0 (param descriptor)
+  0x90e0c86 0x90f4ede 0x914f426 0x914f736 0x914f936 0x914fb36 0x915063e
+  0x91597de 0x915a1f6 0x915c39e 0x915c49e 0x915c59e 0x9160ba6
+             straddle a pointer-table boundary — bytes 00 00 10 42 are the
+             high half of 8-byte code pointers such as 0x0000000001A44200,
+             not a float constant. Zero direct rip-relative refs.
+
+Other constants in the same code (PROOF, all in __const):
+  0x2da8698  f64 50.0   local gate: if focal_px < 50 -> r12=0 and
+                        [rbp-0x3cf0] = {0.5,0.5}, then jmp 0xb6830d
+                        (insn 0xb67eec-0xb67f10)
+  0x2da91a8  f64  4.0   local floor on the other entry path: if focal < 4 ->
+                        focal = 0.0, ebx = 0 (0xb67f17-0xb67f34; re-used at
+                        0xb681b8 and 0xb68267)
+                        NOTE neither is the global plausibility clamp — that
+                        is [10.0, 1000.0] in the separate estimator at FAT
+                        0x7a17ea (see focal_prior.txt). These two are
+                        internal thresholds of Calculate only.
+  0x321dcc0  f64 x2 {0.5, 0.5}  also the struct default for the two
+                        norm-centre fields (0xb66d8e)
+  0x321ebb0  f64 35.0 + f64 70.0 pair — 35.0 used as the focal fallback
+
+2. LONG EDGE vs DIAGONAL vs WIDTH — DIAGONAL
+--------------------------------------------
+PROOF, verbatim, file 0xb67ff4 .. 0xb68050:
+
+  0xb67ff4  mov   eax, r15d
+  0xb67ffa  cvtsi2sd xmm0, rax          ; W  (int -> double)
+  0xb68005  cvtsi2sd xmm1, rax          ; H  (int -> double)
+  0xb6800a  call  _hypot                ; diag_px = hypot(W,H)
+  0xb6800f  movsd [rbp-0x3ef0], xmm0    ; save diag_px
+  0xb68017  movsd xmm0, [0x2da95f0]     ; 24.0
+  0xb6801f  movsd xmm1, [0x321ec88]     ; 36.0
+  0xb68027  call  _hypot                ; 43.2666153  (sensor diagonal)
+  0xb6802c  movsd xmm1, [rbp-0x3ef0]    ; diag_px
+  0xb68034  divsd xmm1, xmm0            ; px per mm = diag_px / 43.2666
+  0xb6803a  movsd [rbp-0x3ef0], xmm1
+  0xb68044  movsd xmm0, [rbp-0x3cd8]    ; focal in mm  (f35)
+  0xb6804c  mulsd xmm0, xmm1            ; focal_px = f35 * px_per_mm
+  0xb68050  movsd [rbp-0x3888], xmm0
+
+max(W,H) does appear, but for a different purpose: 0xb680e5 cmp r15d,r13d /
+0xb680ec cmova r13d,r15d -> [rbp-0x3898] (a transform extent), not the focal.
+Width alone is never used for the focal.
+
+W and H are int32 lanes taken from a geometry object at [rbp-0x3ed8]:
+ 0xb67ac7 movsd xmm0,[rax+8]  -> [rbp-0x3f20]; 0xb67ad3 movsd xmm0,[rax+0x10]
+ -> [rbp-0x3f30]; then 0xb67f89 extractps esi,xmm3,1 (= [rax+0xc]) and
+ 0xb67f8f pextrd edi,xmm2,1 (= [rax+0x14]), each bounds-checked via
+ call 0x14cc8c0 before use.
+INFERENCE: these are the image-plane rect width/height of the render target.
+If a caller ever passes a cropped rect instead of the full frame, the ratio
+changes — the formula is diagonal-of-that-rect, so the aspect ratio of the
+rect matters, not of the sensor.
+
+3. 35 mm NORMALISATION DIVISOR / MULTIPLIER PAIRS
+------------------------------------------------
+There is no "divide by 36" anywhere. The 43.2666 diagonal is computed four
+times inside this one function and used both ways:
+
+  a) mm -> px, site above:  ratio = diag_px/43.2666 ; focal_px = f35*ratio
+  b) px -> mm, 0xb623a0-0xb623b9: xmm0 = hypot(24,36);
+     0xb623a5 xmm1 = [rbp-0xe70]; 0xb623ad divsd xmm1,xmm0;
+     0xb623b1 mulsd xmm1,[0x321ebb0] (= 35.0) -> a 35 mm-equivalent pixel
+     length, stored back to [rbp-0xe70]
+  c) 0xb6245e-0xb62473: xmm0 = hypot(24,36); 0xb62463 divsd xmm0,[rbp-0xe80];
+     0xb62473 divsd xmm3,xmm0 -> mm from px
+  d) 0xb624f0-0xb62509: xmm0 = hypot(24,36); 0xb624fd divsd xmm3,xmm0;
+     0xb62509 mulsd xmm0,xmm3
+  e) inverse scale also at 0xb68257: divsd xmm0,[rbp-0x3ef0] (px/mm)
+
+So the pair is (diag_px, 43.2666) => px-per-mm and mm-per-px. The literal 36
+never participates in a division.
+
+4. IS THE 35.0 DEFAULT THE SAME LITERAL AS "35 mm"?
+---------------------------------------------------
+No — it is a default focal-length VALUE (35 mm on full frame), reused as a
+fallback, and it is not a unit divisor. It appears in three distinct forms:
+
+PROOF — imm64 0x4041800000000000 (= f64 35.0) as a struct field default:
+  0xb66da0 movabs rax, 0x4041800000000000 / 0xb66daa mov [rdi+0x28], rax
+          (default constructor; also writes [rdi]=0x9060000, [rdi+8]=0,
+           [rdi+0x10]={0.5,0.5}, [rdi+0x20]=0, [rdi+0x30]=0)
+  0xb67c01 movabs rax, 0x4041800000000000 / 0xb67c0b mov [rbp-0x3888], rax
+          (local default block; [rbp-0x3898]=0x400, [rbp-0x3890]=0)
+
+PROOF — computed fallback: 0xb68279 movabs rax, 0x4041800000000000 /
+  0xb68283 mov [rbp-0x3cd8], rax, taken when the value just computed is
+  < 4.0 (0xb6826f ucomisd xmm1(=4.0), xmm0 / 0xb68273 jbe skip).
+
+PROOF — an explicit "if zero then 35.0" select on the px->mm path:
+  0xb62497 cmpeqsd xmm1,xmm2 / 0xb6249c movsd xmm0,[0x321ebb0] (=35.0) /
+  0xb624a4 andpd / 0xb624a8 andnpd / 0xb624ac orpd
+  => value = (value == 0.0) ? 35.0 : value.
+
+The f35 slot [rbp-0x3cd8] is only populated when a predicate at 0xb67e80 is
+true AND the raw parameter at [rbp-0x1238] is > 0.0 (0xb67eb5 ucomisd/seta,
+ANDed into ebx); otherwise it is 0 (0xb67f29). Before use the raw parameter
+is multiplied by a ratio returned by 0x1358e60, which computes
+(double)[rdi] / (double)[rdi+4] (0x1358e60-0x1358e79) — INFERENCE: a
+crop/scale ratio.
+INFERENCE: [rbp-0x1238] is the deserialised UprightFocalLength35mm setting,
+read from the params struct returned by call 0x57cd80 at 0xb67e92. Not
+proven field-by-field; the key string itself (file 0x8eb58a8) has no static
+xref because __cstring is one dot-joined key blob indexed at runtime.
+
+5. SUMMARY TABLE
+----------------
+  offset      type   value       role                              tag
+  0x2da95f0   f64    24.0        sensor short edge, hypot arg 1    PROOF
+  0x321ec88   f64    36.0        sensor long edge, hypot arg 2     PROOF
+  (computed)  f64    43.2666153  diag_px / this = px per mm        PROOF
+  0x321ebb0   f64    35.0        focal fallback literal            PROOF
+  0x2da8698   f64    50.0        local gate, focal_px < 50           PROOF
+  0x2da91a8   f64    4.0         local floor, focal < 4 -> 0         PROOF
+  0x321dcc0   f64x2  {0.5,0.5}   centre-normalisation default      PROOF
+  none        -      43.266      no literal anywhere               PROOF
+
+6. CAVEATS
+----------
+- Only the x86_64 slice was analysed. The arm64 slice is the same build and
+  carries the same strings ("upright_focal" at arm64 file 0x11995dec,
+  "cr_upright_params::Calculate" at 0x11995e11) but was not disassembled;
+  no arm64 adrp/add xref to those strings was resolved, so arm64 is
+  unconfirmed.
+- Function boundaries come from the assert/pretty-function strings, not from
+  LC_FUNCTION_STARTS (that command's dataoff did not land on a ULEB stream,
+  so the function-start table was not used).
+- Nothing here depends on symbols: the binary has zero `ura` symbols and the
+  RTTI typeinfo structs are gone, only the orphaned name strings survive at
+  file 0x85ab908 / 0x85ab924 with no pointer references at all.

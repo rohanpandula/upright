@@ -1,0 +1,33 @@
+test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) ... 
+  test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=980) ... FAIL
+  test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=1200) ... FAIL
+  test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=1820) ... FAIL
+
+======================================================================
+FAIL: test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=980)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_round2.py", line 19, in test_wrong_metadata_on_real_raster
+    self.assertLess(max(bench.deviation(out['H'], truth,
+AssertionError: 1.2633874157560432 not less than 0.061668
+
+======================================================================
+FAIL: test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=1200)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_round2.py", line 19, in test_wrong_metadata_on_real_raster
+    self.assertLess(max(bench.deviation(out['H'], truth,
+AssertionError: 0.5131484635287602 not less than 0.061668
+
+======================================================================
+FAIL: test_wrong_metadata_on_real_raster (test_round2.TestSourceFocal.test_wrong_metadata_on_real_raster) (focal=1820)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_round2.py", line 19, in test_wrong_metadata_on_real_raster
+    self.assertLess(max(bench.deviation(out['H'], truth,
+AssertionError: 0.6047863396806414 not less than 0.061668
+
+----------------------------------------------------------------------
+Ran 1 test in 0.347s
+
+FAILED (failures=3)

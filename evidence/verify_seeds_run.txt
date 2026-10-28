@@ -1,0 +1,15 @@
+scene seeds maxV maxH over0.1 failures
+A_clean 50 0.021023 0.029151 0 0
+  seed4 0.020194/0.023601 ok=True
+B_strong 50 0.048784 0.010856 0 0
+  seed4 0.048487/0.006192 ok=True
+C_noisy 50 0.021288 0.030458 0 0
+  seed4 0.021260/0.030353 ok=True
+D_roll 50 0.013866 0.001190 0 0
+  seed4 0.013721/0.001034 ok=True
+replay:
+  full False poor undamped family alignment True
+  auto False poor undamped family alignment True
+  level False poor undamped family alignment True
+  vertical False poor undamped family alignment True
+over0.1: 0

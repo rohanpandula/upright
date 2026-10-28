@@ -1,0 +1,1308 @@
+-- ImportSweep.lua -- hardened Upright sweep harness.
+-- Menu item: Library > Plug-in Extras > Import Sweep  (do not rename; see Info.lua)
+-- Trace destination: <BASE>/TRACE.txt  (do not move; other agents tail it)
+--
+-- Design notes -- every branch below exists because the naive version silently
+-- produced nothing:
+--   * setSelectedPhotos can "succeed" while getTargetPhoto() stays nil. The photo
+--     MUST be in a collection that is the ACTIVE SOURCE. We self-check the target
+--     and abort loudly instead of solving into the void.
+--   * A library FILTER makes collections render "0 of N photos". Preflight detects
+--     and clears it (Cmd-L reveals the filter bar, then "None").
+--   * A modal "internal error" alert blocks the UI. The watchdog dismisses it by
+--     AXPress on UI element 4.
+--   * A collapsed right panel hides Transform/Upright. Preflight fixes it with
+--     Window > Fill, then Cmd-Shift-3.
+--   * applyDevelopSettings outside catalog:withWriteAccessDo silently no-ops.
+--   * catalog:getCollections() / catalog:getSelectedPhotos() do not exist here.
+--   * Init.lua never auto-runs; only this menu item runs.
+--   * A solve is SUPPRESSED while UprightDependentDigest (or the guided digest)
+--     still matches. Writing settings does not solve; zeroing the digest (32
+--     zeros) plus one explicit Update press always solves. Guided additionally
+--     needs mode 5 and non-empty guides; mode 0 never recomputes.
+--   * Two concurrent agents corrupt TRACE rows: a lockfile guards the run.
+--
+-- Trace format: TSV, one header row, fixed 15 columns (see OPERATIONS.md).
+
+local LrApplication = import 'LrApplication'
+local LrApplicationView = import 'LrApplicationView'
+-- os.getenv is absent in the LR Lua sandbox on this build; wrap it.
+local function getenv(k)
+    local ok, v = pcall(function() return os.getenv(k) end)
+    if ok then return v end
+    return nil
+end
+-- os.remove is also absent in this sandbox; fall back to the shell.
+local function removeFile(p)
+    if os.remove then
+        local ok = pcall(os.remove, p)
+        if ok then return end
+    end
+    local f = io.popen('rm -f "' .. tostring(p) .. '" 2>/dev/null')
+    if f then f:close() end
+end
+local LrDialogs = import 'LrDialogs'
+local LrTasks = import 'LrTasks'
+
+--------------------------------------------------------------------------------
+-- configuration
+--------------------------------------------------------------------------------
+
+local BASE = '/Users/rohan/Projects/trichroma/research/upright/lrtest'
+local TRACE_PATH = BASE .. '/TRACE.txt'
+local LOCK_PATH = BASE .. '/.ImportSweep.lock'
+local TMP = BASE .. '/.sweep-tmp'
+local LR_PROC = 'Adobe Lightroom Classic'
+
+-- Optional job-file mode: if this file exists it drives the run instead of the
+-- directory sweep. Protocol matches the guided-limits runner: SETUP/CASE lines,
+-- an external clicker creating <dir>/CLICKED, results in <dir>/results.txt.
+local JOB = getenv('UPRIGHT_JOB') or '/tmp/uplim/job.txt'
+
+local LOCK_STALE_SEC = 45 * 60 -- older than this => previous agent died
+local UPDATE_TIMEOUT = tonumber(getenv('UPRIGHT_TIMEOUT') or '') or 30
+local MAX_ATTEMPTS = 2
+local POLL_SEC = 1.5
+
+local MODE_NAMES = { [1] = 'auto', [2] = 'full', [3] = 'level', [4] = 'vertical', [5] = 'guided' }
+local MODE_BUTTON = { [1] = 'Auto', [2] = 'Full', [3] = 'Level', [4] = 'Vertical', [5] = 'Guided' }
+
+local ZERO32 = string.rep('0', 32)
+-- Identity homography, written into a slot before a case so that a
+-- no-op solve leaves identity rather than a previous case's result.
+local IDENT9 = '1.000000000,0.000000000,0.000000000,'
+    .. '0.000000000,1.000000000,0.000000000,'
+    .. '0.000000000,0.000000000,1.000000000'
+
+-- Placeholder guides: only used so the guided gate (non-empty vector) is met.
+-- Pass real ones with UPRIGHT_GUIDES="x1,y1,x2,y2;..." for meaningful geometry.
+local DEFAULT_GUIDES = {
+    '0.20,0.02,0.20,0.98',
+    '0.80,0.02,0.80,0.98',
+    '0.02,0.30,0.98,0.30',
+    '0.02,0.70,0.98,0.70',
+}
+
+local function split(s, sep)
+    local out = {}
+    if not s or s == '' then return out end
+    for piece in string.gmatch(s .. sep, '([^' .. sep .. ']*)' .. sep) do
+        if piece ~= '' then out[#out + 1] = piece end
+    end
+    return out
+end
+
+local DIRS = split(getenv('UPRIGHT_DIRS') or (BASE .. '/abstain'), ':')
+local MODES = {}
+for _, m in ipairs(split(getenv('UPRIGHT_MODES') or '1,2', ',')) do
+    local n = tonumber(m)
+    if n and MODE_NAMES[n] then MODES[#MODES + 1] = n end
+end
+if #MODES == 0 then MODES = { 1, 2 } end
+
+local GUIDES = split(getenv('UPRIGHT_GUIDES') or '', ';')
+if #GUIDES == 0 then GUIDES = DEFAULT_GUIDES end
+
+local LIMIT = tonumber(getenv('UPRIGHT_LIMIT') or '') or 0
+local AGENT = getenv('UPRIGHT_AGENT') or getenv('USER') or 'unknown'
+
+local RUN_ID = string.format('%s-%d-%04d', os.date('%Y%m%dT%H%M%S'), os.time() % 100000,
+    math.random(0, 9999))
+
+--------------------------------------------------------------------------------
+-- small utilities
+--------------------------------------------------------------------------------
+
+local function q(path) return '"' .. tostring(path) .. '"' end
+
+local function readAll(path)
+    local f = io.open(path, 'r')
+    if not f then return nil end
+    local s = f:read('*a')
+    f:close()
+    return s
+end
+
+local function writeFile(path, body)
+    local f = io.open(path, 'w')
+    if not f then return false end
+    f:write(body)
+    f:close()
+    return true
+end
+
+local function trim(s)
+    if not s then return '' end
+    s = s:gsub('^%s+', ''):gsub('%s+$', '')
+    return s
+end
+
+local function bezel(msg)
+    LrTasks.pcall(function() LrDialogs.showBezel(msg, 4) end)
+end
+
+-- Run a shell command, capture combined output, return exit code + text.
+local function sh(cmd)
+    local out = TMP .. '/cmd.out'
+    writeFile(out, '')
+    local rc = LrTasks.execute(cmd .. ' > ' .. q(out) .. ' 2>&1')
+    local s = readAll(out) or ''
+    return rc, s
+end
+
+-- Run a complete AppleScript file (quoted paths and handlers stay out of argv).
+local function osa(script)
+    local path = TMP .. '/ax.scpt'
+    if not writeFile(path, script) then return 1, 'tmp-write-failed' end
+    return sh('osascript ' .. q(path))
+end
+
+local function axBody(body, opts)
+    local front = (opts and opts.frontmost) and '      set frontmost to true\n' or ''
+    return 'with timeout of 8 seconds\n'
+        .. '  tell application "System Events"\n'
+        .. '    tell process "' .. LR_PROC .. '"\n'
+        .. front
+        .. body .. '\n'
+        .. '    end tell\n'
+        .. '  end tell\n'
+        .. 'end timeout\n'
+end
+
+-- Handler for axBody-based snippets that need a deep AX search by name.
+local FIND_ROLE_HANDLER = [[
+on findRole(root, needle, wantRole)
+  try
+    set kids to UI elements of root
+  on error
+    return missing value
+  end try
+  repeat with k in kids
+    try
+      if (role of k as string) is wantRole then
+        try
+          if (name of k as string) is needle then return contents of k
+        end try
+        try
+          if (description of k as string) is needle then return contents of k
+        end try
+      end if
+    end try
+    try
+      set r to my findRole(k, needle, wantRole)
+      if r is not missing value then return r
+    end try
+  end repeat
+  return missing value
+end findRole
+]]
+
+--------------------------------------------------------------------------------
+-- TSV trace
+--------------------------------------------------------------------------------
+
+local COLUMNS = {
+    'run_id', 'ts', 'agent', 'event', 'image', 'mode', 'attempt', 'target',
+    'solved', 'digest', 'f35', 'panel', 'filter', 'alert', 'detail',
+}
+
+local function cell(v)
+    if v == nil then return '-' end
+    v = tostring(v):gsub('[\t\r\n]+', ' ')
+    if v == '' then return '-' end
+    return v
+end
+
+local function traceHeaderIfNeeded()
+    local f = io.open(TRACE_PATH, 'r')
+    if f then
+        local size = f:seek('end')
+        f:close()
+        if size and size > 0 then return end
+    end
+    local h = io.open(TRACE_PATH, 'a')
+    if h then
+        h:write(table.concat(COLUMNS, '\t') .. '\n')
+        h:close()
+    end
+end
+
+local function trace(event, fields)
+    fields = fields or {}
+    local row = {}
+    for i, name in ipairs(COLUMNS) do
+        if name == 'run_id' then
+            row[i] = RUN_ID
+        elseif name == 'ts' then
+            row[i] = os.date('%Y-%m-%dT%H:%M:%S')
+        elseif name == 'agent' then
+            row[i] = cell(AGENT)
+        elseif name == 'event' then
+            row[i] = cell(event)
+        else
+            row[i] = cell(fields[name])
+        end
+    end
+    local f = io.open(TRACE_PATH, 'a')
+    if f then
+        f:write(table.concat(row, '\t') .. '\n')
+        f:close()
+    end
+end
+
+--------------------------------------------------------------------------------
+-- lockfile (failure mode 9: concurrent agents corrupt TRACE)
+--------------------------------------------------------------------------------
+
+local lockHeld = false
+
+local function lockOwner()
+    local body = readAll(LOCK_PATH)
+    if not body then return nil end
+    local ts = tonumber(body:match('ts=(%d+)') or '')
+    local owner = body:match('run=([^\n]+)') or '?'
+    local agent = body:match('agent=([^\n]+)') or '?'
+    return { ts = ts, run = owner, agent = agent, raw = body }
+end
+
+local function writeLock()
+    return writeFile(LOCK_PATH, string.format(
+        'run=%s\nagent=%s\nts=%d\niso=%s\n', RUN_ID, AGENT, os.time(),
+        os.date('%Y-%m-%dT%H:%M:%S')))
+end
+
+local function acquireLock()
+    local existing = lockOwner()
+    if existing then
+        local age = os.time() - (existing.ts or 0)
+        if age >= 0 and age < LOCK_STALE_SEC then
+            trace('LOCKED', {
+                detail = string.format('held by run=%s agent=%s age=%ds', existing.run, existing.agent, age),
+            })
+            return false, string.format('another run holds the lock (%ds old)', age)
+        end
+        trace('LOCK_STALE_STEAL', {
+            detail = string.format('stale run=%s age=%ds', existing.run, age),
+        })
+        removeFile(LOCK_PATH)
+    end
+    if not writeLock() then
+        trace('LOCKED', { detail = 'cannot write lockfile ' .. LOCK_PATH })
+        return false, 'cannot write lockfile'
+    end
+    -- Read back: if two runs raced, the later writer wins and the earlier one
+    -- sees a foreign run id here and stands down.
+    local confirm = lockOwner()
+    if not confirm or confirm.run ~= RUN_ID then
+        trace('LOCK_LOST', { detail = 'lost race to run=' .. tostring(confirm and confirm.run) })
+        return false, 'lost lock race'
+    end
+    lockHeld = true
+    trace('LOCK_OK', { detail = LOCK_PATH })
+    return true
+end
+
+local function heartbeat()
+    if not lockHeld then return end
+    local existing = lockOwner()
+    if existing and existing.run ~= RUN_ID then
+        trace('LOCK_STOLEN', { detail = 'now run=' .. tostring(existing.run) })
+        lockHeld = false
+        return
+    end
+    writeLock()
+end
+
+local function releaseLock()
+    if not lockHeld then return end
+    local existing = lockOwner()
+    if existing and existing.run == RUN_ID then removeFile(LOCK_PATH) end
+    lockHeld = false
+    trace('LOCK_RELEASED', {})
+end
+
+--------------------------------------------------------------------------------
+-- alert watchdog (failure mode 3)
+--------------------------------------------------------------------------------
+
+local alertSeen, alertDismissed, alertStuck = 0, 0, 0
+
+-- Alert windows have exactly 4 UI elements and carry the internal-error text.
+-- Dismiss by AXPress on element 4. Returns "dismissed" | "none" | "error".
+local function watchdog()
+    local script = 'with timeout of 8 seconds\n'
+        .. '  tell application "System Events"\n'
+        .. '    tell process "' .. LR_PROC .. '"\n'
+        .. '      repeat with w in windows\n'
+        .. '        try\n'
+        .. '          set n to count of UI elements of w\n'
+        .. '          if n is 4 then\n'
+        .. '            set txt to ""\n'
+        .. '            try\n'
+        .. '              set txt to (value of static text 1 of w) as string\n'
+        .. '            end try\n'
+        .. '            if txt contains "An internal error has occurred." then\n'
+        .. '              perform action "AXPress" of UI element 4 of w\n'
+        .. '              return "dismissed"\n'
+        .. '            end if\n'
+        .. '          end if\n'
+        .. '        end try\n'
+        .. '      end repeat\n'
+        .. '      return "none"\n'
+        .. '    end tell\n'
+        .. '  end tell\n'
+        .. 'end timeout\n'
+
+    local rc, out = osa(script)
+    local result = trim(out)
+    if rc ~= 0 then
+        alertStuck = alertStuck + 1
+        trace('ALERT_WATCHDOG_ERROR', { alert = alertStuck, detail = result })
+        return 'error'
+    end
+    if result == 'dismissed' then
+        alertSeen = alertSeen + 1
+        alertDismissed = alertDismissed + 1
+        trace('ALERT_DISMISSED', { alert = alertSeen, detail = 'AXPress on UI element 4' })
+        LrTasks.sleep(0.6)
+        return 'dismissed'
+    end
+    return 'none'
+end
+
+--------------------------------------------------------------------------------
+-- panel + filter preflight (failure modes 2 and 4)
+--------------------------------------------------------------------------------
+
+local PANEL_SCRIPT = [[
+with timeout of 8 seconds
+  tell application "System Events"
+    tell process "]] .. LR_PROC .. [["
+      try
+        set ww to item 1 of (size of window 1)
+      on error
+        return "no-window"
+      end try
+      set hit to missing value
+      repeat with w in windows
+        set hit to my findRole(w, "Transform", "AXStaticText")
+        if hit is not missing value then exit repeat
+      end repeat
+      if hit is missing value then
+        if ww < 1100 then return "collapsed" end
+        return "no-transform"
+      end if
+      if ww < 1100 then return "collapsed" end
+      return "ok"
+    end tell
+  end tell
+end timeout
+
+on findRole(root, needle, wantRole)
+  try
+    set kids to UI elements of root
+  on error
+    return missing value
+  end try
+  repeat with k in kids
+    try
+      if (role of k as string) is wantRole and ((value of k as string) is needle) then return contents of k
+    end try
+    try
+      set r to my findRole(k, needle, wantRole)
+      if r is not missing value then return r
+    end try
+  end repeat
+  return missing value
+end findRole
+]]
+
+local function panelState()
+    local rc, out = osa(PANEL_SCRIPT)
+    local s = trim(out)
+    if rc ~= 0 or s == '' then return 'unknown', s end
+    return s, s
+end
+
+local FILL_SCRIPT = axBody([[
+      try
+        click menu item "Fill" of menu "Window" of menu bar 1
+      on error
+        return "fill-failed"
+      end try
+      delay 0.4
+      keystroke "3" using {command down, shift down}
+      return "done"
+]], { frontmost = true })
+
+local function fixPanel()
+    local rc, out = osa(FILL_SCRIPT)
+    return rc == 0 and trim(out) == 'done', trim(out)
+end
+
+local COUNT_SCRIPT = [[
+with timeout of 8 seconds
+  tell application "System Events"
+    tell process "]] .. LR_PROC .. [["
+      set acc to my collect(window 1, {})
+      return my joinLines(acc)
+    end tell
+  end tell
+end timeout
+
+on collect(root, acc)
+  try
+    set kids to UI elements of root
+  on error
+    return acc
+  end try
+  repeat with k in kids
+    try
+      set v to (value of k as string)
+      if v contains "photos" then set end of acc to v
+    end try
+    my collect(k, acc)
+  end repeat
+  return acc
+end collect
+
+on joinLines(lst)
+  set out to ""
+  repeat with s in lst
+    set out to out & (s as string) & linefeed
+  end repeat
+  return out
+end joinLines
+]]
+
+-- Returns active, total, state: "inactive" | "active" | "unknown"
+local function filterState()
+    local rc, out = osa(COUNT_SCRIPT)
+    if rc ~= 0 then return nil, nil, 'unknown' end
+    -- Several "N of M photos" labels can be on screen; the largest M is the
+    -- authoritative one, so use that match rather than summing.
+    local bestActive, bestTotal = nil, 0
+    for a, b in string.gmatch(out, '(%d+)%s+of%s+(%d+)%s+photos') do
+        local av, tv = tonumber(a), tonumber(b)
+        if tv and tv > bestTotal then bestActive, bestTotal = av, tv end
+    end
+    if bestTotal == 0 then return nil, nil, 'unknown' end
+    if bestActive < bestTotal then return bestActive, bestTotal, 'active' end
+    return bestActive, bestTotal, 'inactive'
+end
+
+local TOGGLE_FILTER_SCRIPT = axBody([[
+      keystroke "l" using {command down}
+      return "toggled"
+]], { frontmost = true })
+
+local CLEAR_FILTER_SCRIPT = [[
+with timeout of 8 seconds
+  tell application "System Events"
+    tell process "]] .. LR_PROC .. [["
+      set hit to my findRole(window 1, "None", "AXButton")
+      if hit is missing value then return "missing"
+      perform action "AXPress" of hit
+      return "pressed"
+    end tell
+  end tell
+end timeout
+
+on findRole(root, needle, wantRole)
+  try
+    set kids to UI elements of root
+  on error
+    return missing value
+  end try
+  repeat with k in kids
+    try
+      if (role of k as string) is wantRole then
+        try
+          if ((name of k as string) is needle) or ((description of k as string) is needle) then return contents of k
+        end try
+      end if
+    end try
+    try
+      set r to my findRole(k, needle, wantRole)
+      if r is not missing value then return r
+    end try
+  end repeat
+  return missing value
+end findRole
+]]
+
+-- Returns state: "inactive" | "cleared" | "stuck" | "unknown"
+local function ensureNoFilter()
+    local active, total, state = filterState()
+    if state == 'inactive' then return 'inactive' end
+    if state == 'unknown' then
+        -- Filter bar may simply be hidden; reveal it and look again.
+        osa(TOGGLE_FILTER_SCRIPT)
+        LrTasks.sleep(1.0)
+        active, total, state = filterState()
+        if state ~= 'active' then return 'unknown' end
+    end
+
+    trace('FILTER_ACTIVE', { filter = state, detail = string.format('%s of %s photos', tostring(active), tostring(total)) })
+    osa(CLEAR_FILTER_SCRIPT)
+    LrTasks.sleep(1.0)
+    active, total, state = filterState()
+    if state == 'inactive' then
+        trace('FILTER_CLEARED', { filter = 'inactive', detail = 'None pressed' })
+        return 'cleared'
+    end
+    trace('FILTER_STUCK', { filter = tostring(state), detail = string.format('%s of %s photos', tostring(active), tostring(total)) })
+    return 'stuck'
+end
+
+--------------------------------------------------------------------------------
+-- UI: press Update (the explicit re-analyse; failure mode 8)
+--------------------------------------------------------------------------------
+
+local PRESS_SCRIPT = [[
+with timeout of 8 seconds
+  tell application "System Events"
+    tell process "]] .. LR_PROC .. [["
+      repeat with w in windows
+        set hit to my findRole(w, "Update", "AXButton")
+        if hit is not missing value then
+          perform action "AXPress" of hit
+          return "pressed"
+        end if
+      end repeat
+      return "missing"
+    end tell
+  end tell
+end timeout
+
+on findRole(root, needle, wantRole)
+  try
+    set kids to UI elements of root
+  on error
+    return missing value
+  end try
+  repeat with k in kids
+    try
+      if (role of k as string) is wantRole then
+        try
+          if (name of k as string) is needle then return contents of k
+        end try
+        try
+          if (description of k as string) is needle then return contents of k
+        end try
+      end if
+    end try
+    try
+      set r to my findRole(k, needle, wantRole)
+      if r is not missing value then return r
+    end try
+  end repeat
+  return missing value
+end findRole
+]]
+
+local function pressNamedButton(name)
+    local script = PRESS_SCRIPT:gsub('"Update"', '"' .. name .. '"')
+    local rc, out = osa(script)
+    return rc == 0 and trim(out) == 'pressed'
+end
+
+-- Ensure the Upright panel is open enough for its Update button to exist.
+local function ensureUpdateVisible()
+    if pressNamedButton('Update') then return 'update' end
+    -- Not present: the panel may be collapsed. Toggle the header, then retry.
+    for _ = 1, 2 do
+        osa(axBody([[
+          repeat with w in windows
+            set hit to my findRole(w, "Upright", "AXStaticText")
+            if hit is not missing value then
+              perform action "AXPress" of hit
+              return "pressed"
+            end if
+          end repeat
+          return "missing"
+        ]], { frontmost = true }) .. FIND_ROLE_HANDLER)
+        LrTasks.sleep(0.8)
+        if pressNamedButton('Update') then return 'update' end
+    end
+    return 'none'
+end
+
+local function pressUpdate(mode)
+    local how = ensureUpdateVisible()
+    if how == 'update' then
+        trace('UPDATE_PRESSED', { detail = 'Update' })
+        return true
+    end
+    -- Fallback: click the mode's own button (may re-arm the panel).
+    local btn = MODE_BUTTON[mode]
+    if btn and pressNamedButton(btn) then
+        trace('UPDATE_PRESSED', { detail = 'mode-button:' .. btn })
+        return true
+    end
+    trace('UPDATE_MISSING', { detail = 'no Update button and no mode button' })
+    return false
+end
+
+--------------------------------------------------------------------------------
+-- selection with self-check (failure mode 1)
+--------------------------------------------------------------------------------
+
+local ACTIVE_COL = nil
+
+local function samePhoto(a, b)
+    if not a or not b then return false end
+    local ok, ida, idb = LrTasks.pcall(function()
+        return a.localIdentifier, b.localIdentifier
+    end)
+    if ok and ida and idb then return ida == idb end
+    return a == b
+end
+
+local function selectPhoto(catalog, p, name)
+    LrTasks.pcall(function() catalog:setSelectedPhotos(p, { p }) end)
+    LrTasks.sleep(0.8)
+    local t = catalog:getTargetPhoto()
+    if samePhoto(t, p) then
+        trace('TARGET_OK', { image = name, target = 'self' })
+        return true
+    end
+    trace('TARGET_NIL', { image = name, detail = 'first attempt' })
+
+    -- Recovery: the photo is outside the active source, or the source was lost.
+    if ACTIVE_COL then
+        LrTasks.pcall(function() catalog:setActiveSources({ ACTIVE_COL }) end)
+        LrTasks.sleep(1.2)
+    end
+    LrTasks.pcall(function() catalog:setSelectedPhotos(p, { p }) end)
+    LrTasks.sleep(1.0)
+    t = catalog:getTargetPhoto()
+    if samePhoto(t, p) then
+        trace('TARGET_OK', { image = name, target = 'self', detail = 'after-source-reassert' })
+        return true
+    end
+    trace('TARGET_NIL', {
+        image = name,
+        detail = 'after-source-reassert: ' .. (t and 'wrong-photo' or 'nil'),
+    })
+    return false
+end
+
+--------------------------------------------------------------------------------
+-- arming: mode + digest invalidation (+ guides for guided)
+--------------------------------------------------------------------------------
+
+local function readSettings(p)
+    local ok, s = LrTasks.pcall(function() return p:getDevelopSettings() end)
+    if ok and type(s) == 'table' then return s end
+    return {}
+end
+
+local function writeSettings(catalog, p, tbl, tag)
+    local ok, err = LrTasks.pcall(function()
+        catalog:withWriteAccessDo('upright ' .. tag, function()
+            p:applyDevelopSettings(tbl)
+        end, { timeout = 25 })
+    end)
+    if not ok then trace('WRITE_FAILED', { detail = tag .. ': ' .. tostring(err) }) end
+    return ok
+end
+
+local function digestKey(mode)
+    return (mode == 5) and 'UprightGuidedDependentDigest' or 'UprightDependentDigest'
+end
+
+-- Zero the digest so the next Update always finds a mismatch. Without this the
+-- solver is suppressed and the run yields nothing (failure mode 8).
+-- Returns true only if the zeroed digest actually landed; the caller then knows
+-- that "digest left zero" is a trustworthy solve signal. If the write silently
+-- no-ops we fall back to matrix/focal comparison and say so in the trace.
+local function arm(catalog, p, name, mode)
+    writeSettings(catalog, p, { PerspectiveUpright = 0 }, 'reset')
+    LrTasks.sleep(0.6)
+
+    if mode == 5 then
+        -- Write the segments while still in Off, so the solver cannot read a
+        -- half-populated list, then switch the mode on in a second write.
+        local segs = { UprightFourSegmentsCount = #GUIDES }
+        for i = 1, #GUIDES do segs['UprightFourSegments_' .. (i - 1)] = GUIDES[i] end
+        writeSettings(catalog, p, segs, 'segments')
+        LrTasks.sleep(0.6)
+    end
+    local tbl = { PerspectiveUpright = mode }
+    tbl[digestKey(mode)] = ZERO32
+
+    local key = digestKey(mode)
+    writeSettings(catalog, p, tbl, 'arm')
+
+    local zeroed = tostring(readSettings(p)[key]) == ZERO32
+    if not zeroed then
+        -- One more shot; a transient busy catalog can swallow the write.
+        LrTasks.sleep(0.5)
+        writeSettings(catalog, p, { [key] = ZERO32 }, 'arm-retry')
+        zeroed = tostring(readSettings(p)[key]) == ZERO32
+    end
+    trace('ARM', {
+        image = name, mode = mode,
+        digest = zeroed and 'zeroed' or 'STALE',
+        detail = (mode == 5 and ('guides=' .. #GUIDES) or 'mode0-then-arm')
+            .. (zeroed and '' or '; digest write did not stick'),
+    })
+    LrTasks.sleep(0.5)
+    return zeroed
+end
+
+--------------------------------------------------------------------------------
+-- solve wait
+--------------------------------------------------------------------------------
+
+local function solvedNow(p, mode, base, armed)
+    local s = readSettings(p)
+    local dig = s[digestKey(mode)]
+    local slot = s['UprightTransform_' .. mode]
+    local f35 = s.UprightFocalLength35mm
+
+    -- Authoritative signal: we wrote 32 zeros, and a solve restamps a real
+    -- digest. A matching digest is exactly what suppresses the solver, so
+    -- "digest still zeros" means "did not solve".
+    if armed and dig ~= nil and tostring(dig) ~= ZERO32 then return true, s end
+
+    -- Fallback when the digest write did not stick: any observable change.
+    if slot ~= nil and tostring(slot) ~= tostring(base.slot) then return true, s end
+    if mode ~= 5 and f35 ~= nil and tostring(f35) ~= tostring(base.f35) then return true, s end
+    return false, s
+end
+
+local function waitForSolve(p, name, mode, base, armed)
+    local deadline = os.time() + UPDATE_TIMEOUT
+    local tick = 0
+    while os.time() < deadline do
+        LrTasks.sleep(POLL_SEC)
+        tick = tick + 1
+        if tick % 2 == 0 then watchdog() end
+        local ok, s = solvedNow(p, mode, base, armed)
+        if ok then
+            return true, s
+        end
+    end
+    return false, readSettings(p)
+end
+
+--------------------------------------------------------------------------------
+-- per-image solve with one retry (failure mode 4)
+--------------------------------------------------------------------------------
+
+local function baseline(p, mode)
+    local s = readSettings(p)
+    return { slot = s['UprightTransform_' .. mode], f35 = s.UprightFocalLength35mm }
+end
+
+local function solveOne(catalog, p, name, mode)
+    for attempt = 1, MAX_ATTEMPTS do
+        if attempt > 1 then
+            trace('RETRY', { image = name, mode = mode, attempt = attempt, detail = 'no-transform; reselecting' })
+            if ACTIVE_COL then
+                LrTasks.pcall(function() catalog:setActiveSources({ ACTIVE_COL }) end)
+                LrTasks.sleep(1.0)
+            end
+        end
+
+        if not selectPhoto(catalog, p, name) then
+            trace('FAILED', {
+                image = name, mode = mode, attempt = attempt,
+                detail = 'target nil after selection; not solving',
+            })
+            if attempt >= MAX_ATTEMPTS then return false, 'target-nil' end
+        else
+            local base = baseline(p, mode)
+            local armed = arm(catalog, p, name, mode)
+            local pressed = pressUpdate(mode)
+            if not pressed then
+                trace('SOLVE_EMPTY', { image = name, mode = mode, attempt = attempt, detail = 'update-not-pressed' })
+            else
+                local ok, s = waitForSolve(p, name, mode, base, armed)
+                if ok then
+                    trace('SOLVE_OK', {
+                        image = name, mode = mode, attempt = attempt,
+                        solved = 'yes',
+                        digest = tostring(s[digestKey(mode)] or '-'):sub(1, 8),
+                        f35 = s.UprightFocalLength35mm,
+                    })
+                    return true, 'solved'
+                end
+                trace('SOLVE_EMPTY', {
+                    image = name, mode = mode, attempt = attempt,
+                    digest = tostring(s[digestKey(mode)] or '-'):sub(1, 8),
+                    f35 = s.UprightFocalLength35mm,
+                    detail = 'no new transform after ' .. UPDATE_TIMEOUT .. 's'
+                        .. (armed and '' or ' (digest write stale)'),
+                })
+            end
+        end
+        heartbeat()
+    end
+
+    trace('FAILED', {
+        image = name, mode = mode, attempt = MAX_ATTEMPTS,
+        solved = 'no', detail = 'no transform after ' .. MAX_ATTEMPTS .. ' attempts',
+    })
+    return false, 'no-transform'
+end
+
+--------------------------------------------------------------------------------
+-- import
+--------------------------------------------------------------------------------
+
+local function listImages()
+    local found = {}
+    for _, dir in ipairs(DIRS) do
+        local pipe = io.popen('ls ' .. q(dir) .. ' 2>/dev/null')
+        if pipe then
+            for line in pipe:lines() do
+                local n = line:gsub('%.tiff?$', '')
+                if #n > 0 and n ~= line then
+                    found[#found + 1] = { dir .. '/' .. line, n }
+                end
+            end
+            pipe:close()
+        end
+        if LIMIT > 0 and #found >= LIMIT then break end
+    end
+    if LIMIT > 0 and #found > LIMIT then
+        local cut = {}
+        for i = 1, LIMIT do cut[i] = found[i] end
+        return cut
+    end
+    return found
+end
+
+local function importAll(catalog, names)
+    local photos = {}
+    local ok, err = LrTasks.pcall(function()
+        catalog:withWriteAccessDo('upright sweep import', function()
+            for _, e in ipairs(names) do
+                local path, n = e[1], e[2]
+                local got = catalog:findPhotoByPath(path)
+                if not got then
+                    local h = io.open(path, 'r')
+                    if h then
+                        h:close()
+                        got = catalog:addPhoto(path)
+                    else
+                        trace('MISSING', { image = n, detail = path })
+                    end
+                end
+                if got then photos[#photos + 1] = { got, n } end
+            end
+        end)
+    end)
+    trace('IMPORT', {
+        image = tostring(#photos), detail = 'requested=' .. #names .. ' ok=' .. tostring(ok) .. ' err=' .. tostring(err),
+    })
+    return photos
+end
+
+--------------------------------------------------------------------------------
+-- preflight: panel
+--------------------------------------------------------------------------------
+
+-- Returns "ok" | "collapsed" | "no-transform" | "unknown". Call only in Develop:
+-- the Transform/Upright panel does not exist in Library.
+local function ensurePanel()
+    local panel, raw = panelState()
+    trace('PANEL_STATE', { panel = panel, detail = raw })
+    if panel == 'collapsed' or panel == 'no-transform' then
+        trace('PANEL_COLLAPSED', { panel = panel, detail = 'Window > Fill then Cmd-Shift-3' })
+        local fixed, out = fixPanel()
+        LrTasks.sleep(1.5)
+        panel, raw = panelState()
+        trace(fixed and 'PANEL_FIXED' or 'PANEL_FIX_FAILED', { panel = panel, detail = out })
+    elseif panel == 'unknown' then
+        trace('PANEL_UNKNOWN', { detail = raw })
+    end
+    return panel
+end
+
+local function panelBad(panel)
+    return panel == 'collapsed' or panel == 'no-transform'
+end
+
+--------------------------------------------------------------------------------
+-- job-file helpers
+--------------------------------------------------------------------------------
+
+local function splitKeep(s, sep)
+    local out = {}
+    for piece in string.gmatch(s .. sep, '([^' .. sep .. ']*)' .. sep) do
+        out[#out + 1] = piece
+    end
+    return out
+end
+
+local function readLines(path)
+    local out = {}
+    local f = io.open(path, 'r')
+    if not f then return out end
+    for l in f:lines() do out[#out + 1] = l end
+    f:close()
+    return out
+end
+
+local function appendLine(path, text)
+    local f = io.open(path, 'a')
+    if f then
+        f:write(text .. '\n')
+        f:close()
+    end
+end
+
+local function fileExists(path)
+    local f = io.open(path, 'r')
+    if f then f:close() return true end
+    return false
+end
+
+-- Same key set the guided-limits runner parses out of results.txt.
+local function grab(p)
+    local ok, s = LrTasks.pcall(function() return p:getDevelopSettings() end)
+    if not ok or not s then return 'READFAIL' end
+    local keys = {}
+    for i = 0, 5 do keys[#keys + 1] = 'UprightTransform_' .. i end
+    local tail = { 'UprightFocalLength35mm', 'PerspectiveUpright', 'UprightTransformCount',
+        'UprightFourSegmentsCount', 'UprightVersion' }
+    for _, k in ipairs(tail) do keys[#keys + 1] = k end
+    local parts = {}
+    for _, k in ipairs(keys) do parts[#parts + 1] = k .. '=' .. tostring(s[k]) end
+    return table.concat(parts, ';')
+end
+
+--------------------------------------------------------------------------------
+-- flow A: job file (guided-limits protocol, external clicker)
+--------------------------------------------------------------------------------
+
+local function runJob(catalog, jobPath, filter)
+    local jobDir = jobPath:match('^(.*)/[^/]+$') or '/tmp/uplim'
+    local RES = jobDir .. '/results.txt'
+    local CLICKED = jobDir .. '/CLICKED'
+    local ARMED = jobDir .. '/ARMED'
+    local DONE = jobDir .. '/DONE'
+    local lines = readLines(jobPath)
+    trace('JOB_BEGIN', { filter = filter, detail = jobPath .. ' lines=' .. #lines })
+    if #lines == 0 then
+        trace('ABORT', { detail = 'job file empty' })
+        return
+    end
+    -- A marker left over from a previous run would make the first case look
+    -- clicked before anything happened.
+    if fileExists(CLICKED) then
+        removeFile(CLICKED)
+        trace('JOB_STALE_MARKER', { detail = 'removed leftover CLICKED' })
+    end
+
+    for _, line in ipairs(lines) do
+        local f = splitKeep(line, '|')
+        if f[1] == 'SETUP' then
+            local photos = {}
+            LrTasks.pcall(function()
+                catalog:withWriteAccessDo('upright job import', function()
+                    for i = 3, #f do
+                        local path = f[i]
+                        local got = catalog:findPhotoByPath(path)
+                        if not got and fileExists(path) then got = catalog:addPhoto(path) end
+                        if got then photos[#photos + 1] = got end
+                    end
+                end)
+            end)
+            local col
+            LrTasks.pcall(function()
+                catalog:withWriteAccessDo('upright job collection', function()
+                    col = catalog:createCollection(f[2] or ('job ' .. RUN_ID), nil, true)
+                    if col then col:addPhotos(photos) end
+                end)
+            end)
+            if col then
+                ACTIVE_COL = col
+                LrTasks.pcall(function() catalog:setActiveSources({ col }) end)
+            end
+            LrApplicationView.switchToModule('develop')
+            LrTasks.sleep(3.0)
+            if photos[1] then
+                LrTasks.pcall(function() catalog:setSelectedPhotos(photos[1], { photos[1] }) end)
+            end
+            LrTasks.sleep(1.5)
+            local panel = ensurePanel()
+            trace('JOB_SETUP', {
+                panel = panel,
+                detail = string.format('col=%s photos=%d', tostring(f[2]), #photos),
+            })
+            if panelBad(panel) or #photos == 0 then
+                trace('ABORT', { detail = 'job setup failed (panel or photos)' })
+                return
+            end
+        elseif f[1] == 'CASE' then
+            local id, path = f[2], f[3]
+            local mode = tonumber(f[4]) or 5
+            local count = tonumber(f[5])
+            local priorAuto = f[6]
+            local segs = {}
+            for i = 7, #f do if f[i] ~= '' then segs[#segs + 1] = f[i] end end
+
+            local p = catalog:findPhotoByPath(path)
+            if not p then
+                trace('JOB_MISSING', { image = id, detail = path })
+            elseif not selectPhoto(catalog, p, id) then
+                trace('FAILED', { image = id, mode = mode, detail = 'target nil; case skipped' })
+            else
+                writeSettings(catalog, p, { PerspectiveUpright = 0 }, 'reset')
+                LrTasks.sleep(0.8)
+                if priorAuto == '1' then
+                    writeSettings(catalog, p, { PerspectiveUpright = 1 }, 'auto')
+                    LrTasks.sleep(10)
+                    appendLine(RES, 'PRE_AUTO|' .. id .. '|' .. grab(p))
+                end
+
+                -- Wipe the slot this case will write, so a solve that
+                -- produces nothing is distinguishable from a stale earlier
+                -- result. Identity in the slot means "did not solve".
+                -- Slot index equals the mode number, so wipe THIS mode's
+                -- slot. Wiping a hardcoded slot 5 while testing slot N left
+                -- the stale transform intact and let the solved test below
+                -- pass on a value that nothing had written this click.
+                local wipe = {}
+                wipe['UprightTransform_' .. mode] = IDENT9
+                writeSettings(catalog, p, wipe, 'wipe' .. mode)
+                LrTasks.sleep(0.5)
+                appendLine(RES, 'PRE|' .. id .. '|' .. grab(p))
+
+                local tbl = { PerspectiveUpright = mode }
+                if count then tbl.UprightFourSegmentsCount = count end
+                for i, s in ipairs(segs) do tbl['UprightFourSegments_' .. (i - 1)] = s end
+                tbl[digestKey(mode)] = ZERO32
+                writeSettings(catalog, p, tbl, 'arm')
+                writeFile(ARMED, tostring(id))
+                trace('JOB_ARMED', {
+                    image = id, mode = mode, digest = 'zeroed',
+                    detail = string.format('segments=%d count=%s auto=%s', #segs, tostring(count), tostring(priorAuto)),
+                })
+
+                local waited, axPressed, earlyOut = 0, false, false
+                while not fileExists(CLICKED) and waited < 40 do
+                    LrTasks.sleep(0.5)
+                    waited = waited + 0.5
+                    if waited % 5 == 0 then watchdog() end
+                    -- Once the press has landed, stop as soon as the digest is
+                    -- restamped (solve done) instead of burning the full 40 s.
+                    if axPressed then
+                        local s2 = readSettings(p)
+                        if tostring(s2[digestKey(mode)]) ~= ZERO32 then
+                            earlyOut = true
+                            break
+                        end
+                    end
+                    -- External OCR clickers may not exist yet: self-serve the
+                    -- re-analyse after a short grace period. A later external
+                    -- click is harmless.
+                    if not axPressed and waited >= 6 then
+                        axPressed = pressUpdate(mode)
+                        trace(axPressed and 'UPDATE_PRESSED' or 'UPDATE_MISSING', {
+                            image = id, mode = mode, detail = 'job: no CLICKED after 6s',
+                        })
+                    end
+                end
+                LrTasks.sleep(1.0)
+                local clicked = fileExists(CLICKED)
+                -- Panel may have collapsed mid-run: one repair attempt.
+                if not clicked and not axPressed then
+                    local panel = ensurePanel()
+                    if not panelBad(panel) then axPressed = pressUpdate(mode) end
+                end
+                -- Give the solve a moment to commit before reading back.
+                LrTasks.sleep(2.0)
+                local post = readSettings(p)
+                local solved = tostring(post[digestKey(mode)]) ~= ZERO32
+                    or tostring(post['UprightTransform_' .. mode]) ~= IDENT9
+                appendLine(RES, 'RESULT|' .. id .. '|clicked=' .. tostring(clicked) .. '|' .. grab(p))
+                trace(solved and 'SOLVE_OK' or 'JOB_TIMEOUT', {
+                    image = id, mode = mode, solved = solved and 'yes' or 'no',
+                    digest = tostring(post[digestKey(mode)] or '-'):sub(1, 8),
+                    f35 = post.UprightFocalLength35mm,
+                    detail = (earlyOut and 'solve detected; early out; ' or '')
+                        .. (clicked and 'external Update click seen'
+                        or (axPressed and 'AX Update press' or 'no CLICKED within 40s')),
+                })
+                removeFile(CLICKED)
+                appendLine(DONE, id)
+                writeFile(ARMED, '')
+                heartbeat()
+            end
+        end
+    end
+    trace('JOB_END', {})
+end
+
+--------------------------------------------------------------------------------
+-- flow B: directory sweep (default)
+--------------------------------------------------------------------------------
+
+local function runSweep(catalog, filter, alertsBefore)
+    local names = listImages()
+    trace('FOUND', { image = tostring(#names), detail = 'dirs=' .. table.concat(DIRS, ',') })
+    if #names == 0 then
+        trace('ABORT', { detail = 'no .tif files found' })
+        bezel('Upright sweep: no images found')
+        return
+    end
+
+    local photos = importAll(catalog, names)
+    if #photos == 0 then
+        trace('ABORT', { detail = 'nothing imported' })
+        return
+    end
+
+    -- Photo must live in a collection that is the ACTIVE SOURCE.
+    local colName = 'sweep ' .. RUN_ID
+    local col
+    LrTasks.pcall(function()
+        catalog:withWriteAccessDo('upright sweep collection', function()
+            col = catalog:createCollection(colName, nil, true)
+            if col then
+                local l = {}
+                for _, x in ipairs(photos) do l[#l + 1] = x[1] end
+                col:addPhotos(l)
+            end
+        end)
+    end)
+    if not col then
+        trace('ABORT', { detail = 'createCollection failed' })
+        return
+    end
+    ACTIVE_COL = col
+
+    local colCount = 0
+    LrTasks.pcall(function()
+        local ps = col:getPhotos()
+        colCount = ps and #ps or 0
+    end)
+    trace('COLLECTION', { detail = string.format('%s photos=%d/%d', colName, colCount, #photos) })
+
+    LrApplicationView.switchToModule('develop')
+    LrTasks.sleep(1.0)
+    local srcOk = LrTasks.pcall(function() catalog:setActiveSources({ col }) end)
+    LrTasks.sleep(2.0)
+    trace('ACTIVE_SOURCE', { detail = 'set=' .. tostring(srcOk) .. ' photos=' .. colCount })
+
+    -- Give Develop something to render before switching into it; a module
+    -- switch with an empty selection can land on the placeholder.
+    LrTasks.pcall(function() catalog:setSelectedPhotos(photos[1][1], { photos[1][1] }) end)
+    LrTasks.sleep(1.0)
+
+    local panel = ensurePanel()
+
+    if colCount == 0 then
+        trace('PREFLIGHT_FAIL', { filter = filter, panel = panel, detail = 'active source is empty (filter?)' })
+        trace('ABORT', { detail = 'collection empty after activation' })
+        bezel('Upright sweep: active source empty')
+        return
+    end
+    if panelBad(panel) then
+        trace('PREFLIGHT_FAIL', { panel = panel, detail = 'right panel collapsed; Update unpressable' })
+        trace('ABORT', { detail = 'collapsed panel not recovered' })
+        bezel('Upright sweep: right panel collapsed')
+        return
+    end
+
+    -- ---- probe: prove a target is reachable before the long loop --------
+    local probe = photos[1]
+    if not selectPhoto(catalog, probe[1], probe[2]) then
+        trace('PREFLIGHT_FAIL', {
+            filter = filter, panel = panel,
+            detail = 'target nil on probe; photo not in active source',
+        })
+        trace('ABORT', { detail = 'self-check failed on probe' })
+        bezel('Upright sweep: cannot select photos')
+        return
+    end
+    trace('PREFLIGHT_OK', { panel = panel, filter = filter, alert = alertsBefore })
+
+    local okCount, failCount = 0, 0
+    for _, x in ipairs(photos) do
+        local p, name = x[1], x[2]
+        for _, mode in ipairs(MODES) do
+            watchdog()
+            local solved = solveOne(catalog, p, name, mode)
+            if solved then okCount = okCount + 1 else failCount = failCount + 1 end
+            LrTasks.sleep(0.4)
+        end
+        trace('IMAGE_DONE', { image = name })
+        heartbeat()
+    end
+
+    trace('SUMMARY', {
+        detail = string.format('solved=%d failed=%d alerts=%d/%d filter=%s panel=%s',
+            okCount, failCount, alertDismissed, alertSeen, filter, panel),
+    })
+    bezel(string.format('Upright sweep: %d ok, %d failed', okCount, failCount))
+end
+
+--------------------------------------------------------------------------------
+-- main
+--------------------------------------------------------------------------------
+
+LrTasks.startAsyncTask(function()
+    LrTasks.execute('mkdir -p ' .. q(TMP))
+    traceHeaderIfNeeded()
+    trace('RUN_START', {
+        detail = string.format('dirs=%s modes=%s limit=%d timeout=%ds',
+            table.concat(DIRS, ','), table.concat(MODES, ','), LIMIT, UPDATE_TIMEOUT),
+    })
+
+    local bodyOk, bodyErr = LrTasks.pcall(function()
+        local catalog = LrApplication.activeCatalog()
+        if not catalog then
+            trace('ABORT', { detail = 'no active catalog' })
+            return
+        end
+
+        local locked, why = acquireLock()
+        if not locked then
+            trace('ABORT', { detail = 'lock held: ' .. tostring(why) })
+            bezel('Upright sweep: another run holds the lock')
+            return
+        end
+
+        -- ---- preflight -----------------------------------------------------
+        -- A modal error alert can already be up before anything else runs.
+        local alertsBefore = watchdog()
+        trace('PREFLIGHT_BEGIN', { alert = alertsBefore })
+
+        -- The library filter is a Library-level condition: check and clear it
+        -- before any photo work, otherwise collections render "0 of N photos".
+        local filter = ensureNoFilter()
+
+        -- ---- dispatch ------------------------------------------------------
+        -- A job file means guided-limits protocol (external clicker); otherwise
+        -- the directory sweep drives the solver through the Update button.
+        -- UPRIGHT_FLOW=sweep|job forces one flow regardless of the job file.
+        local flow = (getenv('UPRIGHT_FLOW') or 'auto'):lower()
+        local useJob
+        if flow == 'job' then
+            useJob = true
+        elseif flow == 'sweep' then
+            useJob = false
+        else
+            useJob = fileExists(JOB)
+        end
+        trace('FLOW', { detail = useJob and 'job' or 'sweep' })
+        if useJob then
+            runJob(catalog, JOB, filter)
+        else
+            runSweep(catalog, filter, alertsBefore)
+        end
+    end)
+
+    if not bodyOk then
+        trace('ABORT', { detail = 'uncaught: ' .. tostring(bodyErr) })
+    end
+    trace('RUN_END', { detail = bodyOk and 'ok' or 'error' })
+    releaseLock()
+end)

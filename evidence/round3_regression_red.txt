@@ -1,0 +1,85 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+F.FFF                                                                    [100%]
+=================================== FAILURES ===================================
+______________ TestRound3.test_all_heldout_seeds_have_small_tails ______________
+
+self = <test_round3.TestRound3 testMethod=test_all_heldout_seeds_have_small_tails>
+
+    def test_all_heldout_seeds_have_small_tails(self):
+        result=bench.run_heldout(range(5))
+        for name,row in result['scenes'].items():
+            for trial in row['trials']:
+                with self.subTest(scene=name,seed=trial['seed']):
+                    self.assertTrue(trial['ok'],trial['reason'])
+>                   self.assertLess(max(trial['median_axis_deg']),.1)
+E                   AssertionError: 0.11344431288257795 not less than 0.1
+
+port/test_round3.py:30: AssertionError
+_______ TestRound3.test_gate_distinguishes_scatter_from_systematic_bias ________
+
+self = <test_round3.TestRound3 testMethod=test_gate_distinguishes_scatter_from_systematic_bias>
+
+    def test_gate_distinguishes_scatter_from_systematic_bias(self):
+        # Symmetric noisy supports are accurate as an ensemble. Rotating
+        # that SAME evidence by .13 degrees must fail, despite identical MAD.
+        w,h=1200,800
+        angles=np.tile(np.linspace(-.16,.16,41),3)
+        a=np.radians(angles)
+        vertical=np.column_stack([np.arange(len(a))*5,np.zeros(len(a)),
+                                  np.arange(len(a))*5+600*np.sin(a),600*np.cos(a)])
+        horizontal=np.array([[30,y,1100,y] for y in (100,300,500)],float)
+        for bias,passed in ((0,True),(.13,False)):
+            a=np.radians(bias);N=np.diag([1/w,1/h,1])
+            H=N@np.array([[np.cos(a),-np.sin(a),0],[np.sin(a),np.cos(a),0],[0,0,1]])@np.linalg.inv(N)
+            q=up._alignment_quality(H,vertical/[w,h,w,h],horizontal/[w,h,w,h],w,h)
+>           self.assertEqual(q['passed'],passed,q)
+E           AssertionError: True != False : {'family_median_deg': [0.13, 0.13000000000000003], 'limit_deg': 0.573445231820516, 'worst_scale': 0.6801105927317529, 'passed': True}
+
+port/test_round3.py:60: AssertionError
+___________ TestRound3.test_gate_rejects_small_systematic_axis_bias ____________
+
+self = <test_round3.TestRound3 testMethod=test_gate_rejects_small_systematic_axis_bias>
+
+    def test_gate_rejects_small_systematic_axis_bias(self):
+        # The old gate accepts .11/.13 deg at these sizes; neither is a
+        # four-pixel-scale optimizer catastrophe. Test both axes and aspects.
+        for w,h in ((1200,800),(1024,576),(640,960)):
+            vertical=np.array([[x,40,x,h-40] for x in (100,200,300,400)],float)
+            horizontal=np.array([[40,y,w-40,y] for y in (100,200,300,400)],float)
+            for angle in (.11,.13):
+                a=np.radians(angle)
+                H=np.array([[np.cos(a),-np.sin(a),0],[np.sin(a),np.cos(a),0],[0,0,1]])
+                N=np.diag([1/w,1/h,1])
+                q=up._alignment_quality(N@H@np.linalg.inv(N),vertical/[w,h,w,h],
+                                         horizontal/[w,h,w,h],w,h)
+>               self.assertFalse(q['passed'],(w,h,angle,q))
+E               AssertionError: True is not false : (1200, 800, 0.11, {'family_median_deg': [0.11, 0.11], 'limit_deg': 0.573445231820516, 'worst_scale': 0.575478334090549, 'passed': True})
+
+port/test_round3.py:45: AssertionError
+_______________ TestRound3.test_vps_fit_their_returned_supports ________________
+
+self = <test_round3.TestRound3 testMethod=test_vps_fit_their_returned_supports>
+
+    def test_vps_fit_their_returned_supports(self):
+        image,_,_,_=heldout.render(heldout.CASES[8])
+        segments=up.detect_segments(image)
+        lines=up._homogeneous_lines(segments)
+        lines/=np.linalg.norm(lines[:,:2],axis=1)[:,None]
+        for seed in (0,1,2,4):
+            for vp in up.estimate_vanishing_points(segments,1024,576,seed):
+                with self.subTest(seed=seed,count=len(vp['inliers'])):
+                    _,_,vt=np.linalg.svd(lines[vp['inliers']])
+                    expected=up._normalize(vt[-1])
+>                   self.assertLess(np.linalg.norm(np.cross(expected,vp['vp'])),1e-10)
+E                   AssertionError: np.float64(3.561642552160217e-05) not less than 1e-10
+
+port/test_round3.py:22: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_round3.py::TestRound3::test_all_heldout_seeds_have_small_tails
+FAILED port/test_round3.py::TestRound3::test_gate_distinguishes_scatter_from_systematic_bias
+FAILED port/test_round3.py::TestRound3::test_gate_rejects_small_systematic_axis_bias
+FAILED port/test_round3.py::TestRound3::test_vps_fit_their_returned_supports
+4 failed, 1 passed in 4.67s

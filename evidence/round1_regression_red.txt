@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_detector_preserves_roll_scene_across_seeds (test_port.TestAccuracyRegression.test_detector_preserves_roll_scene_across_seeds) (seed=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_port.py", line 552, in test_detector_preserves_roll_scene_across_seeds
+    self.assertLess(max(scores), 0.1)
+AssertionError: 22.713279822417537 not less than 0.1
+
+----------------------------------------------------------------------
+Ran 1 test in 1.901s
+
+FAILED (failures=1)

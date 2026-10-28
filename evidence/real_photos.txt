@@ -1,0 +1,316 @@
+REAL-PHOTOGRAPH EVALUATION OF THE UPRIGHT PORT
+==============================================
+
+Date: 2026-10-28. Read-only catalog access (`mode=ro`, `PRAGMA query_only=ON`).
+Port source not edited. All numbers in this file are reproducible from the
+artifacts named at the bottom.
+
+HEADLINE
+--------
+On real photographs the port does not return a wrong homography. It returns
+*no* homography. The policy that was live when this evaluation started rejected
+**600 of 600** records (300 photos x 2 modes) and returned exact identity every
+time. Its real-photo error is therefore not a residual, it is the size of
+Adobe's own correction: median **2.35%** of the diagonal, p99 **19.47%**, max
+**28.28%**, with **23.0%** of records above 5%. The synthetic mean was 0.587%.
+Real-photo performance is roughly 4x worse, and the reason is abstention, not
+geometry.
+
+A sibling round rewrote the gate (`_alignment_quality`) at 08:50 while this run
+was in flight. Under that newer policy the port accepts 9.7% of records and is
+genuinely better than identity *there*, but the whole-sample median barely
+moves (2.35% -> 2.17%). Both policies are reported. The newer one is not a fix
+for the headline, it is a 10% dent in it.
+
+SCORING
+-------
+RMS Euclidean distance between the port's and Adobe's mapped positions over the
+fixed 25x25 source grid used by `benchmark_adobe.agreement` (625 points,
+including all four corners), expressed as percent of the source diagonal.
+Catalog maps are in sensor axes; every candidate is converted through the
+orientation matrix before scoring, so both sides share one gauge. Translation
+and uniform scale are *not* factored out — Adobe's framing is part of the truth.
+
+`frame_output` then `scale_output` are applied in that order for every
+"framing+scale" arm. Where the solve returns identity the two helpers are no-ops.
+
+Some gate-bypassed outputs are geometrically invalid: the homography places part
+of the source frame on the projective horizon, so the sample grid cannot be
+mapped. Those records are counted separately as *unscorable* and excluded from
+the percentile tables. Every table's denominator is its scorable count, given as
+n. The shipped path is always scorable because identity is.
+
+SAMPLE
+------
+Frozen at `evidence/round9_sample.json`: 300 photos drawn with
+`random.Random(9009)` from the 5,443 catalog photos that have a non-identity
+transform in **both** slot 1 (Auto) and slot 2 (Full) and whose file resolves
+through `Adobe_images -> AgLibraryFile` and exists on disk.
+
+    Upright-analysed rows            14,709
+    both slots non-identity          13,287   (90.3% of analysed photos)
+    file missing on disk              7,719   (58.1% of those — sample drawn from survivors)
+    eligible and on disk              5,443
+    sampled                             300
+
+All 300 decoded; no missing files. 274/300 are 3:2. Focal 35 mm-equivalent:
+p5 26 mm, median 35.1 mm, p95 55 mm, max 137.6 mm. Minimum short side 4000 px.
+**The sample contains no extreme aspect ratios and no tiny images**, so those
+two candidate tail explanations are untested here; see Limitations.
+
+Every photo is scored in both modes, so n = 600 records unless stated. Per-photo
+figures take the worse of the two modes.
+
+DISTRIBUTION — SHIPPED PORT, GATE ACTIVE
+----------------------------------------
+Policy A, sha `60f842ea…a7b14ad` (live at start):
+
+    n = 600 records        p50     p90     p99      max    >1%    >5%   >20%
+    percent of diagonal   2.345   8.401  19.474   28.275   429    138      4
+                          (71.5%) (23.0%) (0.67%)
+
+    per photo (worse mode): p50 3.82  p90 10.15  p99 19.87  max 28.27
+                            >5% 116/300  >20% 3/300
+
+    600/600 return identity. Reasons: 444 "poor undamped family alignment",
+    156 "insufficient line structure". Zero accepted.
+
+Policy B, sha `f2a900d9…c52342` (landed mid-task, `_alignment_quality` only):
+
+    n = 600 records        p50     p90     p99      max    >1%    >5%   >20%
+    percent of diagonal   2.166   8.340  19.474   28.275   416    132      4
+                          (69.3%) (22.0%) (0.67%)
+
+    per photo (worse mode): p50 3.70  p90 9.98  p99 19.87  max 28.27
+
+    58/600 accepted (9.7%), 542 identity. The accepted subset is much easier
+    than the rejected one: ungated median error 0.815% vs 2.854%.
+
+On the 58 accepted records the port is worth having: median 0.815% against
+identity's 1.972% on the same records, beating identity in 39/58 (67.2%), and
+only 1/58 above 5%. But 58 records is 9.7% of the sample, and the other 90.3%
+still contribute their full Adobe correction. That is why the sample median
+falls only from 2.345% to 2.166%.
+
+CONTROL 1 — FRAMING+SCALE DISABLED
+----------------------------------
+On policy A this control is *exactly* identical to the shipped path: 0 of 600
+records differ, because the solve returns identity and both helpers are no-ops.
+Framing+scale cannot be evaluated through the shipped gate at all.
+
+On policy B, restricted to the 58 records the gate accepts, the difference is
+large and one-directional:
+
+    shipped (framing+scale on)   p50  0.815   p90  2.940   max   5.784
+    framing+scale disabled       p50 10.129   p90 51.877   max 125.164
+                                 >5% 46/58   >20% 18/58
+
+Framing and scaling are the single largest contributor to agreement on real
+photos — a 12x median difference. The raw solve output is systematically
+mis-translated and mis-scaled against Adobe's framing, and the two helpers
+absorb nearly all of it. Any evaluation that disables them and reports the raw
+solve is measuring the wrong thing.
+
+CONTROL 2 — NAIVE FULL RECTIFICATION
+------------------------------------
+`_base_solve(..., shared_k=True, mode="full")`, i.e. the textbook single-camera
+`K R K^-1` on the same detected segments and the same focal prior, no gate, full
+damping. Scored on the same grid, with and without framing+scale:
+
+    naive, raw              p50 14.465  p90 103.881  p99 1031.501  max 1219.621
+                            >1% 442/488  >5% 343/488  >20% 203/488
+    naive + framing+scale   p50  3.148  p90  17.019  p99   40.049  max   48.229
+                            >1% 388/488  >5% 179/488  >20%  40/488
+
+    gate bypassed, raw              p50  9.510  p90  69.667  p99 602.648  max 1219.621
+    gate bypassed + framing+scale   p50  2.571  p90  14.821  p99  43.275  max  55.368
+
+Paired on the 329 records where both produce a mapping:
+
+    port beats naive                 185/329  (56.2%)
+      Auto mode                       86.1% win, p50 1.44 vs 3.47
+      Full mode                       25.8% win, p50 2.89 vs 3.00
+    port beats identity              134/329  (40.7%)
+    naive beats identity             104/329  (31.6%)
+    median, same records             port 2.201 | naive 3.350 | identity 2.023
+
+**Is the port better on real photos?** Against naive full rectification, yes —
+clearly, and almost entirely because of Auto mode and the far better p90 (14.8%
+vs 17.0%). Against doing nothing, no: the port loses to identity on the median
+and on the win rate. In Full mode the port beats identity only 39.3% of the time
+and actually loses to naive (25.8% win); every bit of the port's advantage over
+naive is in Auto, where it wins 86.1%. Identity is a strong baseline on real photographs because
+Adobe's own corrections are usually small, and the port's residual is the same
+size as the correction it is trying to make.
+
+The port is a better *naive rectifier*. It is not yet a better *correction* than
+identity on an unconditional basis. Only inside the gate does it clear identity.
+
+TAIL ANALYSIS — THE >5% CASES
+-----------------------------
+Two different tails live here and they must not be conflated.
+
+(a) Tail of the shipped port = tail of Adobe's correction. It is not a port
+failure, but it is what the caller experiences. Under policy A: 138/600 records
+and 116/300 photos. Concentrated, not random:
+
+    mode        Full 115/300 (38.3%)     Auto 23/300 (7.7%)
+    orientation BC   48/152 (31.6%)      AB 49/278 (17.6%)   DA 39/160 (24.4%)
+    portrait         92/346 (26.6%)      landscape 46/254 (18.1%)
+    focal        <=50mm 137/562 (24.4%)  >50mm 1/38 (2.6%)
+
+    All four >20% records are 35-40 mm and 24-60 MP; three of the four are Full
+    mode and three are DA (portrait) orientation: DSC07555.ARW 28.27%,
+    R0000497.DNG 24.10%, R0000477.DNG 22.80% in both modes. Portrait + Full +
+    normal-to-wide lens is the worst combination in the sample.
+
+    Rule of thumb: the shipped error is large exactly where the photo needed a
+    large correction and the port gave none. Long lenses are safe; portrait
+    orientation and Full mode are not.
+
+(b) Tail of the port's own geometry, gate bypassed. 174/543 scorable records
+>5%, 39/543 >20%, max 55.4%, plus the 12.8% that do not score at all. This one
+is strongly predictable and monotone in two solved quantities:
+
+    |solved pitch|   n     p50     p90     max   >5%
+      <=2 deg       86    0.81    5.16   24.60     9
+      2-5           80    1.08    7.67   47.03    12
+      5-10          78    2.44   12.76   54.24    23
+      10-20         45    4.40   13.76   21.47    19
+      >20           98    7.65   29.35   55.37    64  (65%)
+
+    keystone        n     p50     p90           >5%
+      <=10 deg      36    0.83    8.97            5
+      10-20         77    1.10    6.97           12
+      20-35        192    2.50   11.91           56
+      35-60         40   10.80   32.78           29  (72%)
+      >60           42    6.66   22.88           25  (60%)
+
+    invalid output — mapping crosses the projective horizon, so the scoring
+    grid cannot be evaluated at all: **57/444 solved records (12.8%)** for the
+    port, against 112/444 (25.2%) for naive. These are hard failures, not
+    residuals, and they are excluded from every distribution above. Where the
+    quad merely degenerates to near-zero area (< 0.2) it still scores, and all
+    15 such records are >5% with p50 26.3%.
+
+    **12.2% of solves (54/444) pin pitch on the hard +/-1.2 rad bound** and
+    return exactly 68.75 deg; 21 of the 32 that still score are >5%. Pitch p50 is
+    7.5 deg and p90 is 68.75 deg, so the bound is not a rare safety valve on real
+    photos — it is a routine operating point. Keystone is similarly saturated:
+    p50 21.5 deg, p99 85.7 deg, against synthetic scenes that sit far lower.
+
+    Not predictive: segment count (>=600 segments p50 4.53%, <600 p50 2.35% — more
+    lines is *worse*), and calibration acceptance (accepted 36/134 >5%, rejected
+    138/409 — a wash).
+
+So yes, the tail is predictable, but the useful predictors are solved-quantity
+magnitudes (pitch, keystone, quad area), which are available after the solve and
+are exactly what a gate should consume. A rule "abstain when |pitch| > 20 deg or
+keystone > 35 deg" would remove most of the intrinsic tail. The current gate
+does not use either.
+
+GATE CALIBRATION
+----------------
+The gate statistic works; the threshold is mis-scaled by roughly 20x. Under
+policy A, `family_median_deg` has Spearman +0.615 against the ungated error and
+AUC 0.831 for predicting >5%; `family_bias_bound_deg` gives +0.606 / 0.827. The
+acceptance limit was 0.114 deg at p50 while the observed scatter p50 was 2.18
+deg — 19x over. Sweeping the bias bound on policy A:
+
+    threshold   accepted   port p50   port p90   identity p50   port<identity
+    0.11           0          —          —           —              —
+    0.50          68         0.73       3.61        2.08            70.6%
+    1.00         136         0.85       3.02        1.56            63.2%
+    2.00         214         1.21       5.28        1.56            50.5%
+    none         387         2.54      17.29        2.07            38.0%
+
+The statistic separates the two populations cleanly: bias bound p50 2.41 deg on
+photos Adobe corrects versus 25.0 deg on photos Adobe abstains. Threshold 1.0
+deg accepts 30.6% of the corrected set and 0/456 abstention records. Policy B's
+1.0 deg scatter cap plus "bias below its own scatter" lands in the same region
+and does reach 58 accepts with zero false positives.
+
+ABSTENTION
+----------
+Adobe abstains on 1,422 of 14,709 analysed photos (9.67%), both slots identity.
+That matches the ~9.7% figure. Because the main sample was filtered to
+non-identity, **0/300 of the main sample are Adobe abstentions** — a deliberate
+consequence of the sampling rule, so the main table says nothing about them.
+
+A separate control of 229 such photos (456 records, all files verified) answers
+it directly:
+
+    policy A shipped: 456/456 return exact identity, error 0.0000%, 0/456 >1%
+    policy B shipped: 456/456 return exact identity, 0/456 accepted
+
+The port matches Adobe's abstention **perfectly on both policies, with zero
+false positives**. That is partly structural: 208/456 records (45.6%) fail before
+the gate even runs (206 with no VP pair, 2 with under four segments).
+
+But it is also not that the port *would* abstain if allowed to speak. 248 of the
+456 records do produce a solve; 152 of those survive framing and scale, and of
+those **151 (99.3%) land >1% from identity and 137 (90.1%) land >5%**, median
+14.26%. The errors are not marginally over threshold, they are large. On
+essentially every Adobe abstention the port would have invented a serious
+correction. The gate is doing real work here, and any loosening must keep the
+1.0 deg separation to preserve it.
+
+VERDICT
+-------
+* The shipped real-photo error is **4x the synthetic 0.587%** and it is 100%
+  abstention. Nothing in the synthetic suite exercised this, because the
+  synthetic gate passed on every fixture. (Strictly, 2.345% is a median and
+  0.587% is the round-10 synthetic mean, so the ratio is indicative, not exact;
+  the synthetic p90 was 2.21% against a real p90 of 8.40%, which is the same
+  story with matching statistics.)
+* Framing+scale is not a nicety. It is the difference between 0.815% and 10.1%
+  median on the records where the port speaks, and it is doing far more work
+  than the solver. The README's "not validated on real photos" note for
+  `scale_output` now has a number: it is the most valuable component measured
+  here.
+* The port beats naive full rectification (56.2% paired, p90 14.8 vs 17.0) but
+  loses to identity (40.7% paired win rate). All of the advantage is Auto
+  (86.1% win over naive); in Full mode the port wins only 25.8% against naive.
+* The tail is predictable — pitch, keystone, quad area — and the bound at
+  68.75 deg is being hit on 12.2% of solves. The gate ignores all three.
+* Policy B is a real improvement in the accepted region (0.815% median, 67.2%
+  wins over identity, 0 false positives on 456 abstention records) but covers
+  only 9.7% of records, so the unconditional median is still 2.17% and the
+  headline stands.
+
+LIMITATIONS
+-----------
+* Sample is 3:2-dominated (274/300), no extreme aspect, no tiny images, 99
+  distinct focals but only 38 records >50 mm. "Extreme aspect" and "tiny image"
+  remain untested tail hypotheses; they are not ruled out.
+* 58% of the eligible catalog photos are missing on disk, so the sample is the
+  surviving subset of one external SSD, not a random sample of the library.
+* The naive control reuses the port's detector, VPs and focal prior, differing
+  only in the camera model and damping. It is a model ablation, not an
+  independent implementation.
+* The gate thresholds in the calibration sweep were chosen on this sample; the
+  1.0 deg figure is not cross-validated. A sibling round is running a
+  calibration/validation split for that.
+* 300 photos, one library, one machine, one day. The port was edited twice
+  underneath this run; both policies are named by digest above.
+
+ARTIFACTS
+---------
+    evidence/round9_sampling.json              eligibility counts and sample seed
+    evidence/real_photos_measure.py            harness (framing/scale arms, naive arm)
+    evidence/real_photos_raw.jsonl             policy A, 300 photos, 600 records
+    evidence/real_photos_abstain.jsonl         policy A abstention control, 229 photos
+    evidence/real_photos_raw_new.jsonl         policy B (f2a900d9), same sample
+    evidence/real_photos_abstain_new.jsonl     policy B abstention control
+    evidence/real_photos_abstain_sample.json   229-photo Adobe-abstention sample
+    evidence/real_photos_port/upright_port.py  byte-identical policy B snapshot
+    evidence/round9_sample.json                frozen 300-photo main sample
+    evidence/real_photos_run*.log              run logs
+
+Reproduce from `research/upright`:
+
+    SHA=f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342
+    RP_PORT_DIR=$PWD/evidence/real_photos_port \
+      python3.12 evidence/real_photos_measure.py gated 4 $SHA
+    RP_PORT_DIR=$PWD/evidence/real_photos_port \
+      python3.12 evidence/real_photos_measure.py abstain 4 $SHA

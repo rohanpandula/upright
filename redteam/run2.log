@@ -1,0 +1,33 @@
+n 400
+rep        median 2.163e-16 p90 6.207e-16 max 1.346e-09 frac<1e-9 0.990
+singleKpp  median 1.056e-01 p90 5.506e-01 max 9.918e-01 frac<1e-9 0.058
+singleKgen median 9.878e-02 p90 4.701e-01 max 6.922e-01 frac<1e-9 0.058
+Dmodel     median 5.936e-02 p90 3.095e-01 max 6.584e-01 frac<1e-9 0.177
+pin0.25    median 2.457e-16 p90 6.547e-16 max 1.346e-09 frac<1e-9 0.990
+pin0.5     median 3.082e-16 p90 8.779e-16 max 1.346e-09 frac<1e-9 0.990
+pin1       median 4.281e-16 p90 9.550e-16 max 1.346e-09 frac<1e-9 0.990
+pin2       median 4.953e-16 p90 4.639e-02 max 4.732e-01 frac<1e-9 0.860
+pin4       median 8.158e-16 p90 6.200e-01 max 8.515e-01 frac<1e-9 0.620
+storedK0   median 5.116e-07 p90 1.523e-02 max 8.599e-02 frac<1e-9 0.147
+n 200
+rep        median 2.220e-16 p90 1.595e-11 max 4.535e-03 frac<1e-9 0.945
+singleKpp  median 4.765e-02 p90 1.185e-01 max 2.577e-01 frac<1e-9 0.060
+singleKgen median 4.500e-02 p90 1.100e-01 max 2.577e-01 frac<1e-9 0.060
+Dmodel     median 2.064e-02 p90 9.746e-02 max 1.787e-01 frac<1e-9 0.255
+pin0.25    median 2.490e-16 p90 1.613e-10 max 4.535e-03 frac<1e-9 0.945
+pin0.5     median 3.587e-16 p90 1.595e-11 max 4.535e-03 frac<1e-9 0.945
+pin1       median 4.441e-16 p90 1.595e-11 max 4.535e-03 frac<1e-9 0.945
+pin2       median 4.397e-16 p90 1.595e-11 max 4.535e-03 frac<1e-9 0.945
+pin4       median 4.441e-16 p90 1.595e-11 max 4.535e-03 frac<1e-9 0.945
+storedK0   median 1.024e-03 p90 5.364e-03 max 2.642e-02 frac<1e-9 0.110
+n 200
+rep        median 2.053e-16 p90 5.760e-16 max 1.346e-09 frac<1e-9 0.985
+singleKpp  median 5.291e-02 p90 1.820e-01 max 6.667e-01 frac<1e-9 0.060
+singleKgen median 4.627e-02 p90 1.803e-01 max 6.468e-01 frac<1e-9 0.060
+Dmodel     median 2.518e-02 p90 1.286e-01 max 4.340e-01 frac<1e-9 0.250
+pin0.25    median 2.357e-16 p90 6.050e-16 max 1.346e-09 frac<1e-9 0.985
+pin0.5     median 3.415e-16 p90 8.875e-16 max 1.346e-09 frac<1e-9 0.985
+pin1       median 3.664e-16 p90 9.263e-16 max 1.346e-09 frac<1e-9 0.985
+pin2       median 4.009e-16 p90 8.917e-16 max 1.346e-09 frac<1e-9 0.985
+pin4       median 4.527e-16 p90 9.982e-10 max 5.844e-01 frac<1e-9 0.905
+storedK0   median 1.220e-07 p90 4.217e-03 max 6.220e-02 frac<1e-9 0.170

@@ -1,0 +1,3 @@
+/Users/rohan/Projects/trichroma/research/upright/evidence/round9_probe.py:67: RuntimeWarning: divide by zero encountered in scalar divide
+  inner = float(.5/np.max(abs(np.sort(p, axis=0)[1:3])))
+57,036 band cases and all stress/boundary controls unchanged

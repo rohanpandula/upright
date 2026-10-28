@@ -1,0 +1,55 @@
+fresh paired solves A_clean
+fresh paired solves B_strong
+fresh paired solves C_noisy
+fresh paired solves D_roll
+four_scene
+identity {'scale_rmse': 0.12096207209448422, 'max_scale_error': 0.32900669462705634, 'mean_raw': 3.198351126807089, 'max_raw': 13.022878119884755}
+preserve_quad_area {'scale_rmse': 0.0712205656838048, 'max_scale_error': 0.14723050258548398, 'mean_raw': 1.9939218999834454, 'max_raw': 4.953435691170145}
+unit_blend_area {'scale_rmse': 0.05513000668510574, 'max_scale_error': 0.13623774707548464, 'mean_raw': 1.557909562594515, 'max_raw': 5.392618464437052}
+fit_contain {'scale_rmse': 0.1929647409122016, 'max_scale_error': 0.3559957373277438, 'mean_raw': 5.2893824049347575, 'max_raw': 14.711381290187528}
+fit_cover {'scale_rmse': 0.11241572357938305, 'max_scale_error': 0.27873775982478, 'mean_raw': 2.547664801802675, 'max_raw': 11.03311249624081}
+fit_inner {'scale_rmse': 0.027612207132142887, 'max_scale_error': 0.05850886358389207, 'mean_raw': 0.6321014641142928, 'max_raw': 1.8530677233494612}
+fit_blend {'scale_rmse': 0.03511083436968886, 'max_scale_error': 0.07492343978619997, 'mean_raw': 0.7672000948955091, 'max_raw': 2.5207306528243185}
+inverse_bbox {'scale_rmse': 0.10883233236130108, 'max_scale_error': 0.27076051189685857, 'mean_raw': 2.4783038925801106, 'max_raw': 10.717353792367415}
+fixed_quad_area_LOSO {'scale_rmse': 0.06013615351293472, 'max_scale_error': 0.11867099860664376, 'mean_raw': 1.7293182499424191, 'max_raw': 4.169983585518733, 'native_min': 0.8247610650467843, 'native_max': 1.361842567297328, 'native_std': 0.13449963853675104}
+fixed_quad_area_per_mode_LOSO {'scale_rmse': 0.048159317169114375, 'max_scale_error': 0.09938342674267564, 'mean_raw': 1.2643884358260453, 'max_raw': 3.3436645572489505, 'native_min': 0.8247610650467843, 'native_max': 1.361842567297328, 'native_std': 0.13449963853675104}
+fixed_blend_area_LOSO {'scale_rmse': 0.055768404421089685, 'max_scale_error': 0.12769093940718057, 'mean_raw': 1.6728128822769683, 'max_raw': 5.054315212992028, 'native_min': 0.690940507189874, 'native_max': 1.095201086760248, 'native_std': 0.11182424819840157}
+fixed_blend_area_per_mode_LOSO {'scale_rmse': 0.04014607110703593, 'max_scale_error': 0.10339628614159124, 'mean_raw': 1.03760362031018, 'max_raw': 3.4786735439230987, 'native_min': 0.690940507189874, 'native_max': 1.095201086760248, 'native_std': 0.11182424819840157}
+fixed_retained_fraction_LOSO {'scale_rmse': 0.06522880991130045, 'max_scale_error': 0.1327169248258815, 'mean_raw': 1.8422818839199901, 'max_raw': 5.148558007233058, 'native_min': 0.7342992677814221, 'native_max': 0.9998465955001037, 'native_std': 0.08111802357511595}
+fixed_retained_fraction_per_mode_LOSO {'scale_rmse': 0.05375313704980479, 'max_scale_error': 0.10013582394733922, 'mean_raw': 1.4516516416056156, 'max_raw': 3.3451815075872893, 'native_min': 0.7342992677814221, 'native_max': 0.9998465955001037, 'native_std': 0.08111802357511595}
+fixed_corner_displacement_LOSO {'scale_rmse': 0.1102131431608836, 'max_scale_error': 0.19025718079467469, 'mean_raw': 2.9847855450925076, 'max_raw': 5.8520741550333195, 'native_min': 0.007484325953307679, 'native_max': 0.27345113413218763, 'native_std': 0.06211052169440476}
+fixed_corner_displacement_per_mode_LOSO {'scale_rmse': 0.0927961263091592, 'max_scale_error': 0.14490409174325836, 'mean_raw': 2.6111582842657217, 'max_raw': 5.8520741550333195, 'native_min': 0.007484325953307679, 'native_max': 0.27345113413218763, 'native_std': 0.06211052169440476}
+sweep
+identity {'scale_rmse': 0.13735374953035764, 'max_scale_error': 0.5820129478356153, 'mean_raw': 3.0810465683530217, 'max_raw': 37.89812207384733}
+preserve_quad_area {'scale_rmse': 0.04059746081595055, 'max_scale_error': 0.08243636386371467, 'mean_raw': 1.049968419777249, 'max_raw': 5.366768771622591}
+unit_blend_area {'scale_rmse': 0.06595934580963614, 'max_scale_error': 0.15891233177322772, 'mean_raw': 1.6816385109520766, 'max_raw': 10.098153646990335}
+fit_contain {'scale_rmse': 0.0609645394256054, 'max_scale_error': 0.14116212375476578, 'mean_raw': 1.409431613838436, 'max_raw': 4.3551921925385155}
+fit_cover {'scale_rmse': 0.13187018573841858, 'max_scale_error': 0.318300361581073, 'mean_raw': 2.8815637991193483, 'max_raw': 20.2574330824101}
+fit_inner {'scale_rmse': 0.034665506521580826, 'max_scale_error': 0.094286900098146, 'mean_raw': 0.5667564919531445, 'max_raw': 3.9651940363853933}
+fit_blend {'scale_rmse': 0.03477238816761942, 'max_scale_error': 0.09466464997057245, 'mean_raw': 0.5695530170909302, 'max_raw': 3.9661648631386837}
+inverse_bbox {'scale_rmse': 0.13208632448991237, 'max_scale_error': 0.29902842637412397, 'mean_raw': 2.905624265912434, 'max_raw': 17.55535760835457}
+fixed_quad_area_LOSO {'scale_rmse': 0.04089816374705407, 'max_scale_error': 0.08291136806028232, 'mean_raw': 1.0606589697324462, 'max_raw': 5.359959261260674, 'native_min': 0.7615346635680486, 'native_max': 1.177733288805223, 'native_std': 0.09420212941662555}
+fixed_quad_area_per_mode_LOSO {'scale_rmse': 0.037618303080928985, 'max_scale_error': 0.10057815302736628, 'mean_raw': 0.9232681714437547, 'max_raw': 4.970152942956641, 'native_min': 0.7615346635680486, 'native_max': 1.177733288805223, 'native_std': 0.09420212941662555}
+fixed_blend_area_LOSO {'scale_rmse': 0.06202170698588354, 'max_scale_error': 0.1376959076644768, 'mean_raw': 1.862922696831388, 'max_raw': 9.15395638751626, 'native_min': 0.5743057419819253, 'native_max': 1.1092096461371717, 'native_std': 0.13098717596455914}
+fixed_blend_area_per_mode_LOSO {'scale_rmse': 0.05512251463037167, 'max_scale_error': 0.11717821805970419, 'mean_raw': 1.3547299443748233, 'max_raw': 8.070525369866008, 'native_min': 0.5743057419819253, 'native_max': 1.1092096461371717, 'native_std': 0.13098717596455914}
+fixed_retained_fraction_LOSO {'scale_rmse': 0.029681780258268606, 'max_scale_error': 0.0755818810047566, 'mean_raw': 0.7822065751240854, 'max_raw': 3.6528080472162943, 'native_min': 0.8490886769571332, 'native_max': 0.9999666272450118, 'native_std': 0.04782714051566176}
+fixed_retained_fraction_per_mode_LOSO {'scale_rmse': 0.025911934877694106, 'max_scale_error': 0.07522638591307262, 'mean_raw': 0.6392673180771778, 'max_raw': 3.6764391982975013, 'native_min': 0.8490886769571332, 'native_max': 0.9999666272450118, 'native_std': 0.04782714051566176}
+fixed_corner_displacement_LOSO {'scale_rmse': 0.08112988704428398, 'max_scale_error': 0.16536967600909547, 'mean_raw': 2.3843947120418463, 'max_raw': 7.43898842227598, 'native_min': 1.4136507092275265e-05, 'native_max': 0.2201608794910184, 'native_std': 0.046982543800244865}
+fixed_corner_displacement_per_mode_LOSO {'scale_rmse': 0.07861749458352507, 'max_scale_error': 0.16536967600909547, 'mean_raw': 2.076697969326422, 'max_raw': 7.43898842227598, 'native_min': 1.4136507092275265e-05, 'native_max': 0.2201608794910184, 'native_std': 0.046982543800244865}
+native scale and boundary metrics
+A_clean auto s 1.03647388 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.9421776), 'unit_blend_area': np.float64(0.9951544), 'fit_contain': 0.8175017, 'fit_cover': 1.0364666, 'fit_inner': 0.977965, 'fit_blend': 0.9673005, 'inverse_bbox': 1.0384427}
+A_clean full s 0.90584327 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8864219), 'unit_blend_area': np.float64(0.9577243), 'fit_contain': 0.735537, 'fit_cover': 1.0288884, 'fit_inner': 0.9163754, 'fit_blend': 0.9036148, 'inverse_bbox': 1.0285728}
+A_clean level s 1.012146 fit {'identity': 1.0, 'preserve_quad_area': np.float64(1.0), 'unit_blend_area': np.float64(1.0074499), 'fit_contain': 0.9880093, 'fit_cover': 1.0121362, 'fit_inner': 1.0062883, 'fit_blend': 1.005032, 'inverse_bbox': 1.0121362}
+A_clean vertical s 0.86443556 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8945224), 'unit_blend_area': np.float64(0.9418289), 'fit_contain': 0.8276222, 'fit_cover': 1.0318515, 'fit_inner': 0.8644937, 'fit_blend': 0.8640093, 'inverse_bbox': 1.0352134}
+B_strong auto s 1.04744297 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.9673098), 'unit_blend_area': np.float64(1.027458), 'fit_contain': 0.8121273, 'fit_cover': 1.0474408, 'fit_inner': 1.0265304, 'fit_blend': 1.0156907, 'inverse_bbox': 1.0467843}
+B_strong full s 0.78760545 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.7061737), 'unit_blend_area': np.float64(0.8454607), 'fit_contain': 0.4316097, 'fit_cover': 0.9450048, 'fit_inner': 0.8181767, 'fit_blend': 0.7757949, 'inverse_bbox': 0.9110778}
+B_strong level s 1.05959473 fit {'identity': 1.0, 'preserve_quad_area': np.float64(1.0), 'unit_blend_area': np.float64(1.0390395), 'fit_contain': 0.9437577, 'fit_cover': 1.059594, 'fit_inner': 1.0328629, 'fit_blend': 1.0263156, 'inverse_bbox': 1.059594}
+B_strong vertical s 0.67099331 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.7388463), 'unit_blend_area': np.float64(0.8072311), 'fit_contain': 0.6707627, 'fit_cover': 0.9497311, 'fit_inner': 0.6709894, 'fit_blend': 0.6709702, 'inverse_bbox': 0.9417538}
+C_noisy auto s 1.03458849 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.9416505), 'unit_blend_area': np.float64(0.9946554), 'fit_contain': 0.816227, 'fit_cover': 1.034581, 'fit_inner': 0.9790163, 'fit_blend': 0.9680519, 'inverse_bbox': 1.0363135}
+C_noisy full s 0.90454032 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8843423), 'unit_blend_area': np.float64(0.9555699), 'fit_contain': 0.7330645, 'fit_cover': 1.0260953, 'fit_inner': 0.9150205, 'fit_blend': 0.9020369, 'inverse_bbox': 1.0252595}
+C_noisy level s 1.0130249 fit {'identity': 1.0, 'preserve_quad_area': np.float64(1.0), 'unit_blend_area': np.float64(1.0080034), 'fit_contain': 0.9871449, 'fit_cover': 1.0130226, 'fit_inner': 1.0067553, 'fit_blend': 1.0054057, 'inverse_bbox': 1.0130226}
+C_noisy vertical s 0.86241921 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8925377), 'unit_blend_area': np.float64(0.9395117), 'fit_contain': 0.8268389, 'fit_cover': 1.02924, 'fit_inner': 0.8624848, 'fit_blend': 0.8619341, 'inverse_bbox': 1.0322188}
+D_roll auto s 1.04406394 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.9426173), 'unit_blend_area': np.float64(1.0264429), 'fit_contain': 0.7678666, 'fit_cover': 1.0440599, 'fit_inner': 1.0418012, 'fit_blend': 1.0245965, 'inverse_bbox': 1.0372919}
+D_roll full s 1.02895532 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8817248), 'unit_blend_area': np.float64(0.9832175), 'fit_contain': 0.6808402, 'fit_cover': 1.028953, 'fit_inner': 0.9838274, 'fit_blend': 0.9540319, 'inverse_bbox': 1.0233928}
+D_roll level s 1.08238525 fit {'identity': 1.0, 'preserve_quad_area': np.float64(1.0), 'unit_blend_area': np.float64(1.0557519), 'fit_contain': 0.9238939, 'fit_cover': 1.0823754, 'fit_inner': 1.0468585, 'fit_blend': 1.0375282, 'inverse_bbox': 1.0823754}
+D_roll vertical s 0.91482685 fit {'identity': 1.0, 'preserve_quad_area': np.float64(0.8874337), 'unit_blend_area': np.float64(0.9618328), 'fit_contain': 0.7743253, 'fit_cover': 1.0329557, 'fit_inner': 0.9164601, 'fit_blend': 0.9033334, 'inverse_bbox': 1.0298843}

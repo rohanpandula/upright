@@ -1,0 +1,5 @@
+40-seed all-mode nonregression A_clean
+40-seed all-mode nonregression B_strong
+40-seed all-mode nonregression C_noisy
+40-seed all-mode nonregression D_roll
+SHIPPED CHECK PASSED sweep f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342

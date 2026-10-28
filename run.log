@@ -1,0 +1,18 @@
+detected 238 segments, 3 vanishing points
+   vp=[ 0.999 -0.047  0.   ] inliers=61 support=14559
+   vp=[0.188 0.982 0.   ] inliers=160 support=13650
+   vp=[0.785 0.619 0.001] inliers=15 support=973
+edge points=1500 junctions=9760
+[auto] E=0.51497 lam=(0.35,0.00) f1/f0=1.0000 rx=0.3798 ry=-0.0762 rz=-0.0817
+[full] E=0.40957 lam=(12.00,12.00) f1/f0=1.0000 rx=0.3809 ry=-0.0761 rz=-0.0828
+[level] E=0.51482 lam=(0.10,4.00) f1/f0=1.0000 rx=0.3793 ry=-0.0765 rz=-0.0816
+[vertical] E=0.51525 lam=(4.00,0.10) f1/f0=1.0000 rx=0.3806 ry=-0.0763 rz=-0.0817
+
+  panel                        vert_tilt  horiz_tilt  p99_stretch  crop_keep
+  input                           3.392°      4.176°       1.000     100.0%
+  naive full rectification        0.224°      0.273°       1.305      98.0%
+  energy: auto  (E=0.515)         0.234°      0.225°       1.274      97.5%
+  energy: full  (E=0.410)         0.235°      0.224°       1.271      97.5%
+  energy: level  (E=0.515)        0.234°      0.225°       1.274      97.5%
+  energy: vertical  (E=0.515)     0.233°      0.225°       1.275      97.5%
+wrote comparison.png

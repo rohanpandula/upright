@@ -1,0 +1,28 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+............................................F...................         [100%]
+=================================== FAILURES ===================================
+_____ TestAccuracyRegression.test_bundled_ground_truth_and_frozen_segments _____
+
+self = <test_port.TestAccuracyRegression testMethod=test_bundled_ground_truth_and_frozen_segments>
+
+    def test_bundled_ground_truth_and_frozen_segments(self):
+        import benchmark_accuracy as benchmark
+        rows = benchmark.run()
+        # MEASURED bounds: evidence/accuracy_gap.txt, original residuals up to
+        # 0.406 degrees. Both families now stay below a tenth of a degree.
+        for name in (*benchmark.CASES, '01_input_truth'):
+            with self.subTest(scene=name):
+                self.assertTrue(rows[name]['image']['ok'])
+                self.assertLess(max(rows[name]['image']['median_axis_deg']), 0.1)
+        # Isolate energy improvement on ORIGINAL supports, before the gate
+        # can conservatively reject their uncertainty and return identity.
+>       self.assertLess(max(rows['B_strong']['fixed_segments']['candidate_axis_deg']), 0.05)
+E       AssertionError: 0.2494770927679184 not less than 0.05
+
+port/test_port.py:666: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_port.py::TestAccuracyRegression::test_bundled_ground_truth_and_frozen_segments
+1 failed, 63 passed in 80.81s (0:01:20)

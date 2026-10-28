@@ -1,0 +1,14 @@
+/Users/rohan/Projects/trichroma/research/upright/evidence/round12_support_audit.py:41: RuntimeWarning: divide by zero encountered in matmul
+  p=np.c_[s.reshape(-1,2),np.ones(2*len(s))]@native.T
+/Users/rohan/Projects/trichroma/research/upright/evidence/round12_support_audit.py:41: RuntimeWarning: overflow encountered in matmul
+  p=np.c_[s.reshape(-1,2),np.ones(2*len(s))]@native.T
+/Users/rohan/Projects/trichroma/research/upright/evidence/round12_support_audit.py:41: RuntimeWarning: invalid value encountered in matmul
+  p=np.c_[s.reshape(-1,2),np.ones(2*len(s))]@native.T
+supports 50 / 387
+supports 100 / 387
+supports 150 / 387
+supports 200 / 387
+supports 250 / 387
+supports 300 / 387
+supports 350 / 387
+supports 387 / 387

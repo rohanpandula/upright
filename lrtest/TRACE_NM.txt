@@ -1,0 +1,44 @@
+22:53:45  === non-manhattan probe ===
+22:53:45  found 8
+22:53:45  imported 8
+22:53:50    NM_curves reset ok=true
+22:53:51    NM_curves auto ok=true
+22:54:01  NM_curves AUTO f35=34.109
+22:54:01    NM_curves full ok=true
+22:54:13  NM_curves FULL f35=34.109
+22:54:15    NM_railing reset ok=true
+22:54:16    NM_railing auto ok=true
+22:54:26  NM_railing AUTO f35=39.769
+22:54:26    NM_railing full ok=true
+22:54:38  NM_railing FULL f35=39.769
+22:54:39    NM_single_wall reset ok=true
+22:54:40    NM_single_wall auto ok=true
+22:54:50  NM_single_wall AUTO f35=34.0449
+22:54:50    NM_single_wall full ok=true
+22:55:02  NM_single_wall FULL f35=34.0449
+22:55:04    NM_three_plane reset ok=true
+22:55:05    NM_three_plane auto ok=true
+22:55:15  NM_three_plane AUTO f35=33.9439
+22:55:15    NM_three_plane full ok=true
+22:55:27  NM_three_plane FULL f35=33.9439
+22:55:29    A_clean reset ok=true
+22:55:30    A_clean auto ok=true
+22:55:40  A_clean AUTO f35=38.9696
+22:55:40    A_clean full ok=true
+22:55:52  A_clean FULL f35=38.9696
+22:55:53    B_strong reset ok=true
+22:55:54    B_strong auto ok=true
+22:56:04  B_strong AUTO f35=39.9956
+22:56:04    B_strong full ok=true
+22:56:16  B_strong FULL f35=39.9956
+22:56:18    C_noisy reset ok=true
+22:56:19    C_noisy auto ok=true
+22:56:29  C_noisy AUTO f35=39.7882
+22:56:29    C_noisy full ok=true
+22:56:41  C_noisy FULL f35=39.7882
+22:56:42    D_roll reset ok=true
+22:56:44    D_roll auto ok=true
+22:56:54  D_roll AUTO f35=39.8743
+22:56:54    D_roll full ok=true
+22:57:06  D_roll FULL f35=39.8743
+22:57:06  === nm done ===

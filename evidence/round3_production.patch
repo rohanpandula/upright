@@ -1,0 +1,120 @@
+--- round2/upright_port.py
++++ round3/upright_port.py
+@@ -637,6 +637,34 @@
+     return out
+ 
+ 
++def _refine_vp(segments, w, h, vp):
++    """Length-weighted Cauchy angular VP fit on the returned support set.
++
++    CHOICE: IRLS in centered isotropic coordinates, with the energy's four-
++    pixel angular scale. Raw pixel TLS overweights short angular outliers.
++    """
++    d = max(w, h)
++    N = np.array([[1/d, 0, -w/(2*d)], [0, 1/d, -h/(2*d)], [0, 0, 1.]])
++    seg = (segments - [w/2, h/2, w/2, h/2]) / d
++    lines = _homogeneous_lines(seg)
++    lines /= np.maximum(np.linalg.norm(lines[:, :2], axis=1)[:, None], _EPS)
++    mids = (seg[:, :2] + seg[:, 2:]) / 2
++    lengths = np.linalg.norm(segments[:, 2:] - segments[:, :2], axis=1)
++    v = _normalize(N @ vp)
++    for _ in range(20):
++        denom = np.maximum(np.linalg.norm(v[:2] - mids*v[2], axis=1), _EPS)
++        residual = np.sum(lines*v, axis=1) / denom
++        weight = np.sqrt(lengths / (denom**2 * (1 + (residual/(4/(d-1)))**2)))
++        _, _, vt = np.linalg.svd(lines*weight[:, None], full_matrices=False)
++        fitted = _normalize(vt[-1])
++        change = np.linalg.norm(np.cross(v, fitted))
++        v = fitted
++        if change < 1e-10:
++            break
++    v = _normalize(np.linalg.inv(N) @ v)
++    return -v if v[2] < 0 else v
++
++
+ def _classify(vps: list[dict], seg_n: np.ndarray) -> tuple[dict | None, list[dict]]:
+     """Split families into one vertical family and the horizontal ones."""
+     verticals, horizontals = [], []
+@@ -812,25 +840,48 @@
+ # Solvers
+ # ---------------------------------------------------------------------------
+ def _alignment_quality(H, seg_v, seg_h, w, h):
+-    """Check raw pixel angles of the undamped fit, independently of Cauchy loss."""
+-    medians = []
++    """Check undamped support scatter and systematic signed pixel-angle bias.
++
++    CHOICE: .1 degree bias budget, with a two-standard-error median margin
++    estimated from weighted MAD and effective support count. This is a support
++    consistency policy, not a probability or a ground-truth accuracy guarantee.
++    """
++    medians, signed_medians, margins = [], [], []
+     for seg, axis in ((seg_v, 0), (seg_h, 1)):
+         lines = _homogeneous_lines(seg) @ np.linalg.inv(H)
+         directions = _normalize_rows(np.column_stack([-lines[:, 1] * w, lines[:, 0] * h]))
+         residual = np.abs(directions[:, axis])
+         lengths = np.hypot((seg[:, 2] - seg[:, 0]) * w,
+                            (seg[:, 3] - seg[:, 1]) * h)
+-        order = np.argsort(residual)
+-        index = np.searchsorted(np.cumsum(lengths[order]), 0.5 * lengths.sum())
+-        medians.append(float(residual[order[index]]))
+-    # CHOICE: allow three times the four-pixel energy scale. The median
+-    # tolerates outliers, but the robust loss cannot hide a whole failed family.
++
++        def median(values):
++            order = np.argsort(values)
++            index = np.searchsorted(np.cumsum(lengths[order]), 0.5 * lengths.sum())
++            return float(values[order[index]])
++
++        medians.append(median(residual))
++        # Orient each line toward its intended positive axis before measuring
++        # signed error; absolute medians conflate noisy evidence with bias.
++        sign = np.where(directions[:, 1-axis] < 0, -1., 1.)
++        angles = np.degrees(np.arcsin(np.clip(directions[:, axis] * sign, -1, 1)))
++        centre = median(angles)
++        effective_n = lengths.sum()**2 / max(float(lengths @ lengths), _EPS)
++        signed_medians.append(centre)
++        # 2 * 1.253 (median SE) * 1.483 (Gaussian MAD conversion).
++        margins.append(3.72 * median(np.abs(angles-centre)) / math.sqrt(effective_n))
+     scale = 4.0 / (max(w, h) - 1)
+     limit = min(1.0, 3.0 * scale)
++    bounds = np.abs(signed_medians) + margins
++    scatter_passed = bool(np.all(np.isfinite(medians)) and max(medians) <= limit)
++    bias_passed = bool(np.all(np.isfinite(bounds)) and max(bounds) <= 0.1)
+     return dict(family_median_deg=np.degrees(np.arcsin(np.clip(medians, 0, 1))).tolist(),
+                 limit_deg=float(np.degrees(np.arcsin(limit))),
+                 worst_scale=float(max(medians) / scale),
+-                passed=bool(np.all(np.isfinite(medians)) and max(medians) <= limit))
++                family_signed_median_deg=signed_medians,
++                family_median_margin_deg=margins,
++                family_bias_bound_deg=bounds.tolist(), bias_limit_deg=0.1,
++                scatter_passed=scatter_passed, bias_passed=bias_passed,
++                passed=scatter_passed and bias_passed)
+ 
+ 
+ def _source_calibration(seg_v, seg_h, vp_v, vp_h, w, h, prior):
+@@ -900,6 +951,12 @@
+         return abs(_normalize(K0i @ v["vp"])[0])
+ 
+     horizontal.sort(key=lateral, reverse=True)
++    # Lock the RANSAC family identities before refining their final supports.
++    # Refining weak unused intersections first can change the lateral ranking.
++    for family in (vertical, *horizontal[:2]):
++        vp = family["vp"] * [w, h, 1]
++        fitted = _refine_vp(seg_n[family["inliers"]] * [w, h, w, h], w, h, vp)
++        family["vp"] = _normalize(fitted / [w, h, 1])
+     vp_h = horizontal[0]["vp"]
+     vp_h2 = horizontal[1]["vp"] if len(horizontal) > 1 else None
+ 
+@@ -1075,8 +1132,10 @@
+     ``focal_px`` retains the supplied value; ``source_focal_px`` reports the
+     source focal actually used. ``calibration`` describes the geometry check
+     in automatic modes (None for guided/off and shared_k comparisons).
+-    Automatic modes check the undamped fit's raw, length-weighted median
+-    pixel-angle residual in each selected family. ``quality`` is None for
++    Automatic modes check undamped raw support scatter and signed median
++    pixel-angle bias with a MAD-based support margin. These checks establish
++    support consistency, not a guarantee of world-camera correctness.
++    ``quality`` is None for
+     guided/off or when no fit is available. Failure returns identity.
+     """
+     if mode not in MODES:

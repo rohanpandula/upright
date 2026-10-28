@@ -1,0 +1,5 @@
+measured A_clean
+measured B_strong
+measured C_noisy
+measured D_roll
+wrote evidence/round7.txt and evidence/round7.json

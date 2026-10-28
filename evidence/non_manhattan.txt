@@ -1,0 +1,171 @@
+NON-MANHATTAN SCENES — nothing breaks; the arcs are not straightened
+(supersedes the partial version of 22:35; the arc gap it flagged is now closed
+and err_gt is replaced by an interpretable metric)
+
+BOTTOM LINE
+  All four non-Manhattan families are corrected to the same standard as a
+  Manhattan four-plane corner at the identical pose, in both modes. No family
+  degenerates, none is wrong. The known arc is not bent: its circle-fit rms
+  falls 3x (1.00 -> 0.34 px) and its conic aspect stays at 1.009-1.011 against
+  1.000 ideal, i.e. every bit of deformation is the global warp, none is
+  arc-specific — there is no straightness prior pulling the curve flat.
+  The one real defect, present in every family including the Manhattan control,
+  is focal estimation: 33.9-39.8 mm solved against a true 41.14 mm, leaving a
+  ~1.1% aspect error. The one structural gap is unavoidable geometry — a single
+  frontal wall carries almost no yaw information — and even there Adobe
+  recovers yaw to 0.4 deg rather than failing.
+
+HARNESS (working, plus two corrections to the recipe)
+  Trigger: activate Lightroom, keystroke "1" with {command down, option down},
+  then AXPress the item containing "Import Sweep".
+  CORRECTION 1: the plugin items are NOT nested under a submenu in the AX tree.
+  "Upright Probe" is a plain sibling header and "Import Sweep" is a direct child
+  of `menu 1 of menu item "Plug-in Extras"`. `menu 1 of menu item "Upright
+  Probe"` raises "Invalid index (-1719)" open or closed; iterate the flat list.
+  Two `key code 53` escapes and a 2 s settle before the keystroke are required,
+  otherwise `menu bar item "Library"` itself fails to resolve (-1728).
+  CORRECTION 2: a second agent owns lrplugin/.../ImportSweep.lua and rewrites
+  it. A separate plugin (uprightprobe_nm.lrdevplugin) was installed, but
+  Lightroom only rescans the Modules folder at startup, so the shared file had
+  to be swapped in per run and restored after. Two concurrent plugin tasks also
+  fight over the active source, so runs were serialised.
+
+METHOD
+  make_test_images.render_scene(name, rx, ry, rz), 1400x1000, f=1600, pitch
+  15 deg, yaw 6 deg, rz=0:
+    (a) NM_single_wall  one plane filling the frame, open on the other side;
+                        verticals + in-plane horizontals only
+    (b) NM_railing      the same wall plus railings running into depth, which
+                        restores the second vanishing point
+    (c) NM_curves       two 7 m / 5 m arcs on the wall and a 3.2 m cylindrical
+                        column; no straight edges among the curves
+    (d) NM_three_plane  back wall + side wall + floor
+  Controls: CT_manhattan2, a four-plane Manhattan box at the same 15/6 pose;
+  A_clean (22/6) and B_strong (34/12) at the old poses. The first control
+  attempt was byte-identical to NM_three_plane (its fourth wall fell outside
+  the frame); the box was narrowed until it rendered distinctly.
+  Each photo: PerspectiveUpright=0, then 1 (Auto), then 2 (Full), 10 s / 12 s
+  settles. Read back from the catalog mode=ro, Adobe_imageDevelopSettings,
+  keys UprightTransform_1/2 and UprightFocalLength35mm.
+
+METRICS (convention free — the stored transform is not exactly K R K^-1)
+  mag    max|H-I|, H rescaled to H[2,2]=1
+  f35    solved focal in 35 mm equivalent; truth for this render is 41.14
+  vdev   median |angle from vertical| of the known vertical 3-D lines, deg,
+         over the in-frame part of each line only (the earlier 22:35 note used
+         a 300 px extrapolation and so reported ~4.0 deg where the in-frame
+         value is 3.3-4.3; both directions improve, so the conclusion holds)
+  hdev   same against horizontal
+  sim    max px distance between the Adobe warp and the ground-truth
+         rectification after fitting the best similarity. Isolates shape error
+         and is not fooled by Adobe's own recentring, which is what made the
+         old err_gt uninterpretable. Uncorrected baseline 98.4 px.
+  fill   % of source pixels still inside the frame after the warp
+  arc    circle-fit rms before -> after, plus fitted radius and conic aspect
+         (1.000 = still a circle)
+
+REFERENCE
+  uncorrected : vdev 3.3-4.3, hdev 0.2-1.7, sim 98.4, fill 100, arc 0.76-1.00
+  perfect     : vdev 0.00, hdev 0.00, sim 0.0, fill 86.8 (recentred truth),
+                arc 0.000, aspect 1.000, f35 41.14
+
+RESULTS (frac = fraction of the ideal correction achieved)
+  scene           mode mag   f35    vdev pre->post  hdev pre->post  sim   fill  frac  verdict
+  NM_single_wall  auto 0.132  34.04   3.33-> 0.35   1.70-> 0.25    13.0   84.9  0.87  sensible
+  NM_single_wall  full 0.142  34.04   3.33-> 0.14   1.70-> 0.13     6.8   83.7  0.93  sensible
+  NM_railing      auto 0.125  39.77   3.63-> 0.63   1.71-> 0.20    16.9   85.2  0.83  sensible
+  NM_railing      full 0.142  39.77   3.63-> 0.17   1.71-> 0.03     4.3   82.9  0.96  sensible
+  NM_curves       auto 0.136  34.11   4.27-> 0.27   1.71-> 0.11     8.5   84.4  0.91  sensible
+  NM_curves       full 0.142  34.11   4.27-> 0.10   1.71-> 0.11     7.6   83.7  0.92  sensible
+  NM_three_plane  auto 0.134  33.94   3.54-> 0.29   0.22-> 0.17    11.2   84.6  0.89  sensible
+  NM_three_plane  full 0.142  33.94   3.54-> 0.15   0.22-> 0.10     7.1   83.7  0.93  sensible
+  CT_manhattan2   auto 0.133  34.21   2.60-> 0.25   0.22-> 0.15    12.7   84.8  0.87  sensible
+  CT_manhattan2   full 0.142  34.21   2.60-> 0.11   0.22-> 0.09     8.2   83.6  0.92  sensible
+  A_clean         auto 0.144  38.97   1.83-> 1.01   2.47-> 0.44    51.4   82.6  0.66  marginal
+  A_clean         full 0.206  38.97   1.83-> 0.14   2.47-> 0.06     8.7   92.1  0.94  sensible
+  B_strong        auto 0.094  40.00   3.28-> 4.26   5.80-> 2.88   196.5   85.3  0.00  WRONG
+  B_strong        full 0.338  40.00   3.28-> 0.19   5.80-> 0.08    19.9   76.8  0.95  sensible
+
+  No degenerate cell: every slot carried a real transform (mag 0.094-0.338) and
+  a real focal. The 15/6 pose is milder than the old 22/6 and 34/12 poses, so
+  the frac column is the honest cross-family comparison, not the raw residual.
+
+PER FAMILY
+
+  (a) single wall — no break, and better than the geometry allows for
+    One plane, so the wall's horizontals are parallel to the image plane, the
+    horizontal vanishing point is at infinity and yaw is unobservable. Adobe
+    still recovered most of it (residual yaw 0.36 deg Auto, 0.20 Full, against
+    6 deg injected) off the weak convergence of the horizontals, and drove
+    pitch to 0.14-0.35 deg. sim 13.0 / 6.8. This is the family most likely to
+    collapse to identity and it did not.
+    Carry the caveat: 6 deg is small. A frontal wall at 20-30 deg yaw has
+    horizontals that no longer converge usefully and the yaw channel should
+    die — untested here.
+
+  (b) wall plus railings — no break, weakest Auto cell
+    The railings restored the second vanishing point and Full was the best
+    result in the set (sim 4.3, hdev 0.03). Auto managed only 0.83 of the ideal
+    (sim 16.9) but stayed fully sensible. The near-vertical posts were not
+    mistaken for another vertical family.
+
+  (c) strong curves — no break; the arc is protected
+      arc            mode  res pre -> post  ratio  radius pre -> post  aspect
+      wall arc 7 m   auto     1.00 -> 0.36   0.36   342 -> 359          1.011
+      wall arc 7 m   full     1.00 -> 0.34   0.34   342 -> 360          1.009
+      wall arc 5 m   auto     0.76 -> 0.26   0.34   244 -> 256          1.011
+      wall arc 5 m   full     0.76 -> 0.25   0.32   244 -> 257          1.009
+      column ring 4  auto    41.39 -> 40.79  0.99   110 -> 110          n/a
+      column ring 7  auto    33.45 -> 33.40  1.00   109 -> 114          n/a
+      column ring 10 auto    26.35 -> 25.77  0.98   109 -> 120          n/a
+      ideal (recentred truth)      0.00             350                1.000
+
+    The wall arcs are in-plane circles, so a correct rectification must return
+    them to circles. The conic fit says it does: aspect 1.009-1.011 against
+    1.000 ideal (1.03 before), residual down 2.8-3.1x, radius moving 5% toward
+    the true 350 rather than away. A straightness penalty that had flattened
+    the arc would push the radius to thousands of px; it stays at 360, and the
+    residual ellipticity (1.1%) matches the scene's global anisotropy (1.01),
+    so all deformation is explained by the warp and none is arc-specific.
+    The column rings are 3-D circles seen obliquely, so they fit a circle badly
+    by construction (rms ~40 px before and after, ratio 0.98-1.01) and carry
+    little signal; the wall arcs are the load-bearing test.
+
+  (d) three planes — no break, but not informative
+    Effectively the Manhattan case: sim 11.2 / 7.1 against 12.7 / 8.2 for
+    CT_manhattan2 at the same pose. The third plane adds nothing the two-wall
+    corner lacks.
+
+CONTROLS — the failure mode is pitch, not structure
+  B_strong Auto is the only WRONG cell and it is Manhattan: at 34 deg pitch /
+  12 deg yaw Auto applies essentially none of the correction (sim 196.5 against
+  a 195.8 baseline, frac 0.00, verticals worse after, 3.28 -> 4.26 deg, residual
+  pitch 24.2 deg). Its Full is fine (19.9, 0.95). A_clean Auto is half-hearted
+  (0.66, residual pitch 7.1 deg); Full is clean. So the Auto under-correction
+  the earlier experiments saw is driven by correction magnitude, not by
+  Manhattan-ness — at 15/6 Auto already reaches 0.83-0.91 of the ideal in every
+  family, Manhattan control included.
+
+FOCAL
+  f35 solved 33.94-39.77 against a true 41.14 (17.5% low on three families,
+  3.3% low on the railing). Full never re-estimated it — every Auto/Full pair
+  shares one focal, independently confirming the 22:35 note that one shared
+  analysis is cached into all slots and the modes only differ in the damping
+  applied afterwards. Consequence: the sim-to-truth residual carries an aspect
+  term, the arc conic comes out 1.1% elliptical, radii run 3-10% long. It is a
+  uniform mild stretch, not a wrong rotation, and it is equally present in the
+  Manhattan control (1.01 anisotropy), so it belongs to the focal estimator, not
+  to non-Manhattan content.
+
+WHICH FAMILIES BREAK
+  None. Ranked by residual difficulty, worst first:
+    (b) railing    — Auto only 0.83 of ideal, still sensible
+    (a) single wall — yaw only weakly observable; handled at 6 deg, expected to
+        fail at large yaw
+    (d) three planes — indistinguishable from the Manhattan control
+    (c) curves     — best protected; arcs survive at 0.34 px rms, aspect 1.009
+
+ARTEFACTS
+  lrtest/nm/*.tif, lrtest/nm2/CT_manhattan2.tif, make_test_images.py
+  (render_scene, ground_truth_H, SCENES), nm_analyze.py, nm_metrics.json,
+  lrtest/TRACE_NM.txt, lrtest/TRACE_NM2.txt

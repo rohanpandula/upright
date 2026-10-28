@@ -1,0 +1,55 @@
+14:01:21  === abstention probe ===
+14:01:21  found 17
+14:01:41  imported 17
+14:01:46    A_noise04 reset ok=true
+14:01:47    A_noise04 auto ok=true
+14:01:57  A_noise04 f35=40.3661
+14:01:59    A_noise12 reset ok=true
+14:02:00    A_noise12 auto ok=true
+14:02:10  A_noise12 f35=39.6983
+14:02:11    A_noise28 reset ok=true
+14:02:12    A_noise28 auto ok=true
+14:02:22  A_noise28 f35=31.6728
+14:02:24    A_noise55 reset ok=true
+14:02:25    A_noise55 auto ok=true
+14:02:35  A_noise55 f35=31.5794
+14:02:37    B_blur02 reset ok=true
+14:02:38    B_blur02 auto ok=true
+14:02:48  B_blur02 f35=39.5123
+14:02:49    B_blur04 reset ok=true
+14:02:50    B_blur04 auto ok=true
+14:03:00  B_blur04 f35=32.6555
+14:03:02    B_blur07 reset ok=true
+14:03:03    B_blur07 auto ok=true
+14:03:13  B_blur07 f35=31.5967
+14:03:14    B_blur11 reset ok=true
+14:03:15    B_blur11 auto ok=true
+14:03:25  B_blur11 f35=40.113
+14:03:27    C_contrast05 reset ok=true
+14:03:28    C_contrast05 auto ok=true
+14:03:38  C_contrast05 f35=39.5156
+14:03:39    C_contrast12 reset ok=true
+14:03:40    C_contrast12 auto ok=true
+14:03:50  C_contrast12 f35=40.7846
+14:03:52    C_contrast25 reset ok=true
+14:03:53    C_contrast25 auto ok=true
+14:04:03  C_contrast25 f35=35.747
+14:04:04    C_contrast45 reset ok=true
+14:04:05    C_contrast45 auto ok=true
+14:04:15  C_contrast45 f35=40.0289
+14:04:17    D_crop12 reset ok=true
+14:04:18    D_crop12 auto ok=true
+14:04:28  D_crop12 f35=36.7773
+14:04:30    D_crop22 reset ok=true
+14:04:31    D_crop22 auto ok=true
+14:04:41  D_crop22 f35=33.6819
+14:04:42    D_crop35 reset ok=true
+14:04:43    D_crop35 auto ok=true
+14:04:53  D_crop35 f35=36.8684
+14:04:55    D_crop55 reset ok=true
+14:04:56    D_crop55 auto ok=true
+14:05:06  D_crop55 f35=40.5374
+14:05:07    Z_control reset ok=true
+14:05:08    Z_control auto ok=true
+14:05:18  Z_control f35=40.3259
+14:05:18  === done ===

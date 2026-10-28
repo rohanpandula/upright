@@ -1,0 +1,1 @@
+Calibration snapshot and final public-API harness replay exactly on both real regression fixtures.

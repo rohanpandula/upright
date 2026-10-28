@@ -1,0 +1,293 @@
+================================================================================
+NEGPY `keystone_quad` vs LIGHTROOM `s·K₁·R·K₀⁻¹` — WHAT THE MODEL IS AND IS NOT
+================================================================================
+NEGPY   /Users/rohan/Projects/negpy, branch lab-redesign @ 3436a891
+        (199c29ca is an ancestor; skew.py unchanged since it, and the two
+        logic.py commits since touch only the crop/rebate region at 202-275,
+        well before keystone_quad at 554)
+        negpy/features/geometry/logic.py:544-592, skew.py:26-43,183-273
+LR      research/UPRIGHT-REVERSE-ENGINEERING.md §3.1, §3.4, §3.8; Guided from
+        evidence/guided_mode.txt
+
+TAGS
+  [CODE]      read out of the NegPy source, quoted with file:line
+  [MEASURED]  produced by research/upright/negpy_compare_calc.py
+  [DERIVED]   follows from the algebra in §1
+  [LR]        taken from the Lightroom report, not re-measured here
+
+METHOD. A Manhattan scene (make_test_images.world_segments, 1400x1000, f=1600 px)
+is projected through a known pose and scored with NegPy's OWN warp
+(keystone_matrix) and its OWN residual (skew._line_angles). The "best in family"
+number is a free Gauss-Newton over NegPy's full parameter set with every safety
+rail removed — the most generous reading available. Calibration check: at the
+report's scene A (pitch 22 / yaw 6) the harness reproduces the report's own
+15.52° pre-correction vertical convergence exactly, so the metric matches.
+
+--------------------------------------------------------------------------------
+1. WHAT THE TRANSFORM FAMILY IS [CODE]/[DERIVED]
+--------------------------------------------------------------------------------
+logic.py:554
+
+    a, b = converge_v * 0.005, converge_h * 0.005
+    quad  = [[a, b], [1-a, -b], [1+a, 1+b], [-a, 1-b]]        # source
+    dst   = [[0,0], [1,0], [1,1], [0,1]]                       # unit square
+
+The output rect samples that quad, so the quad is what the frame becomes. Each
+corner is the unit square's corner displaced by the SAME vector (a,b) — sign +1
+on the main diagonal (TL, BR), −1 on the anti-diagonal (TR, BL). One displacement
+vector, applied in a checkerboard pattern, is the entire model.
+
+Consequences, exactly:
+
+  * 2 degrees of freedom. Not 2 of a plausible 3 — 2 inside PGL(3)'s 8.
+  * It IS a genuine homography (four point correspondences determine one), so
+    "it is only a bilinear warp" would be the wrong criticism. It is a homography
+    drawn from a 2-parameter submanifold.
+  * The centre and all four edge midpoints are fixed points. The quad's top-edge
+    midpoint is always exactly (0.5, 0), the bottom's always (0.5, 1). So the
+    principal point is pinned to the frame centre and both mid-lines are fixed.
+  * No asymmetry is representable: a frame shot off the frame centre, or a crop
+    that is not centred, cannot be expressed at all.
+  * |Δx| = |Δy| at every corner. The axes are not independent: raising ch drags
+    the vertical vanishing point whether or not that is wanted.
+  * The depth vanishing point is pinned at the principal point by construction.
+
+Vanishing-line structure, measured on the forward map F [MEASURED]:
+
+    cv    ch   F[2,0]     F[2,1]    vertical VP        horizontal VP
+     5     0   0.000e+00  0.10526   (0.50, 10.50)      infinity
+    10     0   0.000e+00  0.22222   (0.50,  5.50)      infinity
+     0     5   1.053e-01  0.00000   infinity           (10.50, 0.50)
+    10     6   1.461e-01  0.24039   (0.56,  5.46)      ( 8.67, 0.60)
+    15    15   4.580e-01  0.45802   (0.65,  3.68)      ( 3.68, 0.65)
+
+  * One axis alone puts its OWN vanishing point at a finite distance and the
+    other's at infinity. Neither parameter can put its own VP at infinity.
+  * So the family can make at most one family of lines exactly parallel, and only
+    by zeroing the other parameter. With both in play — the normal case — both
+    VPs stay finite and the residual is structural, not tuning.
+  * Using ch at all tilts the vanishing line. At cv=10, ch=6 the horizon sits
+    31° off horizontal. For a roll-0 frame the true horizon is horizontal
+    [DERIVED: l = K⁻ᵀRᵀe_y has zero x-component for R = R_yR_x], so the fit has
+    to burn fidelity on a horizon orientation the truth says is flat.
+
+Against H = s·K₁·R·K₀⁻¹ [LR §3.1, §3.4], the family cannot express:
+
+  1. Focal length. `keystone_quad` has no f. The docstring at logic.py:544-547
+     says so outright: "The unit is per-cent of the frame, not tilt degrees,
+     which need an enlarger magnification and focal length the pipeline does not
+     model." The model still has an IMPLIED focal — the trapezoid magnitude
+     fixes it — but it is one number set by cv, not an estimate. Measured
+     implied f = 13397/cv px: cv=8.46 implies 1584 px (truth 1600, correct by
+     luck); the deployed cv=5 implies 2680 px, 1.7x too long.
+  2. K₁ ≠ K₀. The two-camera split is the whole point of Adobe's model and the
+     single line the report calls out as proven to 1e-15. NegPy has no K at all,
+     so it cannot make a wall parallel without forcing the pitch recovery that
+     the split exists to avoid.
+  3. A principal-point offset. Adobe stores UprightCenterNormX/Y ≈ 0.497/0.484;
+     NegPy's is nailed to (0.5, 0.5) by the fixed midpoints.
+  4. Roll from the homography. fine_rotation is a rigid rotation about the
+     centre applied BEFORE the keystone (skew.py:163-171). Adobe's `Level` is
+     also a rigid rotation [LR §3.4 Result 3] — but as a component of H it is a
+     projective-conjugate rotation, and it does not commute with the keystone.
+     NegPy's rotation is a Euclidean isometry of the plane; it cannot stand in
+     for the rotational part of K₁RK₀⁻¹.
+  5. Scale s. apply_keystone keeps the canvas and replicates edges
+     (logic.py:584-592); the wedge is left for the user or crop_to_valid.
+     Correction always costs corners and the cap therefore cannot simply be
+     raised without also costing frame.
+  6. An asymmetric trapezoid, hence any real off-axis keystone.
+
+DOF: 2 (3 including the separate fine rotation). The comparison model has 8.
+This is a 2-D slice, not a degraded 8-D fit — and for a flat gate it is aimed at
+the right observable (§3).
+
+--------------------------------------------------------------------------------
+2. WORKED NUMBERS — PITCH 15° / YAW 6°, f = 1600 px [MEASURED]
+--------------------------------------------------------------------------------
+"vert"/"horiz" are mean |angle off axis| in degrees; "vconv" is the report's
+vertical convergence (max − min tilt) so the Lightroom figures transfer.
+The gate is a rectangle in the film plane, projected through the true pose, and
+the NegPy rows fit THE GATE — which is what its solver actually has available.
+
+    case                                    vert   horiz   vconv
+    original                                1.752   1.801   10.77
+    exact rectification (= Guided)          0.000   0.000    0.00
+    Lightroom Full [LR, ratio-matched]      0.084   0.200    0.51
+    NegPy gate-fitted, no caps              0.609   0.420    0.09
+      -> fitted cv -8.461 %  ch -4.829 %
+      -> gate border itself left bent 0.610° / 0.424°
+      -> family quad misses the true gate quad by 70 px (5.04 % of width)
+    NegPy gate-fitted, cap |cv|<=5 (shipped) 1.228   0.534    4.29
+      -> cv clipped 8.461 -> 5.000 (41 % of the required correction discarded)
+    NegPy live solver, tight gate (note)    2.891   0.042   10.63
+      -> returned angle -1.604, cv None, ch -4.304
+      -> different gate geometry from the rows above: the gate runs past the
+         canvas, so only its horizontal pair survives
+
+  * The FAMILY is not the problem at 15°. Uncapped it leaves 0.09° of vertical
+    convergence against Full's 0.51° — better than Full vertically, 2x worse
+    horizontally (0.420 vs 0.200). That is the coupling of §1 showing up as
+    cost: the single displacement vector is spent on verticals and drags
+    horizontals with it.
+  * The CAP is the problem. cv=5 clips 41 % of the correction and leaves 4.29°
+    of 10.77°, i.e. 60 % removed instead of 99 %. cv hits 5 % at about 9°
+    pitch (fitted cv ≈ 0.57 x pitch), so every frame past ~9° is clipped.
+  * The live run is worse than either: the gate ran past the canvas, so only the
+    gate's top and bottom were found, fit_v was disabled by _pair_spread
+    (skew.py:230), and the solver fitted ch alone. Horizontals went 1.801 ->
+    0.042 and verticals were untouched — while the -1.6° rotation pushed the
+    mean vertical tilt from 1.752 to 2.891. Dropping an axis can leave that axis
+    worse than doing nothing.
+
+Pitch sweep, same yaw 6, same f [MEASURED] — vconv, the number that matters:
+
+    pitch     5      10      15      22      30      40
+    original  3.31    6.60   10.77   15.52   20.59   26.23
+    Guided    0.00    0.00    0.00    0.00    0.00    0.00
+    LR Full   0.15    0.31    0.51    0.74    1.01    1.35
+    NegPy unc 0.03    0.05    0.09    0.12    0.16    0.18
+    NegPy cap 0.03    0.62    4.29    9.30   14.84   21.30
+
+  * Uncapped, the family beats Full on the vertical axis at every angle and
+    keeps improving — it is a good family.
+  * Capped, it is a ~5 %-of-frame corrector. At 30° it leaves 14.84° of 20.59°
+    and at 40° 21.30° of 26.23°: 19-28 % removed. Past roughly 22° the
+    deployed correction is close to worthless and, because the fitted rotation
+    is applied anyway, the dropped axis can end up marginally worse than the
+    original (30°: 3.478 vs 3.372 mean tilt).
+  * Family quad vs true gate quad: 26 px at 5° (1.85 %), 165 px at 30° (11.8 %),
+    267 px at 40° (19.1 %). The quad error is the floor under all of this.
+
+Against Guided the gap is categorical: Guided solves the same 8-DOF family to
+satisfy four user lines exactly and reaches 0.00/0.00 [LR]. NegPy's constraint
+set is the four gate edges too, but its family is 2-DOF, so it reaches 0.61/0.42
+and cannot do better at any setting.
+
+Horizontal absolutes are metric-dependent (the report's 5.32° at scene A covers
+a different detected segment set); the vertical column reproduces the report's
+15.52° exactly and is the one to trust. Full's damping (0.953 / 0.932) is
+calibrated to reproduce the report's 0.73°/0.36° removal ratios, not its
+absolutes.
+
+--------------------------------------------------------------------------------
+3. WHERE THE FILM-EDGE APPROACH IS GENUINELY BETTER, AND WHERE IT FAILS
+--------------------------------------------------------------------------------
+Better — and not marginally:
+
+  * Content independence. Four gate edges exist whether the picture is a sky, a
+    white wall, a repeat pattern or a low-contrast negative. Lightroom's LSD
+    needs 40+ px high-contrast segments and its Auto abstains or latches onto
+    picture lines when the frame has none [LR §3.7, §6]. NegPy's fit never looks
+    at the picture: "measured from the film and gate edges, never the picture"
+    (skew.py:1).
+  * Semantic confidence. The gates are structural, not magnitude-based:
+    from_film_box, has_opposite_pair, at_canvas_edges, _SKEW_TRUSTED_CONFIDENCE
+    (skew.py:303-312). They ask "did this come from the frame?" — a question
+    Lightroom cannot ask, because for Lightroom the frame IS the picture. The
+    report's own porting note is "do not write an abstention heuristic" [LR
+    §3.7]; NegPy has one and it is the right kind.
+  * Determinism and cost. Twelve Gauss-Newton steps on 2-4 lines, no RANSAC, no
+    VP voting, no Powell, no non-determinism. Adobe's own `UprightDependentDigest`
+    exists because its result is content-dependent [LR §7].
+  * The gate is also the crop rectangle. autocrop and crop_to_valid read the same
+    edges, so squaring and cropping agree. Lightroom has to crop out of the
+    homography and eats 23 % of the frame for Full [LR §3.4 Result 5].
+  * No patent exposure. NegPy's family is nowhere near the 2012 claims that run
+    to 2033 [LR §5].
+  * At <= 8° pitch and with the gate visible, the deployed result is within a
+    few tenths of a degree of Lightroom Full — for a fraction of the machinery.
+
+Fails:
+
+  * No gate. Slide in a mount, rebate trimmed, digital crop, or a gate under the
+    holder. _frame_lines falls back to _profile_lines (outermost long edges) and
+    trusted_frame_skew then rejects unless at_canvas_edges (skew.py:310). It
+    abstains rather than guessing from the picture — correct, but zero coverage
+    on exactly the population Lightroom targets.
+  * A tight scan loses the vertical pair. Measured above: the gate ran past the
+    canvas, only the horizontal pair was found, cv was dropped and the result
+    was worse vertically than the original. _off_border (skew.py:93-95) already
+    knows about this case for film edges; the gate path does not.
+  * Keystone beyond 5 %. _solve clips to ±2·_MAX_KEYSTONE and _measure_from then
+    REJECTS rather than clamps if the answer is outside [_MIN_KEYSTONE,
+    _MAX_KEYSTONE] (skew.py:248-252). So the axis is either clipped (41 % of
+    the correction discarded at 15°) or dropped entirely. The manual sliders do
+    not rescue it either: GeometryConfig caps converge_v/h at ±15 %
+    (models.py:122-123), and a 30° pitch needs ~19 %.
+  * _MIN_KEYSTONE = 0.3 discards any real correction below 0.3 % as "edge
+    roughness, curl or lens residue" (skew.py:31), and _KEYSTONE_GAIN = 2.5
+    (skew.py:33) drops the axis unless keystone beats rotation-only RMS by 2.5x.
+    On a clean synthetic the rotation-only RMS is already small, so a real
+    keystone has to cut the RMS by more than 2.5x to survive.
+  * Axes are gated independently, so a half-fitted frame is a normal outcome
+    (measured), and the surviving rotation then tilts the axis it dropped.
+
+The honest summary: this is a corrector tuned for a copy stand that is *nearly*
+square, and it is excellent there. It is not a rectifier for a frame 15° off.
+
+--------------------------------------------------------------------------------
+4. WHAT FOCAL-BASED 3-D CORRECTION WOULD TAKE
+--------------------------------------------------------------------------------
+The philosophy survives intact if the new unknown is a CAMERA property rather
+than a picture property. Focal length is not content: it is EXIF, or a format
+prior (35 mm / 120 / 4x5 nominal), or the frame's own aspect. The detector still
+sees only film and gate edges; nothing about "never the picture" changes. What
+changes is that the four gate edges are allowed to constrain a pose instead of a
+percent.
+
+Rejected alternatives, for the record: fitting a general 8-DOF H to four lines
+is under-determined (4 lines = 4 residuals), so a free H would need line
+detection and would lose the property that makes this worth having.
+
+Integration point — one parameterisation swap, not a rewrite:
+
+  1. Replace the parameter vector. _solve (skew.py:183-201) already runs
+     Gauss-Newton on (angle, cv, ch) against _line_angles. Change it to
+     (r_x, r_y, log f): the residual, the weights, the Jacobian loop and the
+     re-solve gates all stay. The rotation stays a parameter, so the horizon
+     stays horizontal by construction instead of by accident.
+  2. Add one prior residual on log f, sigma ≈ 0.35, from EXIF or the format's
+     nominal focal. Without a prior the pitch/f pair is weakly separable at
+     small angles; with it, f only moves when the gate's trapezoid insists.
+  3. Add the builder. keystone_quad keeps its signature; add
+     rotation_quad(r_x, r_y, f, w, h) returning the four corners of
+     K R K⁻¹ applied to the frame rect, normalised, in the same corner order.
+     keystone_matrix_normalized already derives everything from keystone_quad
+     (logic.py:568-570) — dispatch there, and the pixel matrix and the shader
+     inverse both follow for free.
+  4. Replace the gates. _MAX_KEYSTONE (percent) becomes _MAX_PITCH /
+     _MAX_YAW (degrees, ~25). _MIN_KEYSTONE becomes a minimum residual gain
+     instead of a minimum percent. _MIN_PAIR_SEPARATION stays as is.
+  5. API. GeometryConfig.converge_v/converge_h must keep working for saved
+     edits, so store converge_v/h plus an optional (rotation_v, rotation_h,
+     focal) triple and let the render path prefer the triple. Migration: fit the
+     old cv/ch quad at a default focal and store the equivalent angles, so
+     existing sidecars render identically.
+  6. Parity. transform.wgsl and map_coords_to_geometry carry the quad today
+     (logic.py:544-547 says to change the quad in all three places). Both need
+     the 3-D path, and compute_geometry_crop_rect already assumes a projectivity,
+     so it needs no change.
+
+Two-line stopgap that buys most of §2 without any of the above: raise
+_MAX_KEYSTONE from 5 to 20 and the converge_v/h slider span from ±15 to ±30.
+The family was never the limit at 15° (0.09° residual uncapped, better than
+Full); the cap was. The cost is corner loss, which crop_to_valid already handles,
+and the horizon-tilt error of §1, which it does not.
+
+--------------------------------------------------------------------------------
+5. WHAT THIS DOES NOT SHOW
+--------------------------------------------------------------------------------
+  * One synthetic scene family at one focal, hard-edged fills, no grain, no lens
+    distortion, no curl. Real gate edges are noisier and the detector's real
+    behaviour on real rebates is not exercised here; the live-solver row is one
+    crude render, not a corpus.
+  * Roll is 0 throughout. NegPy's rotation is a separate stage and a rolled frame
+    would change the split between the two stages.
+  * The Lightroom side is the report's measured model, not a fresh run of
+    Lightroom at 15°/6°; Full's damping is ratio-matched to scene A.
+  * Nothing here measures crop loss or stretch for NegPy — only line residual
+    and quad error.
+
+Reproduce: /Users/rohan/Projects/negpy/.venv/bin/python
+           research/upright/negpy_compare_calc.py

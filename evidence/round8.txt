@@ -1,0 +1,520 @@
+ROUND 8 — DESTINATION SCALE — 2026-10-28
+===================================================================================================================
+RESULT: a geometric, piecewise boundary-fit policy emerges. Implemented as a second OPT-IN step.
+No mode constants or damping changed. Raw clone distance is measured on fresh solves, without fitted scale.
+Primary mean raw: original 33.266029% -> framing 3.562255% -> framing+scale 0.587092%.
+Primary pooled RMS after framing+scale: 0.919553%; all aggregates and maximum errors below.
+Primary oracle mean lower bounds: scale alone 0.430136%; scale+translation 0.403312%.
+
+1. DEFINITIONS / SOURCE GAUGE / IDENTIFIABILITY
+Coordinates are normalized to the source rectangle; scoring is 625 fixed 25x25 grid points in pixels,
+RMS as percent of SOURCE diagonal (1400x1000), matching Round 7. Means below are arithmetic means of
+per-attempt RMS unless explicitly marked pooled RMS. All four scenes, four modes, two focal protocols,
+five seeds: 160 paired attempts; failures would be retained. No new native solve or catalog access.
+For native analysis fix K0 to stored source focal, principal point (.5,.5). RQ(P H K0)=K1 R, P=diag(w,h,1).
+s_native=sqrt(K1.fx*K1.fy)/f0. Build unit-scale centred K1 by dividing its whole 2x2 linear block by
+s_native and setting its centre to (w/2,h/2). Retain native aspect/skew and EXACT SAME rotation.
+H0=P^-1 K1_unit R K0^-1; B=frame_output(H0). H_native=S(.5,s_native) B except known framing failures.
+Round 7 centred_H retained native destination focal, so scale relative to THAT map is 1 by construction.
+This round removes that circularity by fixing its destination geometric-mean focal to f0.
+Separately scale*_port fits the actual centred port solution to Adobe. It includes geometry mismatch;
+s_native is a fixed-camera-gauge measure, not a uniquely identifiable internal Adobe zoom parameter.
+s_isotropic below uses centred K0 R K0^-1 instead; residual aspect/skew remains in shape.
+"Blend area" means the area of Round 7's 90% inner/10% outer BOUND RECTANGLE, not an inscribed quad.
+Quad area is the shoelace area. Before means B above; after means the stored native map.
+Crop fraction = area(mapped quad intersect unit frame)/area(mapped quad), in OUTPUT-area measure.
+This is not retained source pixels under a nonlinear Jacobian or a Lightroom crop metadata setting.
+A freely sized inscribed crop fraction is invariant to uniform scale and cannot identify scale.
+
+scene       mode      pitch      yaw     roll  |R|deg  s_native s_isotropic scale*_port[scene/stored]
+A_clean     auto      -14.040    5.042    0.656  14.955  1.036474    1.035657 1.024873/1.027600
+A_clean     full      -20.376    5.500    0.337  21.116  0.905843    0.904937 0.889156/0.894259
+A_clean     level       0.000   -0.000    0.498   0.498  1.012146    1.012146 1.012111/1.012113
+A_clean     vertical  -20.383    0.000    0.122  20.383  0.864436    0.863400 0.849865/0.854920
+B_strong    auto       -9.373    5.977    2.628  11.530  1.047443    1.046987 0.942746/0.943202
+B_strong    full      -32.806   11.754    0.562  34.852  0.787605    0.787259 0.763918/0.765556
+B_strong    level       0.000   -0.000    2.478   2.478  1.059595    1.059595 1.058624/1.058628
+B_strong    vertical  -32.811    0.000    0.007  32.811  0.670993    0.670054 0.652603/0.654314
+C_noisy     auto      -14.119    5.142    0.685  15.066  1.034588    1.033870 1.026222/1.027158
+C_noisy     full      -20.625    5.564    0.348  21.374  0.904540    0.903732 0.890095/0.891926
+C_noisy     level       0.000   -0.000    0.535   0.535  1.013025    1.013025 1.012984/1.012985
+C_noisy     vertical  -20.632    0.000    0.139  20.632  0.862419    0.861462 0.849822/0.851621
+D_roll      auto      -14.056    4.969    3.580  15.467  1.044064    1.043320 1.034775/1.035590
+D_roll      full      -20.835    5.749    3.200  21.991  1.028955    1.027999 1.015122/1.016954
+D_roll      level       0.000   -0.000    3.447   3.447  1.082385    1.082385 1.082266/1.082269
+D_roll      vertical  -21.135    0.008    2.966  21.340  0.914827    0.913786 0.906039/0.907674
+
+scene       mode      corrRMS   quad_before quad_after blend_before blend_after crop_before crop_after
+A_clean     auto     0.027762    1.126508   1.210183     1.009762    1.084765    0.883807   0.826321
+A_clean     full     0.046607    1.272679   1.044300     1.090232    0.894592    0.784363   0.921287
+A_clean     level    0.002613    1.000000   1.024440     0.985265    1.009345    0.995441   0.976144
+A_clean     vertical 0.046801    1.249734   0.933862     1.127343    0.842406    0.798091   0.992864
+B_strong    auto     0.031414    1.068732   1.172545     0.947266    1.039280    0.924283   0.852846
+B_strong    full     0.135443    2.005289   1.243926     1.398985    0.867822    0.498681   0.767625
+B_strong    level    0.012994    1.000000   1.122741     0.926266    1.039957    0.978051   0.890677
+B_strong    vertical 0.119686    1.831858   0.824761     1.534632    0.690941    0.545894   0.999847
+C_noisy     auto     0.027867    1.127770   1.207135     1.010776    1.081907    0.883168   0.828408
+C_noisy     full     0.047167    1.278672   1.046201     1.095154    0.896047    0.780963   0.920151
+C_noisy     level    0.002804    1.000000   1.026219     0.984183    1.009988    0.995110   0.974450
+C_noisy     vertical 0.047165    1.255298   0.933649     1.132911    0.842621    0.794866   0.992750
+D_roll      auto     0.040412    1.125458   1.226827     0.949140    1.034629    0.880624   0.815111
+D_roll      full     0.057011    1.286275   1.361843     1.034429    1.095201    0.776128   0.734299
+D_roll      level    0.018076    1.000000   1.171558     0.897173    1.051090    0.969942   0.853564
+D_roll      vertical 0.052280    1.269779   1.062689     1.080938    0.904646    0.785637   0.906216
+
+2. CORRELATIONS (NOT A CAUSAL FORMULA)
+Pearson r / Spearman rho against s_native. Mode uses one-hot/point-biserial correlations.
+correction_deg=acos((trace(R)-1)/2); correction_rms is translation-framed grid displacement/source diagonal.
+After-area correlations partly encode s^2 algebraically; they cannot predict s from an input map.
+The 16 scene/slot rows are related synthetic scenes, and within-mode n=4 is descriptive only.
+The 320 stored sweep rows have narrow yaw/roll coverage and correlated exposures; no p-value claims.
+No duplicate seeds are counted as new native samples. All 320 sweep slots, including bad V40S3, retained.
+
+four_scene, all, n=16: feature                              Pearson    Spearman
+  pitch                                           0.81740     0.75854
+  yaw                                            -0.03973    -0.15704
+  roll                                            0.59263     0.78824
+  abs_pitch                                      -0.81740    -0.75854
+  abs_yaw                                        -0.03973    -0.15704
+  abs_roll                                        0.59263     0.78824
+  correction_deg                                 -0.79726    -0.67647
+  correction_rms                                 -0.82493    -0.67059
+  before_quad_area                               -0.85648    -0.69412
+  before_blend_area                              -0.95381    -0.95588
+  before_retained_fraction                        0.87030     0.67941
+  before_corner_displacement                     -0.70018    -0.67941
+  after_quad_area                                 0.61918     0.51765
+  after_blend_area                                0.95592     0.85294
+  after_retained_fraction                        -0.41066    -0.51471
+  after_corner_displacement                      -0.45198    -0.20588
+  mode_auto                                       0.44487     0.50098
+  mode_full                                      -0.24534    -0.34442
+  mode_level                                      0.45077     0.43836
+  mode_vertical                                  -0.65031    -0.59491
+
+four_scene, auto, n=4: feature                              Pearson    Spearman
+  pitch                                           0.74685     0.80000
+  yaw                                             0.64109     0.20000
+  roll                                            0.86977     0.60000
+  abs_pitch                                      -0.74685    -0.80000
+  abs_yaw                                         0.64109     0.20000
+  abs_roll                                        0.86977     0.60000
+  correction_deg                                 -0.66233    -0.40000
+  correction_rms                                  0.61919     0.60000
+  before_quad_area                               -0.76195    -1.00000
+  before_blend_area                              -0.97199    -1.00000
+  before_retained_fraction                        0.69956     0.40000
+  before_corner_displacement                     -0.48702    -0.40000
+  after_quad_area                                -0.43222    -0.20000
+  after_blend_area                               -0.94124    -0.60000
+  after_retained_fraction                         0.44416     0.20000
+  after_corner_displacement                      -0.40757    -0.20000
+
+four_scene, full, n=4: feature                              Pearson    Spearman
+  pitch                                           0.79032     0.40000
+  yaw                                            -0.78575    -0.40000
+  roll                                            0.78283     0.20000
+  abs_pitch                                      -0.79032    -0.40000
+  abs_yaw                                        -0.78575    -0.40000
+  abs_roll                                        0.78283     0.20000
+  correction_deg                                 -0.77367    -0.40000
+  correction_rms                                 -0.73499    -0.40000
+  before_quad_area                               -0.79770    -0.40000
+  before_blend_area                              -0.89314    -1.00000
+  before_retained_fraction                        0.79279     0.40000
+  before_corner_displacement                     -0.79263    -0.40000
+  after_quad_area                                 0.32504     0.20000
+  after_blend_area                                0.88969     0.80000
+  after_retained_fraction                        -0.15537    -0.20000
+  after_corner_displacement                      -0.45909    -0.40000
+
+four_scene, level, n=4: feature                              Pearson    Spearman
+  roll                                            0.99999     1.00000
+  abs_roll                                        0.99999     1.00000
+  correction_deg                                  0.99999     1.00000
+  correction_rms                                  0.99999     1.00000
+  before_blend_area                              -0.99999    -1.00000
+  before_retained_fraction                       -0.99998    -1.00000
+  before_corner_displacement                      0.99999     1.00000
+  after_quad_area                                 0.99998     1.00000
+  after_blend_area                                0.99859     1.00000
+  after_retained_fraction                        -0.99980    -1.00000
+  after_corner_displacement                       0.99999     1.00000
+
+four_scene, vertical, n=4: feature                              Pearson    Spearman
+  pitch                                           0.96209     0.40000
+  yaw                                             0.53864     0.80000
+  roll                                            0.57084     0.80000
+  abs_pitch                                      -0.96209    -0.40000
+  abs_yaw                                         0.53864     0.80000
+  abs_roll                                        0.57084     0.80000
+  correction_deg                                 -0.95753    -0.40000
+  correction_rms                                 -0.95606    -0.40000
+  before_quad_area                               -0.96751    -0.40000
+  before_blend_area                              -0.99310    -1.00000
+  before_retained_fraction                        0.96414     0.40000
+  before_corner_displacement                     -0.92231    -0.40000
+  after_quad_area                                 0.90155     1.00000
+  after_blend_area                                0.99492     0.80000
+  after_retained_fraction                        -0.59843    -0.80000
+  after_corner_displacement                      -0.97280    -0.20000
+
+sweep, all, n=320: feature                              Pearson    Spearman
+  pitch                                           0.62809     0.54021
+  yaw                                            -0.21896    -0.32956
+  roll                                           -0.21947    -0.12986
+  abs_pitch                                      -0.89896    -0.57882
+  abs_yaw                                        -0.01588     0.13575
+  abs_roll                                        0.04429     0.05796
+  correction_deg                                 -0.89930    -0.55752
+  correction_rms                                 -0.92915    -0.56093
+  before_quad_area                               -0.87221    -0.57692
+  before_blend_area                              -0.85809    -0.74433
+  before_retained_fraction                        0.96898     0.56130
+  before_corner_displacement                     -0.93700    -0.56087
+  after_quad_area                                 0.88754     0.99906
+  after_blend_area                                0.96763     0.99825
+  after_retained_fraction                        -0.38005    -0.62914
+  after_corner_displacement                      -0.86217    -0.46465
+  mode_auto                                       0.30061     0.41094
+  mode_full                                      -0.29808    -0.22852
+  mode_level                                      0.29654     0.04984
+  mode_vertical                                  -0.29906    -0.23227
+
+sweep, auto, n=80: feature                              Pearson    Spearman
+  pitch                                           0.52386     0.10940
+  yaw                                            -0.76002    -0.45912
+  roll                                            0.16269     0.07046
+  abs_pitch                                      -0.52388    -0.10940
+  abs_yaw                                        -0.49505    -0.13066
+  abs_roll                                       -0.10767    -0.08099
+  correction_deg                                 -0.52407    -0.10940
+  correction_rms                                 -0.75457    -0.12902
+  before_quad_area                               -0.77351    -0.12353
+  before_blend_area                              -0.73637    -0.15619
+  before_retained_fraction                        0.74008     0.12707
+  before_corner_displacement                     -0.76745    -0.13179
+  after_quad_area                                 0.85476     0.98601
+  after_blend_area                                0.98505     0.98092
+  after_retained_fraction                        -0.69226    -0.90162
+  after_corner_displacement                      -0.34436     0.19327
+
+sweep, full, n=80: feature                              Pearson    Spearman
+  pitch                                           0.51444     0.85617
+  yaw                                            -0.04893     0.01739
+  roll                                            0.06692     0.14723
+  abs_pitch                                      -0.96884    -0.93024
+  abs_yaw                                        -0.29614    -0.32940
+  abs_roll                                       -0.18917    -0.17700
+  correction_deg                                 -0.96884    -0.93024
+  correction_rms                                 -0.92718    -0.92846
+  before_quad_area                               -0.86193    -0.93218
+  before_blend_area                              -0.85631    -0.93809
+  before_retained_fraction                        0.98811     0.93190
+  before_corner_displacement                     -0.93773    -0.92799
+  after_quad_area                                 0.93748     0.99740
+  after_blend_area                                0.96761     0.99569
+  after_retained_fraction                        -0.50592    -0.79395
+  after_corner_displacement                      -0.94282    -0.86575
+
+sweep, level, n=80: feature                              Pearson    Spearman
+  roll                                           -0.91110    -0.85089
+  abs_roll                                        0.99999     0.99965
+  correction_deg                                  0.99999     0.99965
+  correction_rms                                  0.99999     0.99965
+  before_blend_area                              -0.99999    -0.99965
+  before_retained_fraction                       -0.99999    -0.99965
+  before_corner_displacement                      0.99999     0.99965
+  after_quad_area                                 1.00000     1.00000
+  after_blend_area                                0.99997     0.99958
+  after_retained_fraction                        -1.00000    -1.00000
+  after_corner_displacement                       1.00000     0.99965
+
+sweep, vertical, n=80: feature                              Pearson    Spearman
+  pitch                                           0.51508     0.85661
+  yaw                                             0.02345    -0.03050
+  roll                                            0.07682     0.15567
+  abs_pitch                                      -0.96896    -0.93068
+  abs_yaw                                        -0.17519    -0.25458
+  abs_roll                                       -0.22009    -0.21364
+  correction_deg                                 -0.96896    -0.93068
+  correction_rms                                 -0.92707    -0.92818
+  before_quad_area                               -0.86152    -0.93226
+  before_blend_area                              -0.85636    -0.93863
+  before_retained_fraction                        0.98809     0.93200
+  before_corner_displacement                     -0.93681    -0.92780
+  after_quad_area                                 0.93764     0.99768
+  after_blend_area                                0.96767     0.99557
+  after_retained_fraction                        -0.50974    -0.80241
+  after_corner_displacement                      -0.94302    -0.86812
+
+scene_focal: actual port scale* vs native geometric features, n=16 (seed means, descriptive):
+  pitch                                           0.82755     0.72002
+  yaw                                            -0.11818    -0.27260
+  roll                                            0.55261     0.76471
+  abs_pitch                                      -0.82755    -0.72002
+  abs_yaw                                        -0.11818    -0.27260
+  abs_roll                                        0.55261     0.76471
+  correction_deg                                 -0.81274    -0.64412
+  correction_rms                                 -0.83819    -0.67647
+  before_quad_area                               -0.85451    -0.66471
+  before_blend_area                              -0.93744    -0.88824
+  before_retained_fraction                        0.86973     0.65000
+  before_corner_displacement                     -0.71248    -0.65000
+  after_quad_area                                 0.58009     0.51176
+  after_blend_area                                0.93336     0.87059
+  after_retained_fraction                        -0.36655    -0.50882
+  after_corner_displacement                      -0.48801    -0.22353
+  mode_auto                                       0.34737     0.40705
+  mode_full                                      -0.24498    -0.31311
+  mode_level                                      0.52038     0.50098
+  mode_vertical                                  -0.62277    -0.59491
+
+adobe_stored_focal: actual port scale* vs native geometric features, n=16 (seed means, descriptive):
+  pitch                                           0.82469     0.73187
+  yaw                                            -0.11663    -0.27853
+  roll                                            0.55002     0.75882
+  abs_pitch                                      -0.82469    -0.73187
+  abs_yaw                                        -0.11663    -0.27853
+  abs_roll                                        0.55002     0.75882
+  correction_deg                                 -0.81011    -0.65294
+  correction_rms                                 -0.83891    -0.68824
+  before_quad_area                               -0.85547    -0.67059
+  before_blend_area                              -0.93846    -0.89412
+  before_retained_fraction                        0.86909     0.65588
+  before_corner_displacement                     -0.71276    -0.65588
+  after_quad_area                                 0.58011     0.51176
+  after_blend_area                                0.93290     0.87059
+  after_retained_fraction                        -0.36652    -0.50882
+  after_corner_displacement                      -0.48778    -0.22353
+  mode_auto                                       0.34755     0.40705
+  mode_full                                      -0.24131    -0.31311
+  mode_level                                      0.51532     0.50098
+  mode_vertical                                  -0.62155    -0.59491
+
+3. EXPLICIT HYPOTHESIS TESTS
+All scale-error units are multiplicative scale (0.01 = one scale percentage point); raw is source-diagonal %. 
+These controls use SAME native R/aspect/skew, so they test destination size rather than solver geometry.
+Identity = PerspectiveScale/100, which is 1 in all four scene metadata records.
+preserve_quad_area=1/sqrt(area(B)); unit_blend_area=1/sqrt(blend_area(B)).
+fit_contain=1/max(2*abs(q-.5)); fit_cover tests every original corner against every quad edge half-plane.
+fit_inner=1/max(inner widths); fit_blend=1/max(blended widths); inverse_bbox=max bbox width of B^-1.
+Fixed area rules fit a constant final area using all other scenes. Fixed crop fraction numerically
+solves retained_fraction(s)=training mean. Fixed displacement solves max corner displacement=training
+mean (diagonal units), taking the root nearest 1. If unreachable, use its minimum; no impossible row dropped.
+LOSO holds out the entire scene, including every slot; per_mode versions learn a separate constant by mode.
+
+four_scene: hypothesis                                 scale RMSE max abs err  mean raw   max raw
+  identity                                            0.120962    0.329007  3.198351 13.022878
+  preserve_quad_area                                  0.071221    0.147231  1.993922  4.953436
+  unit_blend_area                                     0.055130    0.136238  1.557910  5.392618
+  fit_contain                                         0.192965    0.355996  5.289382 14.711381
+  fit_cover                                           0.112416    0.278738  2.547665 11.033112
+  fit_inner                                           0.027612    0.058509  0.632101  1.853068
+  fit_blend                                           0.035111    0.074923  0.767200  2.520731
+  inverse_bbox                                        0.108832    0.270761  2.478304 10.717354
+  fixed_quad_area_LOSO                                0.060136    0.118671  1.729318  4.169984
+  fixed_quad_area_per_mode_LOSO                       0.048159    0.099383  1.264388  3.343665
+  fixed_blend_area_LOSO                               0.055768    0.127691  1.672813  5.054315
+  fixed_blend_area_per_mode_LOSO                      0.040146    0.103396  1.037604  3.478674
+  fixed_retained_fraction_LOSO                        0.065229    0.132717  1.842282  5.148558
+  fixed_retained_fraction_per_mode_LOSO               0.053753    0.100136  1.451652  3.345182
+  fixed_corner_displacement_LOSO                      0.110213    0.190257  2.984786  5.852074
+  fixed_corner_displacement_per_mode_LOSO             0.092796    0.144904  2.611158  5.852074
+  Native invariant range fixed_quad_area_LOSO: 0.82476107..1.36184257; std=0.13449964
+  Native invariant range fixed_blend_area_LOSO: 0.69094051..1.09520109; std=0.11182425
+  Native invariant range fixed_retained_fraction_LOSO: 0.73429927..0.99984660; std=0.08111802
+  Native invariant range fixed_corner_displacement_LOSO: 0.00748433..0.27345113; std=0.06211052
+
+sweep: hypothesis                                 scale RMSE max abs err  mean raw   max raw
+  identity                                            0.137354    0.582013  3.081047 37.898122
+  preserve_quad_area                                  0.040597    0.082436  1.049968  5.366769
+  unit_blend_area                                     0.065959    0.158912  1.681639 10.098154
+  fit_contain                                         0.060965    0.141162  1.409432  4.355192
+  fit_cover                                           0.131870    0.318300  2.881564 20.257433
+  fit_inner                                           0.034666    0.094287  0.566756  3.965194
+  fit_blend                                           0.034772    0.094665  0.569553  3.966165
+  inverse_bbox                                        0.132086    0.299028  2.905624 17.555358
+  fixed_quad_area_LOSO                                0.040898    0.082911  1.060659  5.359959
+  fixed_quad_area_per_mode_LOSO                       0.037618    0.100578  0.923268  4.970153
+  fixed_blend_area_LOSO                               0.062022    0.137696  1.862923  9.153956
+  fixed_blend_area_per_mode_LOSO                      0.055123    0.117178  1.354730  8.070525
+  fixed_retained_fraction_LOSO                        0.029682    0.075582  0.782207  3.652808
+  fixed_retained_fraction_per_mode_LOSO               0.025912    0.075226  0.639267  3.676439
+  fixed_corner_displacement_LOSO                      0.081130    0.165370  2.384395  7.438988
+  fixed_corner_displacement_per_mode_LOSO             0.078617    0.165370  2.076698  7.438988
+  Native invariant range fixed_quad_area_LOSO: 0.76153466..1.17773329; std=0.09420213
+  Native invariant range fixed_blend_area_LOSO: 0.57430574..1.10920965; std=0.13098718
+  Native invariant range fixed_retained_fraction_LOSO: 0.84908868..0.99996663; std=0.04782714
+  Native invariant range fixed_corner_displacement_LOSO: 0.00001414..0.22016088; std=0.04698254
+
+Verdicts: fixed PerspectiveScale identity FAILS; area preservation FAILS; fixed final quad/blend
+area FAILS, including mode-specific constants; fixed crop fraction FAILS, including mode-specific constants.
+A single always-active corner-displacement constant FAILS. A cap inactive below threshold also cannot
+explain all shrinking maps: their final max displacement is not constant. Always contain / always cover
+the original frame FAIL; a CONDITIONAL cover/inner-bound fit succeeds below.
+Specifically, the seven shrinking four-scene slots have final max corner displacement spanning
+0.07332467..0.27345113 source diagonals; all cannot be binding the same displacement cap.
+
+4. RECOVERED BOUNDARY POLICY
+First translate the 90/10 bounds centre c to (.5,.5). Let p_i=q_i-(.5,.5), i cyclic (TL,TR,BR,BL).
+For each quad edge e_i=p_(i+1)-p_i, use outward n_i=(e_iy,-e_ix), d_i=n_i dot p_i > 0.
+s_cover = max_i (|n_ix|+|n_iy|)/(2*d_i). This is the smallest uniform scale covering the unit frame.
+Sort p independently per axis; keep middle two values (the inner bounds).
+s_inner = .5 / max(abs(inner bounds)). This is the largest scale keeping that rectangle INSIDE the frame.
+Recovered policy: if s_cover/s_inner <= 1.10, choose s_cover; otherwise choose s_inner.
+Apply positive uniform scale about (.5,.5), after framing. No camera angle, mode label, scene name or
+native cache enters this helper. The observed mode dependence comes from quad geometry and this switch.
+The switch is discontinuous; the small stored corpus does not establish behavior at exact equality.
+The 1.10 coefficient is MEASURED, not claimed Adobe source. Both candidate boundaries were identified
+on the four scenes; the sweep was also inspected to identify/narrow the switch, so is NOT a blind holdout.
+
+scene       mode        native s   cover s   inner s     ratio  branch  predicted s scale error   raw same-R
+A_clean     auto      1.0364739  1.036467  0.968705  1.069951 cover    1.0364666   -7.27e-06    0.0002302
+A_clean     full      0.9058433  1.028888  0.905843  1.135835 inner    0.9058433    7.14e-10    0.0000000
+A_clean     level     1.0121460  1.012136  1.006288  1.005811 cover    1.0121362    -9.8e-06    0.0002946
+A_clean     vertical  0.8644356  1.031852  0.864436  1.193671 inner    0.8644356   -5.36e-10    0.0000001
+B_strong    auto      1.0474430  1.047441  1.020838  1.026060 cover    1.0474408   -2.21e-06    0.0000686
+B_strong    full      0.7876055  0.945005  0.787605  1.199845 inner    0.7876055   -5.05e-10    0.0000001
+B_strong    level     1.0595947  1.059594  1.032863  1.025881 cover    1.0595940    -6.8e-07    0.0000204
+B_strong    vertical  0.6709933  0.949731  0.670986  1.415427 inner    0.6709855   -7.78e-06    0.0003078
+C_noisy     auto      1.0345885  1.034581  0.969731  1.066875 cover    1.0345810   -7.54e-06    0.0002389
+C_noisy     full      0.9045403  1.026095  0.904540  1.134383 inner    0.9045403   -5.14e-10    0.0000000
+C_noisy     level     1.0130249  1.013023  1.006755  1.006225 cover    1.0130226   -2.35e-06    0.0000706
+C_noisy     vertical  0.8624192  1.029240  0.862419  1.193434 inner    0.8624192    -3.1e-10    0.0000000
+D_roll      auto      1.0440639  1.044060  1.033330  1.010384 cover    1.0440599      -4e-06    0.0001268
+D_roll      full      1.0289553  1.028953  0.969531  1.061289 cover    1.0289530    -2.3e-06    0.0000775
+D_roll      level     1.0823853  1.082375  1.046859  1.033927 cover    1.0823754   -9.88e-06    0.0002969
+D_roll      vertical  0.9148269  1.032956  0.914827  1.129127 inner    0.9148268   -1.13e-10    0.0000000
+  four_scene: switch interval supported by labels: [1.069950993, 1.129127033).
+  four_scene: all 16 slots scale RMSE=0.000004975, max=0.000009882; mean raw=0.000108288%, max raw=0.000307846%.
+  four_scene: 16/16 translation-law controls; among these max scale error=0.000009882, max raw=0.000307846%.
+  sweep: switch interval supported by labels: [1.099974269, 1.100585847).
+  sweep: all 320 slots scale RMSE=0.003685369, max=0.046673707; mean raw=0.025036253%, max raw=3.965541460%.
+  sweep: 318/320 translation-law controls; among these max scale error=0.000376416, max raw=0.015729037%.
+Exceptions/residuals above 2e-5 scale error (ALL retained in the preceding totals):
+  V16S4 full: error=-0.000036557, raw=0.0011364%, framing matrix error=6.41912717e-10
+  V20S1 full: error=-0.000040944, raw=0.0013369%, framing matrix error=6.89037882e-10
+  V36S1 vertical: error=-0.000035615, raw=0.0014588%, framing matrix error=2.62730837e-10
+  V36S2 full: error=-0.000069776, raw=0.0028497%, framing matrix error=6.57215643e-10
+  V36S3 full: error=-0.000376416, raw=0.0153279%, framing matrix error=2.38460597e-10
+  V36S3 vertical: error=-0.000023398, raw=0.0009530%, framing matrix error=9.15092169e-11
+  V38S1 full: error=-0.000172920, raw=0.0074121%, framing matrix error=3.24833854e-10
+  V38S1 vertical: error=-0.000038962, raw=0.0016702%, framing matrix error=3.79212106e-10
+  V38S4 full: error=-0.000029201, raw=0.0012534%, framing matrix error=5.21075408e-11
+  V38S4 vertical: error=-0.000075188, raw=0.0032271%, framing matrix error=4.24683066e-11
+  V40S2 full: error=-0.000350058, raw=0.0157290%, framing matrix error=3.14947179e-10
+  V40S2 vertical: error=-0.000029175, raw=0.0013112%, framing matrix error=1.55523685e-11
+  V40S3 full: error=-0.046556041, raw=3.9561103%, framing matrix error=0.0699178876
+  V40S3 vertical: error=-0.046673707, raw=3.9655415%, framing matrix error=0.0700564976
+The small ordinary residuals (up to ~4e-4 scale) mean this is an approximation, not an exact clone.
+V40S3 Full/Vertical violate Round 7 framing too; scaling cannot repair that independent failure.
+
+5. FRAMING INTERACTION / MODE STABILITY
+Round 7 centre is affine-equivariant: c(s*q+t)=s*c(q)+t, since its weights sum to one.
+Thus F(S_.5(H)) = S_.5(F(H)) for fixed positive s. Size features are translation invariant.
+scale_output preserves the input blend centre, so F(scale_output(H))=scale_output(F(H)).
+The probe checks this to 2e-14 on all 336 native base maps; tests also cover reversed pitch/yaw/roll.
+Framing then scale about (.5,.5) is correct. Scaling about origin AFTER framing displaces the centre
+by ((s-1)/2,(s-1)/2); that produces a separate translation error. It is not the implementation.
+Scale is NOT a stable constant per mode (population std across native scenes/slots):
+  four_scene auto     n=  4: min=1.0345885 max=1.0474430 mean=1.0406423 std=0.0052911
+  four_scene full     n=  4: min=0.7876055 max=1.0289553 mean=0.9067361 std=0.0853453
+  four_scene level    n=  4: min=1.0121460 max=1.0823853 mean=1.0417877 std=0.0302951
+  four_scene vertical n=  4: min=0.6709933 max=0.9148269 mean=0.8281687 std=0.0931425
+  sweep      auto     n= 80: min=0.8619255 max=1.0516693 mean=1.0017659 std=0.0524624
+  sweep      full     n= 80: min=0.4179871 max=1.0498589 mean=0.8746916 std=0.1435389
+  sweep      level    n= 80: min=1.0000244 max=1.0027588 mean=1.0009015 std=0.0007291
+  sweep      vertical n= 80: min=0.4180896 max=1.0498574 mean=0.8744838 std=0.1436924
+
+6. FRESH END-TO-END CLONE DISTANCE / RESIDUAL LOWER BOUNDS
+All 160 fresh defaults are bit-identical to Round 7 H_unframed; pre-scale framed H is bit-identical
+to Round 7 H. All 160 fresh opt-in attempts accepted. Rotation, damping, source focal and quality
+remain identical. Every shape distance is invariant to <=1e-12. Final raw uses ONLY the runtime rule.
+centre-scale LB = OFFLINE best single scale about (.5,.5), with translation framing held fixed.
+shape LB = OFFLINE best scale AND translation, no rotation/shear/perspective removal.
+No uniform scale can beat centre-scale LB with framing fixed; even free translation cannot beat shape LB.
+Oracle scales in this section are diagnostics, never used by the runtime.
+
+prior               scene       mode        raw original  framed   both     applied s  oracle s  centre LB shape LB
+scene_focal         A_clean     auto        29.310565 0.846481 0.308420   1.028736  1.024909  0.283015 0.251394
+scene_focal         A_clean     full        42.187198 3.779088 0.142237   0.888926  0.889085  0.142132 0.132699
+scene_focal         A_clean     level        0.443765 0.443765 0.432001   1.000481  1.012111  0.254004 0.254004
+scene_focal         A_clean     vertical    41.627985 5.078387 0.199674   0.846609  0.849554  0.173194 0.116500
+scene_focal         B_strong    auto        42.367262 2.741454 2.604829   0.994299  0.943044  1.917004 1.907538
+scene_focal         B_strong    full        74.113659 10.066457 0.253618   0.764863  0.763826  0.249730 0.234862
+scene_focal         B_strong    level        2.226955 2.226955 2.212490   1.000610  1.058624  1.362611 1.362611
+scene_focal         B_strong    vertical    71.831594 14.183147 0.248223   0.652820  0.651909  0.245431 0.159499
+scene_focal         C_noisy     auto        28.710747 0.896073 0.324637   1.028813  1.026265  0.314262 0.280713
+scene_focal         C_noisy     full        42.151463 3.747805 0.160997   0.889045  0.890008  0.157616 0.144793
+scene_focal         C_noisy     level        0.476098 0.476098 0.463524   1.000514  1.012984  0.272893 0.272893
+scene_focal         C_noisy     vertical    41.590743 5.081212 0.213303   0.846772  0.849474  0.192849 0.129146
+scene_focal         D_roll      auto        29.029224 1.192645 0.451786   1.028602  1.035104  0.401029 0.368845
+scene_focal         D_roll      full        42.303838 0.532715 0.237654   1.020459  1.015005  0.147918 0.132140
+scene_focal         D_roll      level        2.518633 2.518633 0.768885   1.062370  1.082266  0.483577 0.483577
+scene_focal         D_roll      vertical    41.366742 3.185163 0.371186   0.898900  0.905953  0.284904 0.221770
+  scene_focal all: mean raw 33.266029 -> 3.562255 -> 0.587092%; centre LB=0.430136%, shape LB=0.403312%.
+    pooled RMS 39.926059 -> 5.093160 -> 0.919553%; max final=2.605488%; original squared-error reduction=99.94696%.
+    pooled lower bounds: fixed framing scale=0.641386%, free translation+scale=0.630593%. An oracle scale could still remove 51.350% of remaining squared displacement; B_strong Auto/Level account for 86.333% of current squared displacement.
+  scene_focal auto: mean raw 32.354450 -> 1.419163 -> 0.922418%; centre LB=0.728828%, shape LB=0.702123%.
+    pooled RMS 32.867526 -> 1.616899 -> 1.340686%; max final=2.605488%; original squared-error reduction=99.83361%.
+  scene_focal full: mean raw 50.189040 -> 4.531516 -> 0.198627%; centre LB=0.174349%, shape LB=0.161123%.
+    pooled RMS 52.055150 -> 5.699669 -> 0.204300%; max final=0.254496%; original squared-error reduction=99.99846%.
+  scene_focal level: mean raw 1.416363 -> 1.416363 -> 0.969225%; centre LB=0.593272%, shape LB=0.593272%.
+    pooled RMS 1.712194 -> 1.712194 -> 1.213237%; max final=2.213055%; original squared-error reduction=49.79057%.
+  scene_focal vertical: mean raw 49.104266 -> 6.881977 -> 0.258097%; centre LB=0.224095%, shape LB=0.156729%.
+    pooled RMS 50.827316 -> 8.107337 -> 0.266815%; max final=0.371651%; original squared-error reduction=99.99724%.
+  scene_focal: wrong origin-pivot AFTER framing mean raw=4.718218%.
+adobe_stored_focal  A_clean     auto        27.783338 0.929553 0.312466   1.030752  1.027588  0.295672 0.272672
+adobe_stored_focal  A_clean     full        39.866302 3.585498 0.169254   0.895706  0.894194  0.161308 0.149020
+adobe_stored_focal  A_clean     level        0.439977 0.439977 0.420509   1.000792  1.012113  0.247244 0.247244
+adobe_stored_focal  A_clean     vertical    39.291100 4.878194 0.168648   0.854195  0.854624  0.168033 0.116457
+adobe_stored_focal  B_strong    auto        42.022879 2.734433 2.606526   0.994639  0.943458  1.922369 1.913837
+adobe_stored_focal  B_strong    full        73.380939 9.975965 0.276317   0.767583  0.765457  0.261103 0.250583
+adobe_stored_focal  B_strong    level        2.225132 2.225132 2.207365   1.000749  1.058628  1.359455 1.359455
+adobe_stored_focal  B_strong    vertical    71.068576 14.075714 0.255138   0.655284  0.653633  0.246167 0.164994
+adobe_stored_focal  C_noisy     auto        28.176646 0.924023 0.326013   1.029511  1.027185  0.317445 0.287569
+adobe_stored_focal  C_noisy     full        41.319370 3.677976 0.160890   0.891457  0.891842  0.160329 0.149073
+adobe_stored_focal  C_noisy     level        0.474579 0.474579 0.458949   1.000638  1.012985  0.270199 0.270199
+adobe_stored_focal  C_noisy     vertical    40.755017 5.009653 0.199655   0.849479  0.851279  0.190240 0.128080
+adobe_stored_focal  D_roll      auto        28.591176 1.215481 0.453686   1.029213  1.035898  0.400191 0.371039
+adobe_stored_focal  D_roll      full        41.613849 0.592439 0.228015   1.021825  1.016822  0.151602 0.137011
+adobe_stored_focal  D_roll      level        2.517579 2.517579 0.759381   1.062619  1.082269  0.477598 0.477598
+adobe_stored_focal  D_roll      vertical    40.673005 3.124095 0.346900   0.901566  0.907595  0.281319 0.221061
+  adobe_stored_focal all: mean raw 32.512466 -> 3.523768 -> 0.584357%; centre LB=0.431892%, shape LB=0.407243%.
+    pooled RMS 39.118257 -> 5.033723 -> 0.917774%; max final=2.606537%; original squared-error reduction=99.94496%.
+    pooled lower bounds: fixed framing scale=0.642323%, free translation+scale=0.632451%. An oracle scale could still remove 51.018% of remaining squared displacement; B_strong Auto/Level account for 86.566% of current squared displacement.
+  adobe_stored_focal auto: mean raw 31.643510 -> 1.450872 -> 0.924673%; centre LB=0.733919%, shape LB=0.711279%.
+    pooled RMS 32.207201 -> 1.633432 -> 1.341988%; max final=2.606537%; original squared-error reduction=99.82638%.
+  adobe_stored_focal full: mean raw 49.045115 -> 4.457969 -> 0.208619%; centre LB=0.183586%, shape LB=0.171422%.
+    pooled RMS 51.022267 -> 5.618144 -> 0.213823%; max final=0.276346%; original squared-error reduction=99.99824%.
+  adobe_stored_focal level: mean raw 1.414317 -> 1.414317 -> 0.961551%; centre LB=0.588624%, shape LB=0.588624%.
+    pooled RMS 1.710864 -> 1.710864 -> 1.207951%; max final=2.207374%; original squared-error reduction=50.14967%.
+  adobe_stored_focal vertical: mean raw 47.946924 -> 6.771914 -> 0.242585%; centre LB=0.221440%, shape LB=0.157648%.
+    pooled RMS 49.773984 -> 8.012164 -> 0.251866%; max final=0.348128%; original squared-error reduction=99.99744%.
+  adobe_stored_focal: wrong origin-pivot AFTER framing mean raw=4.644656%.
+Residual: B_strong Auto and Level dominate the remaining distance. Their irreducible shape
+errors are already large; changing scale cannot fix their angle/geometry differences. There is also
+a remaining scale/framing choice error above the oracle bounds. When returned quad geometry differs,
+this geometric scale rule also returns a different zoom from the native one. Lower bounds and raw
+distances are not additive components. This work changes no damping.
+
+7. IMPLEMENTATION / VALIDATION / LIMITS
+port/upright_port.py: scale_output(H); solve/solve_ex(..., framing=True, scaling=True).
+Default scaling=False. scale_output also works without framing, preserving the current bounds centre.
+H_unscaled retains its input; H_unframed retains the original solve when framing is enabled.
+Off/rejected solves stay identity. Finite-input/horizon checks reuse frame_output; degenerate or
+non-enclosing quads are rejected. Runtime requires no new dependency and reads no evidence/native data.
+AST check: all 42 prior functions except solve_ex/solve unchanged; module constants/imports unchanged.
+Production SHA256: 60f842ea1d03356f4c411b00f3e0e0802dc0a0a8f20a86a468268979fa7b14ad
+Regression tests were run red before implementation (12 failed: missing scale_output/scaling option).
+Reproduce: python3.12 evidence/round8_probe.py > evidence/round8_probe_run.txt 2>&1
+           python3.12 -m pytest -q > evidence/round8_pytest.txt 2>&1
+round8.json includes every native row, correlations, policy errors and all 160 fresh measurements.
+No new real-photo/native execution or broad yaw/roll sweep. Related synthetic data only; 1.10 was
+identified using these stored maps. Generality beyond them is unverified, hence a separate opt-in.
+All edits and generated artifacts are inside research/upright/.
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 72%]
+...........................                                              [100%]
+99 passed in 53.73s

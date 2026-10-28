@@ -1,0 +1,23 @@
+A_clean {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+B_strong {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+C_noisy {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+D_roll {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+01_input_1400 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+01_input_980 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+01_input_1200 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+01_input_1820 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H01 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H02 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H03 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H04 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H05 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H06 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H07 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H08 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H09 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H10 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H11 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H12 {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H13_single_wall {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+H14_near_frontal {'pass_good': 50, 'pass_bad': 0, 'reject_good': 0, 'reject_bad': 0, 'no_fit': 0}
+SHIPPED CHECK PASSED quality f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342

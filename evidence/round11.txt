@@ -1,0 +1,177 @@
+ROUND 11 — INPUT RENDER VS SUPPORT/FAMILY SELECTION — 2026-10-28
+================================================================================================================
+ANSWER: support/family selection is a demonstrated causal contributor. A preview-extraction path is NOT
+supported by the paired data. Better rendered pixels alone do not make the normal pipeline match Adobe.
+With exactly the existing RAW detections, oracle axis-family selection cuts Full median error 3.663819% ->
+0.932318% on all 387 RAW files, including 26 oracle failures returned as identity. This 74.55% median reduction
+is a diagnostic intervention using Adobe truth, NOT a deployable fix or proof that all remaining error is detection.
+No production code, gate, threshold, damping, focal, framing or scale rule was changed. No preview path shipped.
+
+PROTOCOL / DENOMINATORS
+Frozen Round 10 corrected cohort: 450 photos. RAW intervention cohort: all 387 DNG/ARW/NEF/RAF files;
+63 raster files remain in the full-cohort baseline, not in the RAW-pipeline comparisons. No new sample chosen.
+Decoding/radial pilot: the same 40-photo prefix after random.Random(11011).shuffle on those 387 RAW records.
+Both modes, seed 0, same original catalog dimensions, 1200px detector, metadata focal, framing and scale ON.
+Metric: fixed 25x25 source grid RMS / original sensor diagonal, percent. No fitted alignment is removed.
+Catalog orientation Q is applied once to storage pixels; Q^-1 H Q scores in sensor axes. Preview EXIF is NOT
+auto-transposed. All usable embedded previews are sensor-aspect JPEGs; 163 tag=1,115 tag=8,105 tag=6.
+The ungated intervention bypasses only the quality decision. Diagnostics and all geometric validity checks stay.
+"maps" means successful framed/scaled candidate, not every optimizer fit. Ungated tables include the API identity
+fallback when no valid map is returned. "gate" uses the UNCHANGED Round 10 quality verdict; "returned" includes
+every identity fallback. W/L/T are strict wins/losses/ties against identity; ties use 1e-9 percentage points.
+Paired usable-subset summaries and complete failure-retaining summaries are both stored. None is substituted
+for the other. Four extraction failures use existing RAW fallback in the complete preview experiment. Oracle
+failure means no oracle-labelled family pair, and uses identity in its complete diagnostic. No failures vanish.
+Fresh raw decode/solve control exactly reproduces all 80 cached Round 10 maps and gate decisions on the pilot.
+
+1. DETECT ON ADOBE'S ACTUAL CORRECTED OUTPUT
+Read Lightroom cached JPEG pixels, not images warped by our own implementation. Cache digest must equal the
+current develop digest; require uncropped settings, no manual perspective/angle, and an active Auto/Full slot.
+321/450 have digest-matched caches; 256 meet the stricter coordinate criteria: 250 Auto outputs, 6 Full outputs.
+Every active slot still equals its frozen Round 10 target. Cache JPEGs are stored in sensor axes. Detect there,
+then inverse-map endpoints through the active native Upright homography into the source plane before solving.
+This is an oracle diagnostic: Adobe tone and lens profile are already applied. It is not an input option.
+input                       mode    n maps gate ungatedMed% ungatedP90% returnedMed% ungated W/L/T vs identity
+RAW, same 256 files         auto  256  186   20  2.021839  9.382690  1.466528  64/122/ 70
+RAW, same 256 files         full  256  143   20  3.590655 13.843284  3.334509  55/ 88/113
+Adobe output -> backmap     auto  256  192   34  1.842144  9.985181  1.449437  78/114/ 64
+Adobe output -> backmap     full  256  158   34  3.645273 18.040432  3.427840  70/ 88/ 98
+Paired ungated improvements/worsenings/ties: Auto 118/92/46; Full 98/85/73. Full p90 gets worse, and median
+does not improve. Acceptance grows 40 -> 68 attempts but accepts >5% errors in 2 Auto / 4 Full cases.
+The initial random 40-file pilot also failed to show a reliable gain, prompting the next ranked test.
+Six actual Full-output files were additionally solved directly, targeting identity on the corrected image:
+  id6577239: ungated Full residual=0.7709616174081608; gate accepts=False
+  id5587681: ungated Full residual=no map; gate accepts=False
+  id2120346: ungated Full residual=0.6682211659874294; gate accepts=True
+  id2120306: ungated Full residual=1.8036161569528413; gate accepts=False
+  id2119400: ungated Full residual=0.2971749022541042; gate accepts=True
+  id2120250: ungated Full residual=5.904523142609457; gate accepts=False
+Only 2/6 accept. This is a small availability subset; it is not a general accuracy estimate. Most of the broader
+cache test is Auto output, which still contains deliberate convergence. Lens and preview crop/canvas differences
+also limit backmap equivalence. This test does NOT prove the detector is the whole remaining problem.
+
+2. EMBEDDED JPEG VS RAW DECODE — ALL RAW FILES
+input                       mode    n maps gate ungatedMed% ungatedP90% returnedMed% ungated W/L/T vs identity
+RAW baseline                auto  387  282   37  2.061794  9.459428  1.504789 108/174/105
+RAW baseline                full  387  214   37  3.663819 14.615070  3.488517  97/117/173
+Embedded + RAW fallback     auto  387  292   37  2.182358 11.158083  1.569286 116/176/ 95
+Embedded + RAW fallback     full  387  231   37  3.827099 17.139931  3.520460 107/124/156
+Usable-preview-only n=383: ungated Auto median 2.061794 -> 2.182358%; Full 3.754078 -> 3.883372%.
+Paired candidate improvements/worsenings/ties: Auto 147/154/82; Full 120/131/132. Gate accepts 74/766 for BOTH.
+For all 387 with the four extraction failures falling back to RAW, returned medians also worsen:
+Auto 1.504789 -> 1.569286%; Full 3.488517 -> 3.520460%. Full returned >5% count changes 136 -> 135, but one
+new accepted preview candidate has 19.940661% error. This is not evidence to adopt a preview path.
+Extraction failures: id3362052 DSC_1320-Enhanced-NR-2.dng and id3361890 DSC_1321-Enhanced-NR.dng have preview
+aspect errors -8.24%/-14.77%; id2081908/id2081913 have unsupported LibRaw thumbnail formats. No stretching of
+those mismatched previews was allowed. A production path would also need fallback, crop and orientation handling.
+
+3. HALF-SIZE DECODE — SAME 40 RANDOM RAW FILES
+input                       mode    n maps gate ungatedMed% ungatedP90% returnedMed% ungated W/L/T vs identity
+raw                         auto   40   34    7  1.877250  8.646162  1.715001  14/ 20/  6
+raw                         full   40   27    7  3.089356 13.461221  3.038166  11/ 16/ 13
+preview                     auto   40   35    5  2.108477  6.402145  1.873775  16/ 19/  5
+preview                     full   40   28    5  3.874630 15.622104  3.330875  14/ 14/ 12
+full_decode                 auto   40   32    7  2.173491  4.676018  1.723263  14/ 18/  8
+full_decode                 full   40   25    7  3.026392 14.068444  3.038166  12/ 13/ 15
+bright                      auto   40   35    8  1.801442  6.427053  1.658195  14/ 21/  5
+bright                      full   40   27    8  2.856868 15.334240  2.856868  14/ 13/ 13
+full_decode changes only half_size=False; bright changes only no_auto_bright=False. Camera WB and cropping stay.
+Per-image medians of pixel/detector statistics, all at the same 1200px working size:
+input         mean gray dark<16% count  length p10/p50/p90/p99 px     >=50px >=100px Laplacian std
+raw             39.122   29.555 511.5 13.45/21.35/51.57/160.72    54.0    14.5       11.298
+preview         76.663   13.006 518.0 13.32/21.13/49.65/154.00    57.5    14.5       16.214
+full_decode     39.158   29.586 510.5 13.46/21.42/51.86/157.94    55.0    14.5       11.692
+bright          66.760   13.519 521.0 13.51/21.53/50.20/144.99    54.5    15.0       15.458
+The RAW render is visibly dark; the no-auto-bright choice causes that darkness. Full-size demosaicing barely
+changes brightness/counts/lengths, and is not a general rescue. Preview brightness nearly doubles while useful
+long-line counts scarcely move. Brightening/full-size interventions give mixed modest changes, not the needed
+jump. These pilot findings do not exclude file-specific demosaic/aliasing problems. Visual comparison: round11_inputs.jpg.
+
+4. GENERIC RADIAL CORRECTION — SAME 40 FILES, NO PARAMETER CHOSEN FOR PRODUCTION
+On the RAW working image, remap source=center+(output-center)*(1+k*r^2), r=1 at corners. Both signs and
+5%/10% corner radius perturbations are tested. Reflect border, linear interpolation; all other choices fixed.
+input                       mode    n maps gate ungatedMed% ungatedP90% returnedMed% ungated W/L/T vs identity
+RAW baseline                auto   40   34    7  1.877250  8.646162  1.715001  14/ 20/  6
+RAW baseline                full   40   27    7  3.089356 13.461221  3.038166  11/ 16/ 13
+radial_-0.05                auto   40   33    5  1.885315  6.134502  1.723263  13/ 20/  7
+radial_-0.05                full   40   28    5  3.236883 14.331111  3.184216  14/ 14/ 12
+radial_0.05                 auto   40   34    6  2.035851  7.583032  1.715001  14/ 20/  6
+radial_0.05                 full   40   28    6  3.974200 10.050170  3.184216  16/ 12/ 12
+radial_-0.10                auto   40   33    4  2.802089  8.285624  2.027762   8/ 25/  7
+radial_-0.10                full   40   26    4  3.157018 13.870953  3.090885  12/ 14/ 14
+radial_0.10                 auto   40   32    5  2.626461  6.823672  2.027762  10/ 22/  8
+radial_0.10                 full   40   29    5  3.284701 14.503006  3.330875  12/ 17/ 11
+Every tested radial setting worsens Full median; acceptance falls from 14/80 attempts to 8..12/80.
+This rejects a generic radial quick fix on this pilot, not accurate per-lens profiles. Adobe H is a pinhole-plane
+map after lens processing; these interventions compare that H, not a full nonlinear raw-to-output warp.
+
+5. WHY FULL CAN FAIL MORE SEVERELY — SUPPORT/FAMILY INTERVENTION
+Use EXACTLY the cached Round 10 RAW detections, not new pixels or edges. Transform their endpoints by native
+Full, label segments whose output pixel angle is within 1 degree of vertical/horizontal, require >=3 per family.
+Replace only VP/family selection with those oracle-labelled families; keep robust VP refinement, source-focal
+calibration, optimization, damping, quality, framing and scale. No extra line is synthesized. There is no depth
+family in this two-family diagnostic, so a separate no-depth control isolates that possible confound.
+input                       mode    n maps gate ungatedMed% ungatedP90% returnedMed% ungated W/L/T vs identity
+RAW baseline, all 387       auto  387  282   37  2.061794  9.459428  1.504789 108/174/105
+RAW baseline, all 387       full  387  214   37  3.663819 14.615070  3.488517  97/117/173
+Oracle labels, all 387      auto  387  361   75  0.874546  4.774736  1.391907 215/146/ 26
+Oracle labels, all 387      full  387  361   75  0.932318  5.195489  3.014965 291/ 70/ 26
+Normal labels, no depth     auto  387  283   42  1.854538  8.095267  1.480940 115/168/104
+Normal labels, no depth     full  387  230   42  3.663458 15.509223  3.488517 111/119/157
+Oracle labels succeed on 361/387; remaining 26 return identity. On the SAME 361 eligible files, Full median
+3.550164 -> 0.873930%; Auto 1.854538 -> 0.811699%. Full improves vs normal selection on 298 files and worsens
+on 63; Auto improves on 258 and worsens on 103. All 361 produce valid maps in both modes. The unmodified gate
+accepts 150/774 attempts versus RAW 74/774. Normal-label no-depth Full median is 3.663458%, essentially identical
+to baseline 3.663819%; merely removing the depth term does not explain the oracle result.
+Full ungated beats identity on 97/214 valid-map cases (45.33%) with normal selection, versus 291/361 (80.61%)
+with oracle families. Counting all 387 attempts including failures/ties: 25.06% -> 75.19%. The same full-strength
+mode can beat identity frequently when supports identify the right axes; damping alone cannot repair wrong axes.
+Across the full 450-photo frozen baseline, Auto and Full share the same 322 underlying fitted poses. The fitted
+Euler-angle vector magnitude has median 25.95 degrees, p90 71.94 degrees. Unattenuated Full crosses the source-frame
+projective horizon in 75/450 attempts versus Auto 3/450; another 128/450 in both modes lack sufficient structure.
+Those invalid Full maps become identity at the public API. Auto attenuates pitch/yaw; that can contain damage
+from a spurious family/pose. Full amplifies it. This explains a failure mechanism, not the exact external rates.
+The quoted 40.7% /86.1% /25.8% win rates cannot be reproduced from the frozen current returned-H protocol:
+450-file shipped outputs have Auto W/L/T=24/16/410, Full=32/8/410; decisive rates=60%/80%. Gate-bypassed valid
+maps have Auto 117/319=36.68%, Full 110/247=44.53%. Cohort, gate, map validity, identity ties, framing and metric
+must be matched before reusing a rate. Absolute Full error is larger in this snapshot; a Full<Auto win-rate
+inversion itself is not reproduced here. No claim that the external evaluations were invalid is made.
+
+LIMITS / WHAT IS AND IS NOT CAUSAL
+The controlled oracle-family intervention demonstrates that changing which existing supports constrain the fit
+causes a large error reduction without changing render pixels. It uses the target Adobe homography to label
+axes, so it is an upper-bound diagnostic, not an independent deployable classifier or world-line truth. The
+no-depth control rules out removal of that term as the explanation. It does not disentangle pixel-edge semantics,
+VP clustering, lateral-family ranking and the focal changes induced by different selected supports. That is the
+next implementation seam; a genuine image-derived selector still needs to be designed and validated.
+Even the oracle is not exact: all-387 Full mean=2.435441%, median=.932318%, p90=5.195489%, max=86.858380%;
+40 attempts exceed 5%, four exceed 20%, including fallback identities. Its 75 accepted Full maps include two >5%.
+Residual camera-center/focal, mode response, lens, output policy and non-Manhattan ambiguity remain possible.
+This is a personal catalog, availability biased, with related captures/copies; no confidence interval assumes
+independent photos. The 40-file render/lens probes are exploratory. Adobe cache digests are current; no native
+re-solve, catalog write, photo modification, export or external publish was performed.
+
+VALIDATION / ARTIFACTS / REPRODUCTION
+Unchanged production SHA256: f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342
+Suite: 101 passed in 66.08s; existing pytest-asyncio scope deprecation warning. No production code changed after
+that run. round11_checks.txt verifies production hash, 80 exact raw control maps/decisions, three actual-Adobe
+detector/backmap round trips, and failure-retaining 387-attempt summaries. Numerical matmul RuntimeWarnings
+occurred in experimental projections; all stored detector coordinates/maps and scored values used here are finite,
+and inverse/forward coordinate checks pass. Warnings remain visible in run/check logs.
+round11_sample.json freezes metadata/cache paths. round11_*_{all,40}.jsonl contain every per-photo result;
+*.summary.json retain usable-subset and complete summaries; round11_supports/ caches supports and render stats.
+round11_adobe_full_residual.json retains the six direct Full-output residual controls. Historical evidence unchanged.
+Changes are confined to research/upright/: the experiment/check/report scripts, their evidence, and port/README.md.
+From research/upright/, with OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1, Python 3.12:
+  python3.12 evidence/round11_probe.py adobe --workers 3
+  python3.12 evidence/round11_probe.py preview --workers 3
+  python3.12 evidence/round11_probe.py decode --limit 40 --workers 3
+  python3.12 evidence/round11_probe.py radial --limit 40 --workers 3
+  python3.12 evidence/round11_probe.py oracle --workers 3
+  python3.12 evidence/round11_probe.py no_depth --workers 3
+  python3.12 evidence/round11_checks.py
+  python3.12 -m pytest -q
+  python3.12 evidence/write_round11_report.py
+Do not rerun inventory to reproduce the frozen cache selection; current catalog/cache availability may change.
+No gate tuning or unvalidated preview/radial change is shipped. The real answer this round is the family-selection
+bottleneck demonstrated above, with the remaining limits explicitly retained.

@@ -1,0 +1,18 @@
+{
+  "four_comparison": {
+    "fixture_mean_deg": 0.0221553308808805,
+    "fixture_worst_deg": 0.05025092224904881,
+    "heldout_mean_deg": 0.008776784402201443,
+    "heldout_minus_fixture_deg": -0.013378546478679058,
+    "mean_change_percent": -60.38522534648494,
+    "heldout_worst_deg": 0.11344431288257795
+  },
+  "five_comparison": {
+    "fixture_mean_deg": 0.02371237417717313,
+    "fixture_worst_deg": 0.06692316288339216,
+    "heldout_mean_deg": 0.008776784402201443,
+    "heldout_minus_fixture_deg": -0.014935589774971688,
+    "mean_change_percent": -62.986479815882504,
+    "heldout_worst_deg": 0.11344431288257795
+  }
+}

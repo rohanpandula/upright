@@ -1,0 +1,86 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.FF......FFF                                                             [100%]
+=================================== FAILURES ===================================
+_____ TestAccuracyRegression.test_bundled_ground_truth_and_frozen_segments _____
+
+self = <test_port.TestAccuracyRegression testMethod=test_bundled_ground_truth_and_frozen_segments>
+
+    def test_bundled_ground_truth_and_frozen_segments(self):
+        import benchmark_accuracy as benchmark
+        rows = benchmark.run()
+        # MEASURED bounds: evidence/accuracy_gap.txt, original residuals up to
+        # 0.406 degrees. Both families now stay below a tenth of a degree.
+        for name in (*benchmark.CASES, '01_input_truth'):
+            with self.subTest(scene=name):
+                self.assertTrue(rows[name]['image']['ok'])
+                self.assertLess(max(rows[name]['image']['median_axis_deg']), 0.1)
+        # Isolate energy improvement on ORIGINAL supports, before the gate
+        # can conservatively reject their uncertainty and return identity.
+>       self.assertLess(max(rows['B_strong']['fixed_segments']['candidate_axis_deg']), 0.05)
+E       AssertionError: 0.14037845192599718 not less than 0.05
+
+port/test_port.py:666: AssertionError
+_______ TestAccuracyRegression.test_confidence_checks_undamped_geometry ________
+
+self = <test_port.TestAccuracyRegression testMethod=test_confidence_checks_undamped_geometry>
+
+    def test_confidence_checks_undamped_geometry(self):
+        focal = 1.6 * max(W, H)
+        segments, _, _ = project_scene(20, 10, 4, focal)
+        for mode in ('full', 'auto', 'level', 'vertical'):
+            with self.subTest(mode=mode):
+                out = up.solve_ex(segments, W, H, focal, mode)
+>               self.assertTrue(out['ok'], out['reason'])
+E               AssertionError: False is not true : insufficient line structure
+
+port/test_port.py:595: AssertionError
+______________ TestRoundTrip.test_axis_residuals_are_machine_zero ______________
+
+self = <test_port.TestRoundTrip testMethod=test_axis_residuals_are_machine_zero>
+
+    def test_axis_residuals_are_machine_zero(self):
+        focal = 1.5 * max(W, H)
+        seg, _R, _kind = project_scene(18.0, -6.0, 2.0, focal)
+        got = up.solve(seg, W, H, focal, "full", damping=1.0)
+        vert, hor = deviations(got, seg, _kind)
+>       self.assertLess(vert.max(), 1e-6)
+E       AssertionError: np.float64(15.020278576572025) not less than 1e-06
+
+port/test_port.py:153: AssertionError
+____________ TestRoundTrip.test_damped_result_differs_from_undamped ____________
+
+self = <test_port.TestRoundTrip testMethod=test_damped_result_differs_from_undamped>
+
+    def test_damped_result_differs_from_undamped(self):
+        focal = 1.6 * max(W, H)
+        seg, _R, _kind = project_scene(20.0, 10.0, 0.0, focal)
+        undamped = up.solve(seg, W, H, focal, "auto", damping=1.0)
+        full = up.solve(seg, W, H, focal, "full")
+        auto = up.solve(seg, W, H, focal, "auto")
+>       self.assertGreater(np.abs(auto - undamped).max(), 1e-3)
+E       AssertionError: np.float64(0.0) not greater than 0.001
+
+port/test_port.py:162: AssertionError
+______________________ TestRoundTrip.test_exact_recovery _______________________
+
+self = <test_port.TestRoundTrip testMethod=test_exact_recovery>
+
+    def test_exact_recovery(self):
+        focal = 1.6 * max(W, H)
+        seg, R, _kind = project_scene(12.0, 8.0, 3.0, focal)
+        expected = truth_homography(R, focal)
+        got = up.solve(seg, W, H, focal, "full", damping=1.0)
+>       self.assertLess(np.abs(got - expected).max(), 1e-6)
+E       AssertionError: np.float64(0.48711947074564094) not less than 1e-06
+
+port/test_port.py:146: AssertionError
+=========================== short test summary info ============================
+FAILED port/test_port.py::TestAccuracyRegression::test_bundled_ground_truth_and_frozen_segments
+FAILED port/test_port.py::TestAccuracyRegression::test_confidence_checks_undamped_geometry
+FAILED port/test_port.py::TestRoundTrip::test_axis_residuals_are_machine_zero
+FAILED port/test_port.py::TestRoundTrip::test_damped_result_differs_from_undamped
+FAILED port/test_port.py::TestRoundTrip::test_exact_recovery - AssertionError...
+5 failed, 7 passed in 57.95s

@@ -1,0 +1,56 @@
+test_bundled_ground_truth_and_frozen_segments (test_port.TestAccuracyRegression.test_bundled_ground_truth_and_frozen_segments) ... ok
+test_detector_preserves_roll_scene_across_seeds (test_port.TestAccuracyRegression.test_detector_preserves_roll_scene_across_seeds) ... ok
+test_energy_uses_observed_lines_in_pixel_angles (test_port.TestAccuracyRegression.test_energy_uses_observed_lines_in_pixel_angles) ... ok
+test_l0_v_is_not_the_old_twelve (test_port.TestConstants.test_l0_v_is_not_the_old_twelve) ... ok
+test_measured_sigma_v_is_the_branch_value (test_port.TestConstants.test_measured_sigma_v_is_the_branch_value) ... ok
+test_other_measured_constants (test_port.TestConstants.test_other_measured_constants) ... ok
+test_saturation_is_monotone (test_port.TestConstants.test_saturation_is_monotone) ... ok
+test_output_is_normalized (test_port.TestCoordinates.test_output_is_normalized) ... ok
+test_cos_22_5_constant (test_port.TestDetector.test_cos_22_5_constant) ... ok
+test_finds_segments (test_port.TestDetector.test_finds_segments) ... ok
+test_significance_bins_scale_with_long_side (test_port.TestDetector.test_significance_bins_scale_with_long_side) ... ok
+test_solve_from_image (test_port.TestDetector.test_solve_from_image) ... ok
+test_absorbs_contained_segments_but_does_not_bridge_gaps (test_port.TestDetectorSignificance.test_absorbs_contained_segments_but_does_not_bridge_gaps) ... ok
+test_alignment_count_alone_is_not_significance (test_port.TestDetectorSignificance.test_alignment_count_alone_is_not_significance) ... ok
+test_all_eight_directions (test_port.TestDetectorSignificance.test_all_eight_directions) ... ok
+test_blank_noise_and_bad_images (test_port.TestDetectorSignificance.test_blank_noise_and_bad_images) ... ok
+test_caller_can_bypass_detector_with_lsd (test_port.TestDetectorSignificance.test_caller_can_bypass_detector_with_lsd) ... ok
+test_gap_split_returns_the_correct_unsorted_points (test_port.TestDetectorSignificance.test_gap_split_returns_the_correct_unsorted_points) ... ok
+test_nfa_is_exact_binomial_tail (test_port.TestDetectorSignificance.test_nfa_is_exact_binomial_tail) ... ok
+test_nfa_stays_finite_for_long_lines (test_port.TestDetectorSignificance.test_nfa_stays_finite_for_long_lines) ... ok
+test_no_fixed_eight_pixel_minimum (test_port.TestDetectorSignificance.test_no_fixed_eight_pixel_minimum) ... ok
+test_refinement_splits_bent_support (test_port.TestDetectorSignificance.test_refinement_splits_bent_support) ... ok
+test_scale_returns_original_pixel_coordinates (test_port.TestDetectorSignificance.test_scale_returns_original_pixel_coordinates) ... ok
+test_short_line_on_larger_canvases (test_port.TestDetectorSignificance.test_short_line_on_larger_canvases) ... ok
+test_short_line_still_requires_nfa_significance (test_port.TestDetectorSignificance.test_short_line_still_requires_nfa_significance) ... ok
+test_default_focal_is_35mm (test_port.TestFocalConversion.test_default_focal_is_35mm) ... ok
+test_diagonal_not_short_edge (test_port.TestFocalConversion.test_diagonal_not_short_edge) ... ok
+test_full_frame_roundtrip_is_exact (test_port.TestFocalConversion.test_full_frame_roundtrip_is_exact) ... ok
+test_metadata_clamp_applies_and_geometric_does_not (test_port.TestFocalConversion.test_metadata_clamp_applies_and_geometric_does_not) ... ok
+test_beats_full (test_port.TestGuided.test_beats_full) ... ok
+test_drives_both_families_to_zero (test_port.TestGuided.test_drives_both_families_to_zero) ... ok
+test_recovers_the_generating_camera (test_port.TestGuided.test_recovers_the_generating_camera) ... ok
+test_requires_both_families (test_port.TestGuided.test_requires_both_families) ... ok
+test_requires_exactly_four (test_port.TestGuided.test_requires_exactly_four) ... ok
+test_guided_uses_the_two_camera_model (test_port.TestModel.test_guided_uses_the_two_camera_model)
+A guided solve must leave the source camera's K0 untouched. ... ok
+test_solver_returns_a_true_rotation_up_to_scale (test_port.TestModel.test_solver_returns_a_true_rotation_up_to_scale) ... ok
+test_two_camera_fit_recovers_the_destination_focal (test_port.TestModel.test_two_camera_fit_recovers_the_destination_focal) ... ok
+test_two_camera_is_exact_and_single_camera_is_not (test_port.TestModel.test_two_camera_is_exact_and_single_camera_is_not) ... ok
+test_auto_is_a_no_op_on_a_pure_yaw_frame (test_port.TestModes.test_auto_is_a_no_op_on_a_pure_yaw_frame) ... ok
+test_auto_is_between_level_and_full (test_port.TestModes.test_auto_is_between_level_and_full) ... ok
+test_auto_is_stronger_than_nothing (test_port.TestModes.test_auto_is_stronger_than_nothing) ... ok
+test_full_corrects_both (test_port.TestModes.test_full_corrects_both) ... ok
+test_identity_on_too_few_segments (test_port.TestModes.test_identity_on_too_few_segments) ... ok
+test_level_only_rolls (test_port.TestModes.test_level_only_rolls) ... ok
+test_off_is_identity (test_port.TestModes.test_off_is_identity) ... ok
+test_unknown_mode_raises (test_port.TestModes.test_unknown_mode_raises) ... ok
+test_vertical_keeps_horizontals (test_port.TestModes.test_vertical_keeps_horizontals) ... ok
+test_axis_residuals_are_machine_zero (test_port.TestRoundTrip.test_axis_residuals_are_machine_zero) ... ok
+test_damped_result_differs_from_undamped (test_port.TestRoundTrip.test_damped_result_differs_from_undamped) ... ok
+test_exact_recovery (test_port.TestRoundTrip.test_exact_recovery) ... ok
+
+----------------------------------------------------------------------
+Ran 50 tests in 2.445s
+
+OK

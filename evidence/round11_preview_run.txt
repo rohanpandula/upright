@@ -1,0 +1,47 @@
+preview 10 / 387
+preview 20 / 387
+preview 30 / 387
+preview 40 / 387
+preview 50 / 387
+preview 60 / 387
+preview 70 / 387
+preview 80 / 387
+preview 90 / 387
+preview 100 / 387
+preview 110 / 387
+preview 120 / 387
+preview 130 / 387
+preview 140 / 387
+preview 150 / 387
+preview 160 / 387
+preview 170 / 387
+Corrupt JPEG data: 210 extraneous bytes before marker 0x10
+preview 180 / 387
+preview 190 / 387
+preview 200 / 387
+preview 210 / 387
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:685: RuntimeWarning: divide by zero encountered in matmul
+  residual = d @ axis
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:685: RuntimeWarning: overflow encountered in matmul
+  residual = d @ axis
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:685: RuntimeWarning: invalid value encountered in matmul
+  residual = d @ axis
+preview 220 / 387
+preview 230 / 387
+preview 240 / 387
+preview 250 / 387
+preview 260 / 387
+preview 270 / 387
+preview 280 / 387
+preview 290 / 387
+preview 300 / 387
+preview 310 / 387
+Corrupt JPEG data: 210 extraneous bytes before marker 0x10
+preview 320 / 387
+preview 330 / 387
+preview 340 / 387
+preview 350 / 387
+preview 360 / 387
+preview 370 / 387
+preview 380 / 387
+preview 387 / 387

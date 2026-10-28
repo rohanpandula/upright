@@ -1,0 +1,243 @@
+{
+  "adobe": {
+    "variant": {
+      "photos": 40,
+      "errors": 0,
+      "auto": {
+        "n": 40,
+        "fit": 27,
+        "accepted": 7,
+        "candidate": {
+          "win": 10,
+          "lose": 17,
+          "tie": 13,
+          "invalid": 0,
+          "win_all_pct": 25.0,
+          "win_decisive_pct": 37.03703703703704,
+          "error": {
+            "n": 40,
+            "mean": 6.689869973970225,
+            "median": 2.7513199073078356,
+            "p90": 21.34704317325454,
+            "p99": 39.62818350560905,
+            "max": 43.13577235839455,
+            "over1": 25,
+            "over5": 13,
+            "over20": 5
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 4,
+          "lose": 3,
+          "tie": 33,
+          "invalid": 0,
+          "win_all_pct": 10.0,
+          "win_decisive_pct": 57.142857142857146,
+          "error": {
+            "n": 40,
+            "mean": 2.336295113134504,
+            "median": 1.37514300380686,
+            "p90": 3.895760012812588,
+            "p99": 16.929881677243717,
+            "max": 20.6880620974359,
+            "over1": 24,
+            "over5": 4,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      },
+      "full": {
+        "n": 40,
+        "fit": 21,
+        "accepted": 7,
+        "candidate": {
+          "win": 8,
+          "lose": 13,
+          "tie": 19,
+          "invalid": 0,
+          "win_all_pct": 20.0,
+          "win_decisive_pct": 38.095238095238095,
+          "error": {
+            "n": 40,
+            "mean": 6.8693467988207235,
+            "median": 3.5080267013788102,
+            "p90": 19.212478231301063,
+            "p99": 36.588048712421525,
+            "max": 37.04720620250526,
+            "over1": 32,
+            "over5": 16,
+            "over20": 3
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 6,
+          "lose": 1,
+          "tie": 33,
+          "invalid": 0,
+          "win_all_pct": 15.0,
+          "win_decisive_pct": 85.71428571428571,
+          "error": {
+            "n": 40,
+            "mean": 3.803447568808898,
+            "median": 3.104556871744414,
+            "p90": 7.9122744814497965,
+            "p99": 17.892075635784984,
+            "max": 20.6880620974359,
+            "over1": 29,
+            "over5": 9,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      }
+    },
+    "paired_raw": {
+      "photos": 40,
+      "errors": 0,
+      "auto": {
+        "n": 40,
+        "fit": 25,
+        "accepted": 4,
+        "candidate": {
+          "win": 4,
+          "lose": 21,
+          "tie": 15,
+          "invalid": 0,
+          "win_all_pct": 10.0,
+          "win_decisive_pct": 16.0,
+          "error": {
+            "n": 40,
+            "mean": 6.250542270426747,
+            "median": 2.3073471158906136,
+            "p90": 22.1035981552892,
+            "p99": 37.62246419709734,
+            "max": 38.35804355494319,
+            "over1": 30,
+            "over5": 10,
+            "over20": 5
+          },
+          "delta_median": 0.1460590616218925
+        },
+        "returned": {
+          "win": 1,
+          "lose": 3,
+          "tie": 36,
+          "invalid": 0,
+          "win_all_pct": 2.5,
+          "win_decisive_pct": 25.0,
+          "error": {
+            "n": 40,
+            "mean": 2.3534526629690022,
+            "median": 1.4806522081985376,
+            "p90": 3.895760012812588,
+            "p99": 15.511199584884693,
+            "max": 20.6880620974359,
+            "over1": 27,
+            "over5": 4,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      },
+      "full": {
+        "n": 40,
+        "fit": 17,
+        "accepted": 4,
+        "candidate": {
+          "win": 5,
+          "lose": 12,
+          "tie": 23,
+          "invalid": 0,
+          "win_all_pct": 12.5,
+          "win_decisive_pct": 29.41176470588235,
+          "error": {
+            "n": 40,
+            "mean": 5.857467742808316,
+            "median": 3.5532895640228306,
+            "p90": 10.50473592922284,
+            "p99": 36.94729739533224,
+            "max": 41.70610658492796,
+            "over1": 33,
+            "over5": 14,
+            "over20": 2
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 2,
+          "lose": 2,
+          "tie": 36,
+          "invalid": 0,
+          "win_all_pct": 5.0,
+          "win_decisive_pct": 50.0,
+          "error": {
+            "n": 40,
+            "mean": 3.9806234975513854,
+            "median": 3.29228950659947,
+            "p90": 8.222456667004227,
+            "p99": 17.892075635784984,
+            "max": 20.6880620974359,
+            "over1": 31,
+            "over5": 9,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      }
+    },
+    "vs_raw": {
+      "auto": {
+        "candidate": {
+          "improve": 16,
+          "worsen": 14,
+          "tie": 10,
+          "invalid": 0,
+          "median_delta": 0.0
+        },
+        "returned": {
+          "improve": 4,
+          "worsen": 3,
+          "tie": 33,
+          "invalid": 0,
+          "median_delta": 0.0
+        }
+      },
+      "full": {
+        "candidate": {
+          "improve": 13,
+          "worsen": 11,
+          "tie": 16,
+          "invalid": 0,
+          "median_delta": 0.0
+        },
+        "returned": {
+          "improve": 6,
+          "worsen": 1,
+          "tie": 33,
+          "invalid": 0,
+          "median_delta": 0.0
+        }
+      }
+    },
+    "image_stats_median": {
+      "count": 509.5,
+      "length_q": [
+        13.213942322011661,
+        20.283338796346627,
+        43.119721734822804,
+        120.85534155412202
+      ],
+      "length_total": 15065.220203711226,
+      "long50": 40.0,
+      "long100": 9.5,
+      "mean": 109.86487968750001,
+      "std": 58.78019118096127,
+      "dark_fraction": 0.015446354166666666,
+      "clipped_fraction": 0.001865625,
+      "laplacian_std": 10.45994758605957
+    }
+  }
+}

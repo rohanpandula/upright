@@ -1,0 +1,282 @@
+================================================================================
+UprightDependentDigest — mechanism, invalidation, and cache gating
+namespace ura / cr_upright.cpp — Adobe CameraRaw (Lightroom Classic)
+================================================================================
+
+BINARY   /Applications/Adobe Lightroom Classic/Adobe Lightroom Classic.app/
+         Contents/Frameworks/CameraRaw.lrtoolkit/Versions/A/CameraRaw
+SLICE    x86_64 (fat offset 16384, size 156736560) -> /tmp/ur/cr_x86.bin
+         All offsets below are slice-relative. __TEXT fileoff == vmaddr, so
+         string/data offsets are also link addresses.
+BUILD    source path leaks: "…/release/15.5/lr-mac-inst/acr/camera_raw/cr_sdk/
+         source/cr_upright.cpp"  => CameraRaw SDK 15.5
+STATUS   fully stripped (zero `ura` symbols). Everything below is recovered from
+         RTTI, surviving strings, an exhaustive imm32 scan, and the
+         LC_DYLD_INFO rebase stream — not from symbol names.
+
+TAGS     [PROOF]      = read directly out of shipped code, reproducible
+         [STRONG]     = code structure forces the reading; one small gap
+         [INFERENCE]  = consistent with evidence, not directly executed
+
+--------------------------------------------------------------------------------
+0. TL;DR — the answer to the question that matters
+--------------------------------------------------------------------------------
+A stale/matching digest DOES suppress the solve, but the suppression is
+*host-driven*: the library exposes a Lua predicate `enableUprightReanalyze`
+(slice 0x341f0, registered at 0x9174cf8) that returns
+**true = must recompute**. Lightroom calls it before re-running the solver and
+skips the solve when it returns false. Because the digest is a *stored develop
+setting*, any tool that writes `UprightDependentDigest` (or leaves a stale one
+in place alongside new geometry inputs) can make Lightroom believe the existing
+transform is still valid and produce no new transform. [PROOF]
+
+CACHE-INVALIDATION RULE (explicit, complete):
+
+    recompute_upright  <=>  mode != 0
+                       AND  digest(params) != params.stored_digest
+
+    where stored_digest = params+0x4f8  (UprightDependentDigest)  for mode != 5
+                          params+0x508  (UprightGuidedDependentDigest) for mode 5
+    and   digest(x) is an MD5 over a canonical text serialisation of
+          { UprightVersion, profile-list, distortion }   (see §1)
+
+    mode == 5 additionally requires params+0x518 to be a non-empty vector,
+    otherwise the predicate short-circuits to "no recompute".
+
+Mode lives at params+0x198; only 0..5 are legal (`cmp r15d,6; jb` at 0x46c0a,
+else "setUprightMode: invalid mode %d"). Mode 0 therefore never recomputes.
+[PROOF]
+
+--------------------------------------------------------------------------------
+1. WHAT the digest hashes
+--------------------------------------------------------------------------------
+The digest is produced by one function at slice 0xb5f170. It is a *digest-input
+serialiser*: it feeds a text writer, then a digest sink, then copies out a
+16-byte `dng_fingerprint`. [PROOF]
+
+Structure of 0xb5f170 (signature f(rdi=out_fingerprint, rsi=unused,
+rdx=params)):
+
+  0xb5f198  construct text buffer (capacity 0x2000)
+  0xb5f1c9  install writer vtable  0x9066f10
+  0xb5f1d7  install digest-sink vtable 0x9066f68
+  0xb5f1ff  write literal "Version"        (7 chars)
+  0xb5f21a  write int 0x09060000           <- UprightVersion
+  0xb5f230  write literal "Profile"        (7 chars)
+  0xb5f24c  if (params+0x164 == 0) skip the list
+  0xb5f317  write int  count (params+0x164)
+  0xb5f2a1… loop over the counted array at params+0x420, stride 0x30, and for
+            each record write:
+              0xb5f35c  record+0x00  string
+              0xb5f37d  record+0x20  16 raw bytes via sink vtable slot +0x10
+              0xb5f3c3  record+0x10  string
+  0xb5f3ec  write literal "Distort"        (7 chars)
+  0xb5f400  write int params+0x168         <- lens distortion amount
+  0xb5f422  finish sink -> fingerprint, 0xb5f42d copy 16 bytes to *out
+
+So the hashed inputs are exactly three things:
+
+  1. UprightVersion            (the solver-ABI stamp, see §4)
+  2. a counted profile list    (count +0x164, array +0x420) where each record
+     contributes a name, a 16-byte digest, and a second name
+  3. the distortion value at +0x168
+
+NOT hashed (verified by absence): the mode at +0x198, the six transform
+matrices, the crop rectangle, the guide/FourSegments geometry, and the raw file
+bytes. Nothing in 0xb5f170 reads a file, a file size, an mtime, or a hash of
+pixel data. [PROOF for the field list; the claim "no file bytes" is [STRONG] —
+it rests on the complete absence of any file/stream/negative accessor call in
+the function.]
+
+The profile list is the camera/lens-profile dependency set: `LensProfileDigest`
+and `cameraProfileDigest` exist as sibling params (strings @0x8eb…), and the
+record shape (two names + embedded per-profile fingerprint) matches a
+camera/lens profile pair. Records are 0x30 bytes in this builder; an unrelated
+0x90-byte record type compared at 0x587130 carries the same {names…digest…}
+shape. [INFERENCE on record semantics, PROOF on offsets/order.]
+
+Hash algorithm: MD5. The sink is virtual; its 16-byte absorber writes into the
+region at 0x13c7xxx which holds the dng_md5 round constant 0xd76aa478
+(0x13c7714) and the MD5 IV 0x67452301/0xefcdab89/0x98badcfe (0x1886cd8).
+Output is a `dng_fingerprint` (16 bytes, compared by 0x13c6d50 = byte-wise
+16-byte operator==). [STRONG]
+
+--------------------------------------------------------------------------------
+2. What invalidates it
+--------------------------------------------------------------------------------
+Only a change to one of the three hashed inputs changes the digest, i.e.
+[PROOF, from §1]:
+
+  * a different UprightVersion (i.e. a CameraRaw upgrade that bumps the stamp)
+  * any change to the profile list: different camera model, different lens, a
+    different or newly-applied lens profile, profile enable/disable, or a
+    changed per-profile digest
+  * a different distortion value
+
+Consequences worth stating explicitly:
+
+  * Changing the *mode* alone does NOT invalidate — correct by design, since one
+    solve populates all six slots.
+  * Editing crop/rotation by hand does NOT invalidate the digest.
+  * Swapping the photo does NOT invalidate it either — the digest carries no
+    file identity, so it is a per-settings-object stamp, not a per-image one.
+    (Lightroom keeps settings per photo, so this is normally invisible; it
+    matters when settings are copied between photos.) [INFERENCE]
+
+Who writes the digest: after a successful solve, at 0xb651ad the code stamps
+version 0x09060000 into the result struct (0xb65199) and immediately recomputes
+and stores the digest (0xb5f170 → copy 16 bytes at 0xb651c0). The other two call
+sites (0xb687b3/0xb687da) are the compare path itself. [PROOF]
+
+--------------------------------------------------------------------------------
+3. Does a stale/matching digest suppress the solve?
+--------------------------------------------------------------------------------
+Yes. Two independent layers:
+
+(a) The predicate 0xb68600 — the only digest comparison in the whole module
+    (an exhaustive scan of all 409 call sites of the 16-byte comparator
+    0x13c6d50 finds just two inside the Upright module, 0xb687c9 and 0xb687f0,
+    both inside this function). Body:
+
+      0xb6861c  eax = params+0x198 (mode)
+      0xb68622  if mode == 0            -> return 0        (no recompute)
+      0xb6862d  if mode != 5            -> 0xb687d0 path
+      0xb68636  mode == 5: require params+0x518 non-null and non-empty, else
+                                        -> return 0
+      0xb687b3  digest = compute(params)      (guided path)
+      0xb687b8  stored = params+0x508
+      0xb687c9  equal?
+      0xb687d0  (other modes) digest = compute(params); stored = params+0x4f8;
+                compare at 0xb687f0
+      0xb687f7  al = 1;  if (equal) al = 0
+                => returns 1 on MISMATCH, 0 on match
+
+(b) Its sole caller 0x341f0 turns that into a Lua boolean
+    (`lua_pushboolean`, stub 0x2c51270) and is registered as
+    **`enableUprightReanalyze`** in the Lua dispatch table at 0x9174cf8
+    (neighbours: `isUprightNOP` 0x9174cd0, `isUprightGuidesValid` 0x9174ce0,
+    `willResetParamsWhenApplyingUpright` 0x9174d00,
+    `shouldDisplayInfoLensBeforeUpright` 0x9174d10). [PROOF]
+
+So: matching digest -> `enableUprightReanalyze` false -> host skips the solve.
+Stale digest -> true -> host re-solves. Writing a *matching* digest therefore
+suppresses; writing a *stale* one forces a recompute.
+
+Note what the digest does NOT do: `cr_upright_params::Calculate` (0xb635a0)
+never consults the digest itself (no call to 0xb5f170 or 0x13c6d50 anywhere in
+its body). Calling Calculate directly always solves. [PROOF]
+
+Second, independent gate — the task lambda at 0x6db1e0 does not use the digest
+at all; it uses a *guide-structure* validity check 0xb63150:
+
+    0x6db1ea  if (valid(src+0x4a8))  return;            // already have guides
+    0x6db201  if (valid(dst+0x4a8))  copy dst -> src;   // reuse cached result
+    0x6db2b8  else Calculate(...)
+
+0xb63150 walks the 0x90-byte records at +0x4e0 and requires >= 2..7 of them to
+carry marker value 3 in both +8 and +0xc. So there are two distinct
+"don't re-solve" paths: a structural guide cache, and the digest predicate.
+
+--------------------------------------------------------------------------------
+4. UprightVersion = 151388160
+--------------------------------------------------------------------------------
+151388160 = 0x09060000. Reads as packed major<<24 | minor<<16 => 9.6, i.e. an
+algorithm/ABI revision for the Upright solver, not the app version (the build is
+15.5). [decoding is PROOF; "algorithm revision" is INFERENCE]
+
+It is a schema default written by the params constructor at 0xb62d81
+(`mov dword [rdi], 0x9060000`, next to the 35 mm focal default 0x4041800000000000
+= 35.0 at +0x28), and re-stamped on every solve at 0xb65199. The deserialiser
+also pre-seeds it at 0xb65eff before reading a stored value. [PROOF]
+
+Version mismatch forces recompute — but INDIRECTLY. An exhaustive scan for the
+imm32 0x09060000 finds 17 hits: 13 are data-table bytes and the remaining 4
+(0xb5f21b, 0xb62d83, 0xb6519f, 0xb65eff) are all *stores* (`mov [mem], imm32`,
+`mov esi, imm32`). There is no `cmp … 0x09060000` anywhere in the image. So the
+version is not compared; it is hashed (§1), and a version bump changes the
+digest, which trips the §3 predicate. Same net effect, no dedicated code. [PROOF]
+
+Corollary for tooling: to make old transforms recompute after a solver change
+you only need to perturb the digest — the version field alone does nothing.
+
+--------------------------------------------------------------------------------
+5. UprightTransformCount = 6 vs the six slots
+--------------------------------------------------------------------------------
+Param IDs are assigned by a Lua schema table built at 0xa10b8..0xa1440
+(`lua_pushstring(name)` / `lua_pushinteger(id)` / `lua_settable`). Recovered
+schema, in order [PROOF]:
+
+    0x137 UprightCenterMode        0x13d UprightPreview
+    0x138 UprightCenterNormX       0x13e UprightVersion
+    0x139 UprightCenterNormY       0x13f UprightTransformCount
+    0x13a UprightFocalMode         0x140..0x147 UprightTransform_0..7
+    0x13b UprightFocalLength35mm   0x149 UprightGuidedDependentDigest
+    0x13c UprightDependentDigest   0x14a UprightFourSegmentsCount
+                                   0x14b..0x14e UprightFourSegments_0..3
+
+Both transform and segment names come from format strings
+`UprightTransform_%u` (0x8eb190a) / `UprightFourSegments_%u` (0x8eb1954); the
+`_0..3` segment keys also exist as literals at 0x8ebb8cb for the CRD writer.
+
+There are 8 registered transform slots but 6 are used, because there are exactly
+6 modes: mode is range-checked `< 6` at 0x46c0a and the digest predicate treats
+5 as the Guided special case (§3). `UprightTransformCount = 6` is simply the
+count of populated mode slots — one transform per mode, indices 0..5. Slots 6
+and 7 are headroom. [count==modes is STRONG; "headroom" is INFERENCE]
+
+Count is not trusted on read: the deserialiser at 0xb65d39 clamps it,
+`cmp ecx,0x10 / mov eax,0x10 / cmovb eax,ecx` (min(count,16)), then loops
+`snprintf("UprightTransform_%u")` and parses each matrix. So up to 16 slots can
+be read even though only 8 are registered.
+
+--------------------------------------------------------------------------------
+6. Practical notes for the plugin problem
+--------------------------------------------------------------------------------
+* A plugin write of `UprightTransform_*` without a matching
+  `UprightDependentDigest` is inconsistent: if the digest happens to still match
+  the geometry inputs, `enableUprightReanalyze` returns false and no solve runs.
+* Writing `UprightMode = 0` guarantees "no recompute" regardless of digest.
+* To force a solve from a plugin: set the desired mode (1..5) and then perturb
+  the digest (any of: bump UprightVersion, change UprightFocalLength35mm, clear
+  the digest to zeros). Clearing to zeros is safe — all-zero is a valid
+  fingerprint value that simply never compares equal.
+* Guided mode (5) additionally needs params+0x518 non-empty or it short-circuits
+  to "no recompute"; guided transforms alone are not enough.
+* `willResetParamsWhenApplyingUpright` (0xb681d0, returns two booleans) is the
+  separate rule for whether applying Upright wipes other params; it quantises
+  the user rotation at +0x900 and compares against +0x19c. Not digest-related.
+
+--------------------------------------------------------------------------------
+7. Address index (slice-relative)
+--------------------------------------------------------------------------------
+  0xb5f170  digest-input serialiser + MD5            [PROOF]
+  0xb68600  digest-mismatch predicate (=enableUprightReanalyze)  [PROOF]
+  0x341f0   Lua binding for that predicate           [PROOF]
+  0x9174cf8 Lua registration record                  [PROOF]
+  0xb635a0  cr_upright_params::Calculate (no digest check)  [PROOF]
+  0x6db1e0  task lambda: guide-cache gate, not digest [PROOF]
+  0xb63150  guide-vector structural validity          [PROOF]
+  0xb62d70  params ctor: version default 0x09060000   [PROOF]
+  0xb65199  post-solve version stamp + digest refresh [PROOF]
+  0xb65b60  deserialiser (clamps count to 16)         [PROOF]
+  0xa10b8   Lua param-schema table                    [PROOF]
+  0x46b60   setUprightMode (mode < 6 enforced)        [PROOF]
+  0x13c6d50 dng_fingerprint::operator== (16-byte)     [PROOF]
+  0x13c7xxx dng_md5 (round const 0xd76aa478 @0x13c7714) [STRONG]
+  0x8eb18bf "UprightDependentDigest"                  [PROOF]
+  0x8eb191e "UprightGuidedDependentDigest"            [PROOF]
+  0x8f45075 "Distort"   0x8ebb817 "Version"   0x8eb9d1a "Profile"  [PROOF]
+
+--------------------------------------------------------------------------------
+8. Open / not established
+--------------------------------------------------------------------------------
+* Exact record semantics of the +0x420 profile list (0x30-byte records here,
+  0x90-byte in the sibling comparator at 0x587130). The contribution of each
+  record to the digest is proven; which profile attributes map to the two name
+  fields is inferred.
+* Whether the host applies `enableUprightReanalyze` on every render or only on
+  an explicit re-analyse action. Only the predicate and its Lua registration are
+  in this binary; the call policy is in Lightroom proper.
+* The two sink/serialiser "vtables" at 0x9066f10 / 0x9066f68 are laid out as
+  12-byte {tag, tag, rel32} triples rather than plain pointer arrays, so the
+  individual virtual slots were not individually named.

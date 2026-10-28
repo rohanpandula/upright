@@ -1,0 +1,37 @@
+FFFF
+======================================================================
+FAIL: test_bad_seed4_optimizer_result_fails_own_quality_check (test_port.TestAccuracyRegression.test_bad_seed4_optimizer_result_fails_own_quality_check) (mode='full')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_port.py", line 554, in test_bad_seed4_optimizer_result_fails_own_quality_check
+    self.assertFalse(out['ok'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_seed4_optimizer_result_fails_own_quality_check (test_port.TestAccuracyRegression.test_bad_seed4_optimizer_result_fails_own_quality_check) (mode='auto')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_port.py", line 554, in test_bad_seed4_optimizer_result_fails_own_quality_check
+    self.assertFalse(out['ok'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_seed4_optimizer_result_fails_own_quality_check (test_port.TestAccuracyRegression.test_bad_seed4_optimizer_result_fails_own_quality_check) (mode='level')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_port.py", line 554, in test_bad_seed4_optimizer_result_fails_own_quality_check
+    self.assertFalse(out['ok'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_bad_seed4_optimizer_result_fails_own_quality_check (test_port.TestAccuracyRegression.test_bad_seed4_optimizer_result_fails_own_quality_check) (mode='vertical')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/rohan/Projects/trichroma/research/upright/port/test_port.py", line 554, in test_bad_seed4_optimizer_result_fails_own_quality_check
+    self.assertFalse(out['ok'])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.425s
+
+FAILED (failures=4)

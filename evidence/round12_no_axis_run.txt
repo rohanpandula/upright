@@ -1,0 +1,6 @@
+no_axis 25 / 150
+no_axis 50 / 150
+no_axis 75 / 150
+no_axis 100 / 150
+no_axis 125 / 150
+no_axis 150 / 150

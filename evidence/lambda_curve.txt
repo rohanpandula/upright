@@ -1,0 +1,37 @@
+usable 12883   skipped/abstained 1394
+
+photos with real keystone (2-40 deg) away from roll: 7256
+
+ keystone bin      n  med ratio     mean     p25     p75
+     2-3        1026      0.744    0.688   0.428   0.928
+     3-4         825      0.622    0.571   0.311   0.820
+     4-5         680      0.548    0.521   0.266   0.765
+     5-6         656      0.461    0.440   0.188   0.651
+     6-7         545      0.373    0.377   0.132   0.594
+     7-8         499      0.311    0.342   0.105   0.561
+     8-10        779      0.201    0.261   0.072   0.414
+    10-12        605      0.118    0.178   0.040   0.268
+    12-14        474      0.090    0.122   0.025   0.176
+    14-17        523      0.062    0.095   0.017   0.135
+    17-20        345      0.043    0.063   0.013   0.090
+    20-25        252      0.020    0.040   0.005   0.065
+    25-30         36      0.012    0.023   0.005   0.036
+
+fitted  ratio(t) = 1.686 * exp(-t^2 / (2*7.26^2))
+paper   ratio(t) =  1.000 * exp(-t^2 / (2*15.00^2))   (sigma_v = pi/12)
+        -> shipped decay is 2.07x faster than the paper's sigma_v
+        -> and 1.65x faster than the paper's sigma_h
+
+--- roll handling (Level vs Full vs Auto) ---
+n=5854  median |rz|: full=2.438 auto=1.978 level=1.966
+median auto/full ROLL ratio = 0.928
+median auto/full KEYSTONE ratio = 0.262
+
+--- Vertical mode semantics ---
+n=7030
+  pitch |rx|: full=  4.541 vert=  0.843 auto=  1.184
+  yaw   |ry|: full=  4.156 vert=  0.538 auto=  0.575
+
+--- Level mode semantics ---
+  n=12883  median |rx_level|=0.004 |ry_level|=0.004 |rz_level|=0.736
+  median |rx_full|=1.558 |ry_full|=1.387 |rz_full|=0.844

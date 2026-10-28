@@ -1,0 +1,4 @@
+Adobe paired A_clean
+Adobe paired B_strong
+Adobe paired C_noisy
+Adobe paired D_roll

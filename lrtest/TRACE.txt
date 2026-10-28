@@ -1,0 +1,809 @@
+23:22:40  === digest retest: arm then single Update click ===
+23:22:47    reset ok=true
+23:22:49    arm+zero ok=true
+23:22:49    armed. ready for one Update click
+23:22:49  === done ===
+20261028T002637-72397-5639	2026-10-28T00:26:37	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T002637-72397-5639	2026-10-28T00:26:37	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T002637-72397-5639	2026-10-28T00:26:45	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:26:45	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T002637-72397-5639	2026-10-28T00:26:55	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T002637-72397-5639	2026-10-28T00:26:55	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=13
+20261028T002637-72397-5639	2026-10-28T00:27:01	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T002637-72397-5639	2026-10-28T00:27:01	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T002637-72397-5639	2026-10-28T00:27:01	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits photos=1
+20261028T002637-72397-5639	2026-10-28T00:27:02	unknown	TARGET_OK	good4	-	-	self	-	-	-	-	-	-	-
+20261028T002637-72397-5639	2026-10-28T00:27:02	unknown	JOB_ARMED	good4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T002637-72397-5639	2026-10-28T00:27:16	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:27:19	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:19	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:21	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:21	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:23	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:23	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:26	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:26	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:28	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:28	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:31	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:31	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:33	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:33	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:36	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:44	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:27:46	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:46	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:49	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:49	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:51	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:51	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:53	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:53	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:56	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:56	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:27:58	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:27:58	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:01	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:01	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:04	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:04	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:07	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:09	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:09	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:18	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:28:20	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:20	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:22	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:22	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:24	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:24	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:27	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:27	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:29	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:29	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:32	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:32	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:34	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:34	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:36	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:39	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:39	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:41	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:41	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:50	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	5	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:28:52	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:52	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:54	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:54	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:57	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:57	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:28:59	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:28:59	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:01	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:01	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:04	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:04	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:06	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:06	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:09	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:09	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:11	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:11	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:13	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:13	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:22	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	6	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:29:24	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:24	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:26	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:26	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:29	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:29	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:31	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:31	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:34	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:34	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:36	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:38	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:38	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:41	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:41	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:43	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:43	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:46	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:46	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:54	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	7	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:29:56	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:56	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:29:59	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:29:59	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:03	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:03	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:05	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:05	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:07	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:10	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:10	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:12	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:12	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:15	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:15	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:17	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:17	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:20	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:20	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:28	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	8	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:30:30	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:30	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:33	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:33	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:35	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:35	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:37	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:37	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:40	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:40	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:42	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:42	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:45	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:45	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:47	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:47	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:49	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:49	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:30:52	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:30:52	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:31:00	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	9	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T002637-72397-5639	2026-10-28T00:31:02	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:31:02	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T002637-72397-5639	2026-10-28T00:31:03	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T002637-72397-5639	2026-10-28T00:31:03	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T002637-72397-5639	2026-10-28T00:31:05	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T002637-72397-5639	2026-10-28T00:31:05	unknown	SOLVE_OK	good4	5	-	-	yes	-	35	-	-	-	no CLICKED within 40s
+20261028T002637-72397-5639	2026-10-28T00:31:05	unknown	ABORT	-	-	-	-	-	-	-	-	-	-	uncaught: [string "ImportSweep.lua"]:1078: attempt to call field 'remove' (a nil value)
+20261028T002637-72397-5639	2026-10-28T00:31:05	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	error
+20261028T003439-72879-9369	2026-10-28T00:34:39	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T003439-72879-9369	2026-10-28T00:34:39	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T003439-72879-9369	2026-10-28T00:34:47	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: System Events got an error: AppleEvent timed out. (-1712)
+20261028T003439-72879-9369	2026-10-28T00:34:47	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T003439-72879-9369	2026-10-28T00:34:56	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T003439-72879-9369	2026-10-28T00:34:56	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=13
+20261028T003439-72879-9369	2026-10-28T00:35:01	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T003439-72879-9369	2026-10-28T00:35:01	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T003439-72879-9369	2026-10-28T00:35:01	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits photos=1
+20261028T003439-72879-9369	2026-10-28T00:35:01	unknown	TARGET_OK	good4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:02	unknown	JOB_ARMED	good4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:05	unknown	SOLVE_OK	good4	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:06	unknown	TARGET_OK	one_v	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:07	unknown	JOB_ARMED	one_v	5	-	-	-	zeroed	-	-	-	-	segments=1 count=1 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:10	unknown	SOLVE_OK	one_v	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:11	unknown	TARGET_OK	two_vh	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:12	unknown	JOB_ARMED	two_vh	5	-	-	-	zeroed	-	-	-	-	segments=2 count=2 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:15	unknown	SOLVE_OK	two_vh	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:15	unknown	TARGET_OK	three_vvh	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:16	unknown	JOB_ARMED	three_vvh	5	-	-	-	zeroed	-	-	-	-	segments=3 count=3 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:19	unknown	SOLVE_OK	three_vvh	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:20	unknown	TARGET_OK	contra4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:21	unknown	JOB_ARMED	contra4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:24	unknown	SOLVE_OK	contra4	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:25	unknown	TARGET_OK	parallel4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:26	unknown	JOB_ARMED	parallel4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:29	unknown	SOLVE_OK	parallel4	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:29	unknown	TARGET_OK	horizon4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:30	unknown	JOB_ARMED	horizon4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:33	unknown	SOLVE_OK	horizon4	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:34	unknown	TARGET_OK	prior_auto	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:45	unknown	JOB_ARMED	prior_auto	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=1
+20261028T003439-72879-9369	2026-10-28T00:35:48	unknown	SOLVE_OK	prior_auto	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:49	unknown	TARGET_OK	count4_seg2	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:50	unknown	JOB_ARMED	count4_seg2	5	-	-	-	zeroed	-	-	-	-	segments=2 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:53	unknown	SOLVE_OK	count4_seg2	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:54	unknown	TARGET_OK	count2_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:55	unknown	JOB_ARMED	count2_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=2 auto=0
+20261028T003439-72879-9369	2026-10-28T00:35:58	unknown	SOLVE_OK	count2_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:35:58	unknown	TARGET_OK	count0_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:35:59	unknown	JOB_ARMED	count0_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=0 auto=0
+20261028T003439-72879-9369	2026-10-28T00:36:02	unknown	SOLVE_OK	count0_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:36:03	unknown	TARGET_OK	count4_seg5	-	-	self	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:36:04	unknown	JOB_ARMED	count4_seg5	5	-	-	-	zeroed	-	-	-	-	segments=5 count=4 auto=0
+20261028T003439-72879-9369	2026-10-28T00:36:07	unknown	SOLVE_OK	count4_seg5	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T003439-72879-9369	2026-10-28T00:36:07	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T003439-72879-9369	2026-10-28T00:36:07	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T003439-72879-9369	2026-10-28T00:36:07	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:44:54	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T004454-73494-3958	2026-10-28T00:44:54	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T004454-73494-3958	2026-10-28T00:44:55	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:44:55	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T004454-73494-3958	2026-10-28T00:44:56	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T004454-73494-3958	2026-10-28T00:44:56	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=13
+20261028T004454-73494-3958	2026-10-28T00:45:00	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T004454-73494-3958	2026-10-28T00:45:00	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T004454-73494-3958	2026-10-28T00:45:00	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits photos=1
+20261028T004454-73494-3958	2026-10-28T00:45:01	unknown	TARGET_OK	good4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:02	unknown	JOB_ARMED	good4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:45:07	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:45:10	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:45:10	unknown	UPDATE_MISSING	good4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:45:11	unknown	SOLVE_OK	good4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:45:12	unknown	TARGET_OK	one_v	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:13	unknown	JOB_ARMED	one_v	5	-	-	-	zeroed	-	-	-	-	segments=1 count=1 auto=0
+20261028T004454-73494-3958	2026-10-28T00:45:18	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:45:21	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:45:21	unknown	UPDATE_MISSING	one_v	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:45:22	unknown	SOLVE_OK	one_v	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:45:23	unknown	TARGET_OK	two_vh	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:23	unknown	JOB_ARMED	two_vh	5	-	-	-	zeroed	-	-	-	-	segments=2 count=2 auto=0
+20261028T004454-73494-3958	2026-10-28T00:45:29	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:45:32	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:45:32	unknown	UPDATE_MISSING	two_vh	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:45:33	unknown	SOLVE_OK	two_vh	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:45:33	unknown	TARGET_OK	three_vvh	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:34	unknown	JOB_ARMED	three_vvh	5	-	-	-	zeroed	-	-	-	-	segments=3 count=3 auto=0
+20261028T004454-73494-3958	2026-10-28T00:45:39	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	5	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:45:42	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:45:42	unknown	UPDATE_MISSING	three_vvh	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:45:43	unknown	SOLVE_OK	three_vvh	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:45:44	unknown	TARGET_OK	contra4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:45	unknown	JOB_ARMED	contra4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:45:50	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	6	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:45:53	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:45:53	unknown	UPDATE_MISSING	contra4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:45:54	unknown	SOLVE_OK	contra4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:45:55	unknown	TARGET_OK	parallel4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:45:56	unknown	JOB_ARMED	parallel4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:46:01	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	7	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:46:04	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:46:04	unknown	UPDATE_MISSING	parallel4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:46:05	unknown	SOLVE_OK	parallel4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:46:06	unknown	TARGET_OK	horizon4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:46:07	unknown	JOB_ARMED	horizon4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:46:12	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	8	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:46:15	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:46:15	unknown	UPDATE_MISSING	horizon4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:46:16	unknown	SOLVE_OK	horizon4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:46:17	unknown	TARGET_OK	prior_auto	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:46:27	unknown	JOB_ARMED	prior_auto	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=1
+20261028T004454-73494-3958	2026-10-28T00:46:33	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	9	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:46:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:46:36	unknown	UPDATE_MISSING	prior_auto	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:46:37	unknown	SOLVE_OK	prior_auto	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:46:37	unknown	TARGET_OK	count4_seg2	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:46:38	unknown	JOB_ARMED	count4_seg2	5	-	-	-	zeroed	-	-	-	-	segments=2 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:46:43	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	10	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:46:46	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:46:46	unknown	UPDATE_MISSING	count4_seg2	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:46:47	unknown	SOLVE_OK	count4_seg2	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:46:48	unknown	TARGET_OK	count2_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:46:49	unknown	JOB_ARMED	count2_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=2 auto=0
+20261028T004454-73494-3958	2026-10-28T00:46:54	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	11	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:46:57	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:46:57	unknown	UPDATE_MISSING	count2_seg4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:46:58	unknown	SOLVE_OK	count2_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:46:59	unknown	TARGET_OK	count0_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:47:00	unknown	JOB_ARMED	count0_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=0 auto=0
+20261028T004454-73494-3958	2026-10-28T00:47:05	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	12	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:47:08	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:47:08	unknown	UPDATE_MISSING	count0_seg4	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:47:09	unknown	SOLVE_OK	count0_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:47:10	unknown	TARGET_OK	count4_seg5	-	-	self	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:47:10	unknown	JOB_ARMED	count4_seg5	5	-	-	-	zeroed	-	-	-	-	segments=5 count=4 auto=0
+20261028T004454-73494-3958	2026-10-28T00:47:16	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	13	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T004454-73494-3958	2026-10-28T00:47:19	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T004454-73494-3958	2026-10-28T00:47:19	unknown	UPDATE_MISSING	count4_seg5	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T004454-73494-3958	2026-10-28T00:47:20	unknown	SOLVE_OK	count4_seg5	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T004454-73494-3958	2026-10-28T00:47:20	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T004454-73494-3958	2026-10-28T00:47:20	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T004454-73494-3958	2026-10-28T00:47:20	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:50:22	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T005022-73822-7474	2026-10-28T00:50:22	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T005022-73822-7474	2026-10-28T00:50:22	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:50:22	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T005022-73822-7474	2026-10-28T00:50:23	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T005022-73822-7474	2026-10-28T00:50:23	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=13
+20261028T005022-73822-7474	2026-10-28T00:50:28	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005022-73822-7474	2026-10-28T00:50:28	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005022-73822-7474	2026-10-28T00:50:28	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits photos=1
+20261028T005022-73822-7474	2026-10-28T00:50:28	unknown	TARGET_OK	good4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:50:29	unknown	JOB_ARMED	good4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:50:34	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:50:36	unknown	SOLVE_OK	good4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:50:37	unknown	TARGET_OK	one_v	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:50:38	unknown	JOB_ARMED	one_v	5	-	-	-	zeroed	-	-	-	-	segments=1 count=1 auto=0
+20261028T005022-73822-7474	2026-10-28T00:50:43	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:50:46	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T005022-73822-7474	2026-10-28T00:50:46	unknown	UPDATE_MISSING	one_v	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T005022-73822-7474	2026-10-28T00:50:47	unknown	SOLVE_OK	one_v	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:50:48	unknown	TARGET_OK	two_vh	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:50:48	unknown	JOB_ARMED	two_vh	5	-	-	-	zeroed	-	-	-	-	segments=2 count=2 auto=0
+20261028T005022-73822-7474	2026-10-28T00:50:54	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:50:55	unknown	SOLVE_OK	two_vh	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:50:56	unknown	TARGET_OK	three_vvh	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:50:57	unknown	JOB_ARMED	three_vvh	5	-	-	-	zeroed	-	-	-	-	segments=3 count=3 auto=0
+20261028T005022-73822-7474	2026-10-28T00:51:02	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	5	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:03	unknown	SOLVE_OK	three_vvh	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:04	unknown	TARGET_OK	contra4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:05	unknown	JOB_ARMED	contra4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:51:10	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	6	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:12	unknown	SOLVE_OK	contra4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:13	unknown	TARGET_OK	parallel4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:13	unknown	JOB_ARMED	parallel4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:51:19	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	7	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:20	unknown	SOLVE_OK	parallel4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:21	unknown	TARGET_OK	horizon4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:22	unknown	JOB_ARMED	horizon4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:51:27	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	8	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:28	unknown	SOLVE_OK	horizon4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:29	unknown	TARGET_OK	prior_auto	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:40	unknown	JOB_ARMED	prior_auto	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=1
+20261028T005022-73822-7474	2026-10-28T00:51:45	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	9	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:47	unknown	SOLVE_OK	prior_auto	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:48	unknown	TARGET_OK	count4_seg2	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:49	unknown	JOB_ARMED	count4_seg2	5	-	-	-	zeroed	-	-	-	-	segments=2 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:51:54	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	10	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:51:55	unknown	SOLVE_OK	count4_seg2	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:51:56	unknown	TARGET_OK	count2_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:51:57	unknown	JOB_ARMED	count2_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=2 auto=0
+20261028T005022-73822-7474	2026-10-28T00:52:02	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	11	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:52:04	unknown	SOLVE_OK	count2_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:52:04	unknown	TARGET_OK	count0_seg4	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:52:05	unknown	JOB_ARMED	count0_seg4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=0 auto=0
+20261028T005022-73822-7474	2026-10-28T00:52:10	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	12	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:52:12	unknown	SOLVE_OK	count0_seg4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:52:13	unknown	TARGET_OK	count4_seg5	-	-	self	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:52:14	unknown	JOB_ARMED	count4_seg5	5	-	-	-	zeroed	-	-	-	-	segments=5 count=4 auto=0
+20261028T005022-73822-7474	2026-10-28T00:52:19	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	13	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005022-73822-7474	2026-10-28T00:52:20	unknown	SOLVE_OK	count4_seg5	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005022-73822-7474	2026-10-28T00:52:20	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T005022-73822-7474	2026-10-28T00:52:20	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T005022-73822-7474	2026-10-28T00:52:20	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T005333-74013-6929	2026-10-28T00:53:33	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T005333-74013-6929	2026-10-28T00:53:33	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T005333-74013-6929	2026-10-28T00:53:33	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005333-74013-6929	2026-10-28T00:53:33	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T005333-74013-6929	2026-10-28T00:53:35	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T005333-74013-6929	2026-10-28T00:53:35	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T005333-74013-6929	2026-10-28T00:53:39	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005333-74013-6929	2026-10-28T00:53:39	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005333-74013-6929	2026-10-28T00:53:39	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits dg photos=1
+20261028T005333-74013-6929	2026-10-28T00:53:40	unknown	TARGET_OK	dg_ref	-	-	self	-	-	-	-	-	-	-
+20261028T005333-74013-6929	2026-10-28T00:53:41	unknown	JOB_ARMED	dg_ref	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005333-74013-6929	2026-10-28T00:53:46	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005333-74013-6929	2026-10-28T00:53:49	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T005333-74013-6929	2026-10-28T00:53:49	unknown	UPDATE_MISSING	dg_ref	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T005333-74013-6929	2026-10-28T00:53:50	unknown	SOLVE_OK	dg_ref	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T005333-74013-6929	2026-10-28T00:53:50	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T005333-74013-6929	2026-10-28T00:53:50	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T005333-74013-6929	2026-10-28T00:53:50	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T005512-74112-6594	2026-10-28T00:55:12	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T005512-74112-6594	2026-10-28T00:55:12	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T005512-74112-6594	2026-10-28T00:55:12	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005512-74112-6594	2026-10-28T00:55:12	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T005512-74112-6594	2026-10-28T00:55:13	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T005512-74112-6594	2026-10-28T00:55:13	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=4
+20261028T005512-74112-6594	2026-10-28T00:55:18	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005512-74112-6594	2026-10-28T00:55:18	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005512-74112-6594	2026-10-28T00:55:18	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits long photos=1
+20261028T005512-74112-6594	2026-10-28T00:55:18	unknown	TARGET_OK	auto1	-	-	self	-	-	-	-	-	-	-
+20261028T005512-74112-6594	2026-10-28T00:55:19	unknown	JOB_ARMED	auto1	1	-	-	-	zeroed	-	-	-	-	segments=0 count=0 auto=0
+20261028T005512-74112-6594	2026-10-28T00:55:24	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005512-74112-6594	2026-10-28T00:55:27	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T005512-74112-6594	2026-10-28T00:55:27	unknown	UPDATE_MISSING	auto1	1	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T005512-74112-6594	2026-10-28T00:55:28	unknown	SOLVE_OK	auto1	1	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005512-74112-6594	2026-10-28T00:55:29	unknown	TARGET_OK	long4	-	-	self	-	-	-	-	-	-	-
+20261028T005512-74112-6594	2026-10-28T00:55:30	unknown	JOB_ARMED	long4	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005512-74112-6594	2026-10-28T00:55:35	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005512-74112-6594	2026-10-28T00:55:37	unknown	SOLVE_OK	long4	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005512-74112-6594	2026-10-28T00:55:38	unknown	TARGET_OK	good4b	-	-	self	-	-	-	-	-	-	-
+20261028T005512-74112-6594	2026-10-28T00:55:39	unknown	JOB_ARMED	good4b	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005512-74112-6594	2026-10-28T00:55:44	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005512-74112-6594	2026-10-28T00:55:45	unknown	SOLVE_OK	good4b	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005512-74112-6594	2026-10-28T00:55:45	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T005512-74112-6594	2026-10-28T00:55:45	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T005512-74112-6594	2026-10-28T00:55:45	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T005656-74216-5065	2026-10-28T00:56:56	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T005656-74216-5065	2026-10-28T00:56:56	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T005656-74216-5065	2026-10-28T00:56:56	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005656-74216-5065	2026-10-28T00:56:56	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T005656-74216-5065	2026-10-28T00:56:57	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T005656-74216-5065	2026-10-28T00:56:57	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=3
+20261028T005656-74216-5065	2026-10-28T00:57:02	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005656-74216-5065	2026-10-28T00:57:02	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005656-74216-5065	2026-10-28T00:57:02	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits x photos=1
+20261028T005656-74216-5065	2026-10-28T00:57:03	unknown	TARGET_OK	L_with_dg	-	-	self	-	-	-	-	-	-	-
+20261028T005656-74216-5065	2026-10-28T00:57:04	unknown	JOB_ARMED	L_with_dg	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005656-74216-5065	2026-10-28T00:57:09	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005656-74216-5065	2026-10-28T00:57:10	unknown	SOLVE_OK	L_with_dg	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T005656-74216-5065	2026-10-28T00:57:11	unknown	TARGET_NIL	DG_with_L	-	-	-	-	-	-	-	-	-	first attempt
+20261028T005656-74216-5065	2026-10-28T00:57:13	unknown	TARGET_NIL	DG_with_L	-	-	-	-	-	-	-	-	-	after-source-reassert: nil
+20261028T005656-74216-5065	2026-10-28T00:57:13	unknown	FAILED	DG_with_L	5	-	-	-	-	-	-	-	-	target nil; case skipped
+20261028T005656-74216-5065	2026-10-28T00:57:13	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T005656-74216-5065	2026-10-28T00:57:13	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T005656-74216-5065	2026-10-28T00:57:13	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T005935-74375-3293	2026-10-28T00:59:35	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T005935-74375-3293	2026-10-28T00:59:35	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T005935-74375-3293	2026-10-28T00:59:35	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005935-74375-3293	2026-10-28T00:59:35	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T005935-74375-3293	2026-10-28T00:59:36	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T005935-74375-3293	2026-10-28T00:59:36	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T005935-74375-3293	2026-10-28T00:59:42	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005935-74375-3293	2026-10-28T00:59:42	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T005935-74375-3293	2026-10-28T00:59:42	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits f2 photos=1
+20261028T005935-74375-3293	2026-10-28T00:59:42	unknown	TARGET_OK	f2_good	-	-	self	-	-	-	-	-	-	-
+20261028T005935-74375-3293	2026-10-28T00:59:43	unknown	JOB_ARMED	f2_good	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T005935-74375-3293	2026-10-28T00:59:48	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T005935-74375-3293	2026-10-28T00:59:50	unknown	SOLVE_OK	f2_good	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T005935-74375-3293	2026-10-28T00:59:50	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T005935-74375-3293	2026-10-28T00:59:50	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T005935-74375-3293	2026-10-28T00:59:50	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T010207-74527-2358	2026-10-28T01:02:07	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T010207-74527-2358	2026-10-28T01:02:07	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T010207-74527-2358	2026-10-28T01:02:07	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T010207-74527-2358	2026-10-28T01:02:07	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T010207-74527-2358	2026-10-28T01:02:08	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T010207-74527-2358	2026-10-28T01:02:08	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T010207-74527-2358	2026-10-28T01:02:13	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T010207-74527-2358	2026-10-28T01:02:13	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T010207-74527-2358	2026-10-28T01:02:13	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits f3 photos=1
+20261028T010207-74527-2358	2026-10-28T01:02:14	unknown	TARGET_OK	f3_good	-	-	self	-	-	-	-	-	-	-
+20261028T010207-74527-2358	2026-10-28T01:02:14	unknown	JOB_ARMED	f3_good	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T010207-74527-2358	2026-10-28T01:02:20	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T010207-74527-2358	2026-10-28T01:02:23	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T010207-74527-2358	2026-10-28T01:02:23	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T010207-74527-2358	2026-10-28T01:02:25	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T010207-74527-2358	2026-10-28T01:02:25	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T010207-74527-2358	2026-10-28T01:02:27	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T010207-74527-2358	2026-10-28T01:02:27	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T010207-74527-2358	2026-10-28T01:02:30	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T010207-74527-2358	2026-10-28T01:02:30	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T010207-74527-2358	2026-10-28T01:02:32	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T010207-74527-2358	2026-10-28T01:02:32	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T010207-74527-2358	2026-10-28T01:02:33	unknown	SOLVE_OK	f3_good	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T010207-74527-2358	2026-10-28T01:02:33	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T010207-74527-2358	2026-10-28T01:02:33	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T010207-74527-2358	2026-10-28T01:02:33	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T012907-76147-4817	2026-10-28T01:29:07	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T012907-76147-4817	2026-10-28T01:29:07	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T012907-76147-4817	2026-10-28T01:29:07	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T012907-76147-4817	2026-10-28T01:29:07	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T012907-76147-4817	2026-10-28T01:29:08	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T012907-76147-4817	2026-10-28T01:29:08	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T012907-76147-4817	2026-10-28T01:29:13	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T012907-76147-4817	2026-10-28T01:29:13	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T012907-76147-4817	2026-10-28T01:29:13	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits f3 photos=1
+20261028T012907-76147-4817	2026-10-28T01:29:13	unknown	TARGET_OK	f3_good	-	-	self	-	-	-	-	-	-	-
+20261028T012907-76147-4817	2026-10-28T01:29:14	unknown	JOB_ARMED	f3_good	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T012907-76147-4817	2026-10-28T01:29:20	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T012907-76147-4817	2026-10-28T01:29:23	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T012907-76147-4817	2026-10-28T01:29:23	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T012907-76147-4817	2026-10-28T01:29:25	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T012907-76147-4817	2026-10-28T01:29:25	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T012907-76147-4817	2026-10-28T01:29:27	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T012907-76147-4817	2026-10-28T01:29:27	unknown	UPDATE_MISSING	f3_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T012907-76147-4817	2026-10-28T01:29:28	unknown	SOLVE_OK	f3_good	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T012907-76147-4817	2026-10-28T01:29:28	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T012907-76147-4817	2026-10-28T01:29:28	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T012907-76147-4817	2026-10-28T01:29:28	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T013013-76213-2063	2026-10-28T01:30:13	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T013013-76213-2063	2026-10-28T01:30:13	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T013013-76213-2063	2026-10-28T01:30:13	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T013013-76213-2063	2026-10-28T01:30:13	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T013013-76213-2063	2026-10-28T01:30:15	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T013013-76213-2063	2026-10-28T01:30:15	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T013013-76213-2063	2026-10-28T01:30:19	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T013013-76213-2063	2026-10-28T01:30:19	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T013013-76213-2063	2026-10-28T01:30:19	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits p8 photos=1
+20261028T013013-76213-2063	2026-10-28T01:30:20	unknown	TARGET_OK	p8_good	-	-	self	-	-	-	-	-	-	-
+20261028T013013-76213-2063	2026-10-28T01:30:21	unknown	JOB_ARMED	p8_good	5	-	-	-	zeroed	-	-	-	-	segments=8 count=8 auto=0
+20261028T013013-76213-2063	2026-10-28T01:30:26	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T013013-76213-2063	2026-10-28T01:30:29	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013013-76213-2063	2026-10-28T01:30:29	unknown	UPDATE_MISSING	p8_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013013-76213-2063	2026-10-28T01:30:31	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013013-76213-2063	2026-10-28T01:30:31	unknown	UPDATE_MISSING	p8_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013013-76213-2063	2026-10-28T01:30:34	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013013-76213-2063	2026-10-28T01:30:34	unknown	UPDATE_MISSING	p8_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013013-76213-2063	2026-10-28T01:30:35	unknown	SOLVE_OK	p8_good	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T013013-76213-2063	2026-10-28T01:30:35	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T013013-76213-2063	2026-10-28T01:30:35	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T013013-76213-2063	2026-10-28T01:30:35	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T013314-76394-4978	2026-10-28T01:33:14	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T013314-76394-4978	2026-10-28T01:33:14	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T013314-76394-4978	2026-10-28T01:33:14	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T013314-76394-4978	2026-10-28T01:33:14	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T013314-76394-4978	2026-10-28T01:33:16	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T013314-76394-4978	2026-10-28T01:33:16	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T013314-76394-4978	2026-10-28T01:33:20	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T013314-76394-4978	2026-10-28T01:33:20	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:368:369: script error: Expected “with” but found end of line. (-2741)
+20261028T013314-76394-4978	2026-10-28T01:33:20	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright limits p8b photos=1
+20261028T013314-76394-4978	2026-10-28T01:33:21	unknown	TARGET_OK	ord_good	-	-	self	-	-	-	-	-	-	-
+20261028T013314-76394-4978	2026-10-28T01:33:22	unknown	JOB_ARMED	ord_good	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T013314-76394-4978	2026-10-28T01:33:27	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T013314-76394-4978	2026-10-28T01:33:30	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013314-76394-4978	2026-10-28T01:33:30	unknown	UPDATE_MISSING	ord_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013314-76394-4978	2026-10-28T01:33:33	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013314-76394-4978	2026-10-28T01:33:33	unknown	UPDATE_MISSING	ord_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013314-76394-4978	2026-10-28T01:33:35	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T013314-76394-4978	2026-10-28T01:33:35	unknown	UPDATE_MISSING	ord_good	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T013314-76394-4978	2026-10-28T01:33:36	unknown	SOLVE_OK	ord_good	5	-	-	yes	-	39.8008	-	-	-	external Update click seen
+20261028T013314-76394-4978	2026-10-28T01:33:36	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T013314-76394-4978	2026-10-28T01:33:36	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T013314-76394-4978	2026-10-28T01:33:36	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T051223-89543-1039	2026-10-28T05:12:23	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T051223-89543-1039	2026-10-28T05:12:23	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T051223-89543-1039	2026-10-28T05:12:23	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:12:23	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T051223-89543-1039	2026-10-28T05:12:24	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T051223-89543-1039	2026-10-28T05:12:24	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=5
+20261028T051223-89543-1039	2026-10-28T05:12:29	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T051223-89543-1039	2026-10-28T05:12:29	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T051223-89543-1039	2026-10-28T05:12:29	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate photos=1
+20261028T051223-89543-1039	2026-10-28T05:12:30	unknown	TARGET_OK	c1_contradictory	-	-	self	-	-	-	-	-	-	-
+20261028T051223-89543-1039	2026-10-28T05:12:31	unknown	JOB_ARMED	c1_contradictory	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T051223-89543-1039	2026-10-28T05:12:36	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:12:39	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:39	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:42	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:42	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:44	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:44	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:47	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:47	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:49	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:49	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:52	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:52	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:54	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:54	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:57	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:57	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:12:57	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:12:59	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:12:59	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:02	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:02	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:04	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:04	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:07	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:09	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:09	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:11	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:11	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:14	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:14	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:16	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:16	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:19	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:19	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:21	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:21	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:22	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:13:23	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:23	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:26	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:26	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:28	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:28	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:31	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:31	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:33	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:33	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:36	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:38	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:38	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:40	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:40	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:43	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:43	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:45	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:45	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:46	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	5	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:13:48	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:48	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:50	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:50	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:53	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:53	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:55	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:55	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:13:57	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:13:57	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:00	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:00	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:02	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:02	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:05	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:05	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:07	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:09	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:09	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:10	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	6	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:14:12	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:12	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:14	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:14	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:17	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:17	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:19	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:19	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:22	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:22	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:24	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:24	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:27	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:27	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:29	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:29	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:31	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:31	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:34	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:34	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:35	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	7	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051223-89543-1039	2026-10-28T05:14:36	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:36	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:39	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:39	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:41	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:41	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:44	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:44	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:46	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:46	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:48	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:48	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:51	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:51	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:53	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:53	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:56	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:56	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:58	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051223-89543-1039	2026-10-28T05:14:58	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051223-89543-1039	2026-10-28T05:14:59	unknown	ABORT	-	-	-	-	-	-	-	-	-	-	uncaught: [string "ImportSweep.lua"]:1123: attempt to concatenate a boolean value
+20261028T051223-89543-1039	2026-10-28T05:14:59	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	error
+20261028T051223-89543-1039	2026-10-28T05:14:59	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:17:51	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T051751-89871-9075	2026-10-28T05:17:51	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T051751-89871-9075	2026-10-28T05:17:51	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051751-89871-9075	2026-10-28T05:17:51	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T051751-89871-9075	2026-10-28T05:17:52	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T051751-89871-9075	2026-10-28T05:17:52	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=5
+20261028T051751-89871-9075	2026-10-28T05:17:57	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T051751-89871-9075	2026-10-28T05:17:57	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T051751-89871-9075	2026-10-28T05:17:57	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate photos=1
+20261028T051751-89871-9075	2026-10-28T05:17:58	unknown	TARGET_OK	c1_contradictory	-	-	self	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:17:59	unknown	JOB_ARMED	c1_contradictory	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T051751-89871-9075	2026-10-28T05:18:04	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051751-89871-9075	2026-10-28T05:18:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:07	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:10	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:10	unknown	UPDATE_MISSING	c1_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:13	unknown	SOLVE_OK	c1_contradictory	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T051751-89871-9075	2026-10-28T05:18:14	unknown	TARGET_OK	c2_nearparallel	-	-	self	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:18:15	unknown	JOB_ARMED	c2_nearparallel	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T051751-89871-9075	2026-10-28T05:18:20	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051751-89871-9075	2026-10-28T05:18:23	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:23	unknown	UPDATE_MISSING	c2_nearparallel	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:26	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:26	unknown	UPDATE_MISSING	c2_nearparallel	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:29	unknown	SOLVE_OK	c2_nearparallel	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T051751-89871-9075	2026-10-28T05:18:30	unknown	TARGET_OK	c3_horizon	-	-	self	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:18:31	unknown	JOB_ARMED	c3_horizon	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T051751-89871-9075	2026-10-28T05:18:36	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	4	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051751-89871-9075	2026-10-28T05:18:39	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:39	unknown	UPDATE_MISSING	c3_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:42	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:18:42	unknown	UPDATE_MISSING	c3_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:18:45	unknown	SOLVE_OK	c3_horizon	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T051751-89871-9075	2026-10-28T05:18:45	unknown	TARGET_OK	c4_contam	-	-	self	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:18:57	unknown	JOB_ARMED	c4_contam	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=1
+20261028T051751-89871-9075	2026-10-28T05:19:02	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	5	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T051751-89871-9075	2026-10-28T05:19:05	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:19:05	unknown	UPDATE_MISSING	c4_contam	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:19:07	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T051751-89871-9075	2026-10-28T05:19:07	unknown	UPDATE_MISSING	c4_contam	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T051751-89871-9075	2026-10-28T05:19:10	unknown	SOLVE_OK	c4_contam	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T051751-89871-9075	2026-10-28T05:19:10	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T051751-89871-9075	2026-10-28T05:19:10	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T051751-89871-9075	2026-10-28T05:19:11	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T052257-90177-0920	2026-10-28T05:22:57	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T052257-90177-0920	2026-10-28T05:22:57	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T052257-90177-0920	2026-10-28T05:22:57	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052257-90177-0920	2026-10-28T05:22:57	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T052257-90177-0920	2026-10-28T05:22:58	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T052257-90177-0920	2026-10-28T05:22:58	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=3
+20261028T052257-90177-0920	2026-10-28T05:23:03	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052257-90177-0920	2026-10-28T05:23:03	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052257-90177-0920	2026-10-28T05:23:03	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate b photos=1
+20261028T052257-90177-0920	2026-10-28T05:23:04	unknown	TARGET_OK	c1b_contradictory	-	-	self	-	-	-	-	-	-	-
+20261028T052257-90177-0920	2026-10-28T05:23:05	unknown	JOB_ARMED	c1b_contradictory	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T052257-90177-0920	2026-10-28T05:23:10	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052257-90177-0920	2026-10-28T05:23:13	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052257-90177-0920	2026-10-28T05:23:13	unknown	UPDATE_MISSING	c1b_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052257-90177-0920	2026-10-28T05:23:16	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052257-90177-0920	2026-10-28T05:23:16	unknown	UPDATE_MISSING	c1b_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052257-90177-0920	2026-10-28T05:23:19	unknown	SOLVE_OK	c1b_contradictory	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T052257-90177-0920	2026-10-28T05:23:20	unknown	TARGET_OK	c3b_horizon	-	-	self	-	-	-	-	-	-	-
+20261028T052257-90177-0920	2026-10-28T05:23:21	unknown	JOB_ARMED	c3b_horizon	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T052257-90177-0920	2026-10-28T05:23:26	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052257-90177-0920	2026-10-28T05:23:29	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052257-90177-0920	2026-10-28T05:23:29	unknown	UPDATE_MISSING	c3b_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052257-90177-0920	2026-10-28T05:23:32	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052257-90177-0920	2026-10-28T05:23:32	unknown	UPDATE_MISSING	c3b_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052257-90177-0920	2026-10-28T05:23:35	unknown	SOLVE_OK	c3b_horizon	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T052257-90177-0920	2026-10-28T05:23:35	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T052257-90177-0920	2026-10-28T05:23:35	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T052257-90177-0920	2026-10-28T05:23:35	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T052545-90345-5492	2026-10-28T05:25:45	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T052545-90345-5492	2026-10-28T05:25:45	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T052545-90345-5492	2026-10-28T05:25:45	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052545-90345-5492	2026-10-28T05:25:45	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T052545-90345-5492	2026-10-28T05:25:46	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T052545-90345-5492	2026-10-28T05:25:46	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T052545-90345-5492	2026-10-28T05:25:51	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052545-90345-5492	2026-10-28T05:25:51	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052545-90345-5492	2026-10-28T05:25:51	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate reset photos=1
+20261028T052545-90345-5492	2026-10-28T05:25:52	unknown	TARGET_OK	c5_reference	-	-	self	-	-	-	-	-	-	-
+20261028T052545-90345-5492	2026-10-28T05:25:53	unknown	JOB_ARMED	c5_reference	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T052545-90345-5492	2026-10-28T05:25:58	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052545-90345-5492	2026-10-28T05:26:01	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052545-90345-5492	2026-10-28T05:26:01	unknown	UPDATE_MISSING	c5_reference	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052545-90345-5492	2026-10-28T05:26:04	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052545-90345-5492	2026-10-28T05:26:04	unknown	UPDATE_MISSING	c5_reference	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052545-90345-5492	2026-10-28T05:26:07	unknown	SOLVE_OK	c5_reference	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T052545-90345-5492	2026-10-28T05:26:07	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T052545-90345-5492	2026-10-28T05:26:07	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T052545-90345-5492	2026-10-28T05:26:07	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T052739-90459-1896	2026-10-28T05:27:39	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T052739-90459-1896	2026-10-28T05:27:39	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T052739-90459-1896	2026-10-28T05:27:39	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052739-90459-1896	2026-10-28T05:27:39	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T052739-90459-1896	2026-10-28T05:27:41	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T052739-90459-1896	2026-10-28T05:27:41	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=3
+20261028T052739-90459-1896	2026-10-28T05:27:45	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052739-90459-1896	2026-10-28T05:27:45	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T052739-90459-1896	2026-10-28T05:27:45	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate c photos=1
+20261028T052739-90459-1896	2026-10-28T05:27:46	unknown	TARGET_OK	c1c_contradictory	-	-	self	-	-	-	-	-	-	-
+20261028T052739-90459-1896	2026-10-28T05:27:47	unknown	JOB_ARMED	c1c_contradictory	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T052739-90459-1896	2026-10-28T05:27:53	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052739-90459-1896	2026-10-28T05:27:56	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052739-90459-1896	2026-10-28T05:27:56	unknown	UPDATE_MISSING	c1c_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052739-90459-1896	2026-10-28T05:27:58	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052739-90459-1896	2026-10-28T05:27:58	unknown	UPDATE_MISSING	c1c_contradictory	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052739-90459-1896	2026-10-28T05:28:01	unknown	SOLVE_OK	c1c_contradictory	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T052739-90459-1896	2026-10-28T05:28:02	unknown	TARGET_OK	c3c_horizon	-	-	self	-	-	-	-	-	-	-
+20261028T052739-90459-1896	2026-10-28T05:28:03	unknown	JOB_ARMED	c3c_horizon	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T052739-90459-1896	2026-10-28T05:28:08	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	3	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T052739-90459-1896	2026-10-28T05:28:11	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052739-90459-1896	2026-10-28T05:28:11	unknown	UPDATE_MISSING	c3c_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052739-90459-1896	2026-10-28T05:28:14	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T052739-90459-1896	2026-10-28T05:28:14	unknown	UPDATE_MISSING	c3c_horizon	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T052739-90459-1896	2026-10-28T05:28:17	unknown	SOLVE_OK	c3c_horizon	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T052739-90459-1896	2026-10-28T05:28:17	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T052739-90459-1896	2026-10-28T05:28:17	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T052739-90459-1896	2026-10-28T05:28:17	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-
+20261028T053030-90630-2032	2026-10-28T05:30:30	unknown	RUN_START	-	-	-	-	-	-	-	-	-	-	dirs=/Users/rohan/Projects/trichroma/research/upright/lrtest/abstain modes=1,2 limit=0 timeout=30s
+20261028T053030-90630-2032	2026-10-28T05:30:30	unknown	LOCK_OK	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.ImportSweep.lock
+20261028T053030-90630-2032	2026-10-28T05:30:31	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	1	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T053030-90630-2032	2026-10-28T05:30:31	unknown	PREFLIGHT_BEGIN	-	-	-	-	-	-	-	-	-	error	-
+20261028T053030-90630-2032	2026-10-28T05:30:32	unknown	FLOW	-	-	-	-	-	-	-	-	-	-	job
+20261028T053030-90630-2032	2026-10-28T05:30:32	unknown	JOB_BEGIN	-	-	-	-	-	-	-	-	unknown	-	/tmp/uplim/job.txt lines=2
+20261028T053030-90630-2032	2026-10-28T05:30:36	unknown	PANEL_STATE	-	-	-	-	-	-	-	unknown	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T053030-90630-2032	2026-10-28T05:30:36	unknown	PANEL_UNKNOWN	-	-	-	-	-	-	-	-	-	-	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:495:496: script error: Expected “with” but found end of line. (-2741)
+20261028T053030-90630-2032	2026-10-28T05:30:36	unknown	JOB_SETUP	-	-	-	-	-	-	-	unknown	-	-	col=upright degenerate final photos=1
+20261028T053030-90630-2032	2026-10-28T05:30:37	unknown	TARGET_OK	c5b_reference	-	-	self	-	-	-	-	-	-	-
+20261028T053030-90630-2032	2026-10-28T05:30:39	unknown	JOB_ARMED	c5b_reference	5	-	-	-	zeroed	-	-	-	-	segments=4 count=4 auto=0
+20261028T053030-90630-2032	2026-10-28T05:30:44	unknown	ALERT_WATCHDOG_ERROR	-	-	-	-	-	-	-	-	-	2	/Users/rohan/Projects/trichroma/research/upright/lrtest/.sweep-tmp/ax.scpt:110:572: execution error: Not authorized to send Apple events to System Events. (-1743)
+20261028T053030-90630-2032	2026-10-28T05:30:47	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T053030-90630-2032	2026-10-28T05:30:47	unknown	UPDATE_MISSING	c5b_reference	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T053030-90630-2032	2026-10-28T05:30:50	unknown	UPDATE_MISSING	-	-	-	-	-	-	-	-	-	-	no Update button and no mode button
+20261028T053030-90630-2032	2026-10-28T05:30:50	unknown	UPDATE_MISSING	c5b_reference	5	-	-	-	-	-	-	-	-	job: no CLICKED after 6s
+20261028T053030-90630-2032	2026-10-28T05:30:53	unknown	SOLVE_OK	c5b_reference	5	-	-	yes	-	35	-	-	-	external Update click seen
+20261028T053030-90630-2032	2026-10-28T05:30:53	unknown	JOB_END	-	-	-	-	-	-	-	-	-	-	-
+20261028T053030-90630-2032	2026-10-28T05:30:53	unknown	RUN_END	-	-	-	-	-	-	-	-	-	-	ok
+20261028T053030-90630-2032	2026-10-28T05:30:53	unknown	LOCK_RELEASED	-	-	-	-	-	-	-	-	-	-	-

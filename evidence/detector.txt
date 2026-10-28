@@ -1,0 +1,399 @@
+================================================================================
+ura::upright_img — LINE DETECTOR + VANISHING-POINT CLUSTERING
+Static reverse engineering of CameraRaw (Lightroom Classic 15.5)
+================================================================================
+
+BINARY  /Applications/Adobe Lightroom Classic/Adobe Lightroom Classic.app/
+        Contents/Frameworks/CameraRaw.lrtoolkit/Versions/A/CameraRaw
+SLICE   x86_64 (FAT arch 0, file offset 16384, size 156736560)
+NOTE    All addresses below are *file offsets == vmaddrs* for the x86_64 slice
+        (image base 0). Segments: __TEXT 0..0x9069000 (__text 0x1730..0x2c4ec70,
+        __const 0x2da2e00..0x8ea5304), __DATA 0x9170000..0x95f6000.
+        No chained fixups (LC_DYLD_INFO_ONLY), so pointer tables are raw vmaddrs.
+
+TAG CONVENTION
+  [PROVEN]     read directly out of instruction stream / constant pool
+  [INFERRED]   consistent with the code but semantics not uniquely forced
+  [UNRESOLVED] looked for, not found
+
+--------------------------------------------------------------------------------
+0. HOW THE NAMESPACE WAS REACHED (for reproducibility)
+--------------------------------------------------------------------------------
+The binary is stripped, but the *reflection/RTTI metadata block* in __const was
+not. Route:
+
+  __const string pool @0x85a78f6 = "15cr_upright_data"  (length-prefixed)
+  __const string pool @0x85a7908 = "N3ura11UprightDataE"
+  __const string pool @0x85a791c = "N3ura18UprightTimerObjectE"
+
+  name record for UprightData  @0x90b8150 = {u64 0x10, char* 0x85a7908}
+  name record for cr_upright_data @0x90b8160 = {u64 0x10, char* 0x85a78f6}
+
+  base    vtable @0x90b8120  (object vptr = 0x90b8128, [-8] -> 0x90b8160)
+  derived vtable @0x90b8180  (object vptr = 0x90b8188, [-8] -> 0x90b8150)
+
+  slots (base)    0xb677c0 0xb6d900 0xb6d920 0xb6d980 0xb6d990
+  slots (UprightData) 0xb6d9f0 0xb6da00 0xb6da20 0xb6da60 0xb6da80
+  => deleting-dtor / complete-dtor / clone / getTypeDescriptor / hash
+
+  0xb6dd70 = UprightData copy-ctor -> yields the field layout used in §4.
+
+The dead end the task warned about is real: zero symbols in `ura`; only these two
+typeinfo strings survive. Everything below comes from code, not names.
+
+--------------------------------------------------------------------------------
+1. SURVIVING STRINGS — THE PIPELINE IS SELF-LABELLED
+--------------------------------------------------------------------------------
+A run of stage tags in __cstring, all xref'd from ONE function (0x22ec970), each
+pushed through the debug-scope virtual [vptr+0x18] and/or printed via
+printf-style calls (0x2c5155e / 0x2c5148c):
+
+  0x8f85531  "upright_img initial resize"        -> 0x22ec9f8
+  0x8f8554c  "upright_img line segment detection"-> 0x22ecad2
+  0x8f8556f  "number of line segments = %u."
+  0x8f8558e  "upright_img calibration"           -> 0x22ecb7e
+  0x8f855a6  "upright_img VP"                    -> 0x22ecc01
+  0x8f855b5  "upright_img estimate_init_M"       -> 0x22eccba
+  0x8f855e6  "upright_img estimate_MKR"          -> 0x22ece88
+  0x8f85679  "upright_img opt_H5"                -> 0x22ed5e0
+  0x8f85692  "upright_img handle_degen_case"     -> 0x22ece79 (see §2 step 9)
+  0x8f856b0  "Horizon equation"
+  0x8f85761  "No horizon is detected."   / 0x8f85779 "Horizon detected."
+  0x8f85739  "VP computation."           / 0x8f85749 "line segment detection."
+
+Source path for the whole ura blob:
+  0x8f4507d /Users/slbuilds/jenkins/workspace/release/15.5/lr-mac-inst/acr/
+            camera_raw/cr_sdk/source/cr_upright.cpp
+Caller side (cr_upright.cpp, NOT ura): "cr_upright_params::Calculate"
+(0x8f44fe4), "FindSingleHorizonLine", "guided_upright"/"upright_center"/
+"upright_focal" param keys.
+
+--------------------------------------------------------------------------------
+2. PIPELINE ORDER  [PROVEN]
+--------------------------------------------------------------------------------
+Single driver function 0x22ec970 (takes `upright_img*` in rdi). Straight-line,
+sequential, no reordering. Exact order of *work* calls:
+
+  1. 0x22ec9f8 scope "initial resize"
+     0x22bda60(this+8, scale)   scale = *(double*)[this+0x458]  (default 0.0f =>
+     disabled; 0.0 means "keep full resolution")
+  2. 0x22ecaa9 call 0x22edd80(this, xmm0 = (double)(max(w,h)-1))
+     -> params constructor, see §4. NOTE the argument: thresholds are keyed to
+     the LONG IMAGE SIDE, not to a focal length.
+  3. 0x22ecac3 scope "line segment detection"
+     0x22bd090(this) -> detector, see §3
+  4. 0x22ecb45 gate: (this+0x48 - this+0x40)/24 = #segments;
+     if [this+0x468]->+8 (=3) > #segments -> jump to degenerate handling.
+  5. 0x22ecb7e scope "calibration"; virtual [vptr+0x10]
+  6. 0x22ecc01 scope "VP"
+     0x22d7cb0(this) -> VP RANSAC + clustering, see §5
+  7. gate: if (this+0x140 - this+0x138) == 4  (exactly one VP) -> skip ahead
+  8. 0x22eccba scope "estimate_init_M"   0x22d3950(this)
+  9. 0x22ece79 scope "estimate_MKR"      0x22d48d0(this)
+     then: if (*(double*)[this+0x1e8] <= K) -> 0x22ecff7 (accept)
+           else run the "handle_degen_case" retry path (0x22ece79's tag is
+           reused; 0x22ef9b0 = opt_H5 is invoked twice, 0x22ecf41 / 0x22ecf8d)
+ 10. 0x22ed5e0 scope "opt_H5" -> 0x22ef9b0  (log-barrier refinement)
+ 11. 0x22ecff7: if segments non-empty -> 0x22ee110 (emit result)
+
+So: resize -> detect -> calibrate -> VP(cluster) -> select -> init M -> MKR ->
+optimise -> degenerate fallback. The "detect -> cluster -> select -> solve"
+ordering in the task is confirmed, with an explicit "calibration" step between
+detect and cluster and a degenerate-case retry loop around the solve.
+
+--------------------------------------------------------------------------------
+3. LINE DETECTOR
+--------------------------------------------------------------------------------
+### 3.1 It is NOT stock LSD and NOT EDLines  [PROVEN]
+
+Detector entry 0x22bd090. Object at rbp-0x2c8; defaults built by ctor 0x22be000.
+Run wrapper 0x22d2250; segment-merge pass 0x22d2b60; core 0x22c6f20.
+
+The core is a **gradient-orientation, a-contrario-validated, per-length-bin
+extractor with iterative refinement**:
+
+  * 0x22c7148..0x22c7195 computes the bin count  [PROVEN]
+        n_bins = round( 4.0f * logf(max(w,h)) / -logf(8.0f) / detector[+0xc] )
+        i.e. n_bins = round(4 * log8(maxdim))   (detector[+0xc] default 1.0f)
+        const -4.0f        @0x338bcf0
+        const -2.0794415f  @0x8e6d170  (== -ln 8)
+        => ~13 bins for 1000 px, ~16 for 4000 px. These are *minimum aligned-
+           point counts* per length bin, i.e. the significance threshold.
+  * 0x22cae70(&hist, n_bins) called twice (two histograms, rbp-0x60 / rbp-0x90)
+  * loop over bins -> 0x22cafd0(&pts,&int,&v1,&v2,n_bins, scale) extracts
+    candidate point chains per bin; survivors pushed to [this+0xe8] (vector of
+    0x18-stride point vectors) and [this+0xd0] (vector of 12-byte {u64,u32})
+  * 0x22d0720(obj, 10, 0.00048828125f) is called in a loop capped at 0x63 = 99
+    (0x22d2293/0x22d22cf) -> iterative refinement, 10 inner iterations,
+    step 1/2048
+  * 0x22c9b60 = finalise; 0x22c6f20 = setup/execute
+
+Why not LSD: LSD uses 1024 angle bins, 2 directions per bin, a binomial-tail NFA
+over aligned points, and no per-length binning. Here: 8-way direction
+quantisation (§3.2), log-scaled per-length significance bins, and a 10-iteration
+least-squares-style refinement loop. Why not EDLines: EDLines has no a-contrario
+test and no refinement loop.  [INFERRED: "custom / EDLines-lineage but
+NFA-validated"]
+
+### 3.2 Angular quantisation  [PROVEN]
+Detector object defaults (ctor 0x22be000):
+
+  0x22be010  0x2da3770 -> +0x08 double 0.0078125 (1/128), +0x0c float 0.0
+             (the double is 0x3F80000000000000, so +0x08=0.0f, +0x0c=1.0f)
+  0x22be01d  +0x10 qword 0x3f800000  => +0x10 = 1.0f, +0x14 = 0.0f
+  0x22be025  +0x18 = 0
+  0x22be02d  0x8e6d0ec -> +0x20 = 0.04436749219894409f, +0x24 = 0.0f
+  0x22be039  +0x28 = 2                     (int)
+  0x22be040  0x8e6d0f0 -> +0x2c = 1.0f, +0x30 = 0.9238795042037964f
+  0x22be04d  +0x34 = 0x3e000000 = 0.125f
+  0x22be067  +0x60 = 3                     (int)
+  +0x38/+0x48/+0x50 = 0, +0x58 = 0, +0x68 = vector(3), +0x80..+0x100 = 0
+
+  **+0x30 = cos(22.5 deg) = 0.9238795042037964f  == angular tolerance**
+  => 8 gradient directions over 180 deg, each +-22.5 deg.
+
+Proof of use, 0x22cb4b5..0x22cb5d7:
+  xmm4 = [det+0x30]                       ; cos(22.5)
+  xmm5 = 0x338bd00 = 0x7FFFFFFF x4        ; fabs mask
+  per candidate point: xmm3 = |dx*sin(th) + dy*cos(th)|
+  ucomiss xmm3, xmm4 ; sbb edx,-1         ; count += (|cos dtheta| >= cos22.5)
+  cmp edx, r15d ; jg ...                  ; accept only if count > bin minimum
+
++0x34 = 0.125f is a subpixel interpolation weight (0x22cb490: cvtss2sd then
+1.0f - 0.125f at 0x22cb4a2..0x22cb4b5). [PROVEN value / INFERRED role]
++0x20 = 0.0443675f: no reader found in the detector's own code [UNRESOLVED]
+(0.0443675 rad = 2.5424 deg; not a round number in any obvious unit).
++0x28 = 2, +0x60 = 3: small integer modes, unproven.
+
+### 3.3 Segment merge pass 0x22d2b60(obj, 6, 10.0f)  [PROVEN]
+  -0x94 = 2*6 = 12.0f  (0x22d2c5e) -> max perpendicular distance of either
+       endpoint, reject if exceeded (0x22d2dac)
+  -0x150 = -10.0f, -0x140 = 10.0f (0x22d2c66 XOR with the sign mask of 10.0f)
+       -> along-direction gap must satisfy -10 < gap <= 10 px
+       (0x22d2dcb reject if gap <= -10; 0x22d2df1 reject if 10 <= gap)
+  On pass, sets the per-segment "merged" byte and drops the absorbed segment.
+  Segment record stride 0x38: +0x18 Vec3 line coeff (float), +0x28 int x,
+  +0x2c int y, +0x34 byte used.
+
+### 3.4 Minimum line length
+There is **no explicit pixel min-length constant**.  [PROVEN by absence]
+Length is used in exactly two ways:
+  (a) significance: a chain must have > round(4*log8(maxdim)) points that agree
+      with the direction within +-22.5 deg (0x22cb5e3). At 4000 px that is
+      >16 points, at 1000 px >13.
+  (b) weight: 0x22bd394..0x22bd505 computes each segment length, sums, divides
+      each by (sum/count) so weights are mean-normalised, stored in
+      [this+0x70] (vector<double>) and consumed as RANSAC/scoring weights.
+So the effective minimum length is the a-contrario count, which is
+logarithmic in image size rather than a fixed pixel count.  [INFERRED]
+
+### 3.5 Two detection passes  [PROVEN, purpose INFERRED]
+  pass A: 0x22bd0f1 0x22be000(obj,this+8) / 0x22d2250(obj, maxdim*scale)
+          output -> [this+0x40] starts, [this+0x58] ends, [this+0x70] weights
+  pass B: 0x22bd507 scale = 320.0f / (float)[this+0x3f8]  (0x8d3ab98 = 320.0f)
+          -> working image becomes 320 px wide; output -> [this+0x88] as Vec3
+          chains; count printed with "circle_P size = %u" (0x22bd84e)
+[this+0x3f8] is the long side of the *input* image (driver 0x22ec99a compares it
+to max(w,h)). Pass B therefore always downsamples to 320 px. [INFERRED: A = full
+-resolution metric detection, B = coarse 320 px structural pass]
+
+--------------------------------------------------------------------------------
+4. PARAMETER STRUCTS (all defaults, exact)
+--------------------------------------------------------------------------------
+Constructor 0x22edd80(this, xmm0 = (double)(max(w,h)-1)). Five shared_ptrs on
+`this`: +0x458 (16 B), +0x468 (32 B), +0x478 (0x68 B), +0x488 (0x70 B),
++0x490 (0x20 B).
+
+### 4.1 [this+0x468] — RANSAC control, 0x20 bytes  [PROVEN]
+  0x22ede15  [r14+0]  = 0x9000007d0  -> u32 +0x00 = 2000, u32 +0x04 = 9
+  0x22ede22  [r14+8]  = 3
+  0x22ede2a  0x8e6d200 -> [r14+0x10] = 1.0, [r14+0x18] = 0.95
+  => +0x00 RANSAC iterations = 2000
+     +0x04 max VP candidates = 9   (10 slots allocated, 0x22d7fd0 `lea ecx,[rdx+1]`)
+     +0x08 minimum inliers = 3
+     +0x10 count-ratio threshold = 1.0
+     +0x18 = 0.95 (not read by the VP stage; role unproven)
+
+### 4.2 [this+0x478] — angular/camera tolerances, 0x68 bytes  [PROVEN values]
+  0x22edea3 0x8e6d200 -> +0x00 = 1.0, +0x08 = 0.95
+  0x22edead +0x10 = 0x3fd0000000000000 = 0.25
+  0x22edeff +0x18 = (4.0 / (maxdim-1))^2
+  0x22edebb 0x8e6d220 -> +0x20 = 1/3600, +0x28 = 1/8100
+  0x22edec7 0x8e6d230 -> +0x30 = 1/900,  +0x38 = 0.16
+  0x22eded3 +0x40 = +0x48 = 0 ; +0x50 = +0x58 = 0
+  0x22edee0 +0x60 = 2.0
+  0x22ee068.. +0x40,+0x48,+0x50,+0x58 overwritten from this+0x408/0x410/0x418/0x420
+             (= principal point, defaulted to 0.5*w, 0.5*h, 1.0 at 0x22ee030)
+  1/3600 = (1/60 deg)^2, 1/900 = (2/60 deg)^2, 1/8100 = (1/90 deg)^2
+  => +0x20/+0x28/+0x30 are SQUARED ANGULAR tolerances of 1, 1.5 and 2 arcmin.
+     +0x18 is the same idea in radians from the image size: (4/maxdim)^2.
+  +0x38 = 0.16 (= 0.4^2) — squared ratio, role unproven.
+
+### 4.3 [this+0x488] — optimiser config, 0x70 bytes  [PROVEN values]
+  0x22edf76 0x8e6d240 -> +0x10 = 15.0, +0x18 = 15.0
+  0x22edf81 0x8e6d250 -> +0x20 = 1.0, +0x28 = 82.5
+  0x22edfa4 +0x38 = +0x40 = (1.0 / (maxdim-1))^2
+  +0x68 = 2.0 ; rest 0. Consumed by the log-barrier optimiser (0x22e60d0).
+
+--------------------------------------------------------------------------------
+5. VANISHING-POINT STAGE 0x22d7cb0 -> RANSAC 0x22d8f20
+--------------------------------------------------------------------------------
+### 5.1 Normalisation  [PROVEN]
+0x22d7df2..0x22d7ed1: for every segment, l = p_start x p_end (homogeneous line),
+then l /= ||l|| with a 1e-12 guard (0x536d580) and an all-zero guard. Segments
+are stored normalised in a scratch vector; the raw endpoints are kept.
+
+### 5.2 Model and sampling  [PROVEN]
+0x22d8f20(rdi=&out_vps, rsi=segments, rdx=starts, rcx=ends, r8=normalised
+          lines, r9d=iters, stack: cfg=[this+0x468], this)
+  0x22d8f88  iters = r9d  (== 2000)
+  0x22d9071..0x22d90a3  two distinct indices drawn via virtual [sampler+0x20];
+        the `cmp r15,rax / je` loop rejects a repeat (minimal sample = 2 lines)
+  0x22d90a5..0x22d9179  model = l1 x l2, normalised with the 1e-12 guard
+  => a VP is the intersection of two sampled lines. 2-point model, 2000 iters.
+
+### 5.3 Residual and inlier test  [PROVEN]
+0x22ec470(out, starts, ends, &vp, tau):
+  m = 0.5*(p_start + p_end)                       (line midpoint)
+  c = v x m
+  r = |c . p_start| / hypot(c.x, c.y)             (0x2c51174 = hypot)
+  r = min(r, tau)                                 (0x22ec69f minsd)
+  all-zero v -> r = tau for every segment
+
+Inlier test in the RANSAC (0x22d9243..0x22d92ab): `r < tau`, SIMD-counted, then
+  0x22d92b9  cmp cfg[+0x08] (=3), count ; jg reject
+=> **minimum 3 inliers per accepted VP**.
+
+### 5.4 tau = sqrt(3)  [PROVEN]
+The threshold is a lazily-initialised file-scope double at 0x9404638:
+  0x22d7c96 / 0x22d9bd6  movabs rax, 0x3ffbb67ae8584caa
+  0x22d7ca0 / 0x22d9be0  mov [0x9404638], rax
+0x3ffbb67ae8584caa as double = **1.7320508075688772 = sqrt(3)**, guarded by the
+one-shot byte 0x9404640. It is a *constant*, not image- or focal-scaled.
+0x22d8fa0 loads it into the threshold slot.  [PROVEN value; note the residual is
+already in normalised homogeneous units, so a fixed sqrt(3) is dimensionally
+consistent, but it is a surprisingly loose gate]
+
+### 5.5 Clustering = sequential multi-model RANSAC  [PROVEN]
+There is no separate distance-based clustering pass; clustering happens inside
+the same loop:
+  - 0x22d92d0 loop over already-accepted VPs; 0x22d93a0..0x22d93c2 skip the
+    candidate outright if BOTH sampled lines already have r == 0 under that VP
+    (i.e. the candidate is already explained).
+  - 0x22d9360 compares (count_new - 1) / (count_existing - 1) against cfg[+0x10]
+    (= 1.0).  If ratio >= 1.0 -> 0x22d9562: compare SUM of residuals; replace the
+    incumbent only if the new sum is strictly smaller (0x22d95bd ucomisd/jbe).
+    If ratio < 1.0 -> append the new VP (0x22d94f8) and increment the counter.
+  - the loop ends when iters are exhausted or the accepted count reaches the cap.
+  - accepted VPs go to [this+0xe8] (3-double directions, 0x18 stride) and their
+    indices to [this+0x138] (vector<int>), capped at 9 (+1 slot).
+
+### 5.6 Selection / ranking after the loop  [PROVEN, criterion INFERRED]
+0x22d8371..0x22d84d8: a pairwise tournament.
+  for each candidate pair (i, j): s = sum_k M[i][k] * w[k]  (w = [this+0x70],
+  the mean-normalised segment lengths); track running min xmm1 (starts at +inf,
+  0x321ac40) and running max xmm0, recording the argmax with cmova r15,r11.
+  If the final running max != 0, push the winner. 0x22d84d0 then moves on.
+=> greedy max-of-min ("bottleneck") partner selection, i.e. the VP that is
+   jointly best supported across the candidate set wins the slot.
+Downstream, 0x22d3950 (estimate_init_M) builds the per-VP weighted line sums
+  sum_i w_i * l_i  and 0x22e7e00 evaluates candidate M against them.
+
+--------------------------------------------------------------------------------
+6. WHAT IS SOLID vs SPECULATIVE
+--------------------------------------------------------------------------------
+SOLID (read from code/constants, reproducible by address):
+  - pipeline order and every stage boundary (§2)
+  - detector is gradient + a-contrario, 8 directions, +-22.5 deg via
+    cos(22.5)=0.9238795042037964f at detector+0x30 (§3.2)
+  - significance bins = round(4*log8(maxdim)) (§3.1)
+  - merge tolerances 12.0 px perpendicular / +-10 px along (§3.3)
+  - no fixed minimum line length; length is mean-normalised into a weight (§3.4)
+  - RANSAC: 2000 iterations, 2-line minimal sample, >=3 inliers, tau = sqrt(3),
+    cap 9 candidates, count-ratio 1.0 then residual-sum tie-break (§5)
+  - all defaults in the four parameter structs (§4)
+
+SPECULATIVE / INFERRED (flagged above):
+  - the "not LSD / EDLines-lineage" naming; the detector is bespoke
+  - detector+0x20 = 0.0443675f role (no reader found)
+  - detector+0x28 = 2 and +0x60 = 3 modes
+  - pass A vs pass B purposes
+  - +0x18 = 0.95 in the RANSAC config (never read by the VP stage)
+  - the 0.16 = 0.4^2 squared ratio
+  - "bottleneck" reading of the pairwise tournament
+
+UNRESOLVED: no focal length is used anywhere in the VP stage; the angular
+tolerances in §4.2 are dead-simple functions of the long image side, which
+suggests ura treats the camera as having f ~ max(w,h) during clustering and only
+recovers a real f later, in estimate_MKR / opt_H5.
+
+--------------------------------------------------------------------------------
+7. KEY ADDRESSES (quick index)
+--------------------------------------------------------------------------------
+  0x22ec970 driver            0x22bd090 detector
+  0x22be000 detector ctor     0x22c6f20 detector core
+  0x22d2250 detector run      0x22d2b60 segment merge
+  0x22cafd0 per-bin extract   0x22d0720 refinement (10 it, 1/2048)
+  0x22d7cb0 VP stage          0x22d8f20 VP RANSAC
+  0x22ec470 residual          0x9404638 tau = sqrt(3)
+  0x22d3950 estimate_init_M   0x22d48d0 estimate_MKR
+  0x22ef9b0 opt_H5            0x22ee110 emit
+  0x22edd80 params ctor       0x22ecff7 accept path
+
+================================================================================
+8. VERIFICATION EXCERPTS (raw, for audit)
+================================================================================
+A. RANSAC control object built in the params ctor 0x22ede15. 0x7d0 = 2000.
+   0x22ede15  movabs rax, 0x9000007d0      ; u32[0]=2000 u32[4]=9
+   0x22ede1f  mov    [r14], rax
+   0x22ede22  mov    dword [r14+8], 3
+   0x22ede2a  movapd xmm0, [0x8e6d200]     ; 1.0 , 0.95
+
+B. VP stage 0x22d7d0a reads iters / cap / min-inliers off cfg (= [this+0x468]).
+   0x22d7d0a  mov eax, [r15]
+   0x22d7d0d  mov [rbp-0x38], eax          ; 2000 -> iters
+   0x22d7d10  mov eax, [r15+4]
+   0x22d7d14  mov [rbp-0x70], rax          ; 9    -> candidate cap
+   0x22d7d18  mov eax, [r15+8]             ; 3
+
+C. iters is passed to the RANSAC in r9d and becomes the loop bound.
+   0x22d7f15  mov r9d, [rbp-0x38]          ; 2000
+   0x22d8f88  mov [rbp-0x44], r9d
+   0x22d9067  cmp r12d, [rbp-0x44] / je    ; loop bound
+   cap use: 0x22d7fd0  lea ecx, [rdx+1]    ; 9+1 = 10 slots allocated
+
+D. tau is sqrt(3) (0x3ffbb67ae8584caa), lazily written to 0x9404638.
+   0x22d7c96  movabs rax, 0x3ffbb67ae8584caa
+   0x22d7ca0  mov    [rip+0x712c991], rax ; -> 0x9404638
+   0x22d8fa0  movsd  xmm0, [0x9404638]     ; loaded as the threshold
+
+E. Inlier gate: cfg+8 == 3, reject when 3 > count.
+   0x22d92b5  mov rcx, [rbp+0x10]          ; cfg
+   0x22d92b9  cmp dword [rcx+8], eax       ; 3 > inliers ?
+   0x22d92bc  jg  0x22d9060                ; -> next iteration
+
+F. Significance bins = round(4*log(maxdim)/ln(8)).
+   0x22c7159  call 0x2c511d4               ; logf
+   0x22c715e  mulss xmm0, [0x338bcf0]      ; * -4.0f
+   0x22c7166  divss xmm0, [0x8e6d170]      ; / -2.0794415f  (== -ln 8)
+   0x22c716e  divss xmm0, [rbx+0xc]        ; / 1.0f
+   0x22c7173  roundss xmm0, xmm0, 9
+   0x22c7179  cvttss2si rax, xmm0
+
+G. Angular test, fabs(dx*sin+dy*cos) >= cos(22.5 deg), count, compare to bin min.
+   0x22cb4aa  subss xmm1, xmm0             ; 1 - 0.125 (detector+0x34)
+   0x22cb4bd  movaps xmm5, [0x338bd00]     ; 0x7FFFFFFF x4 = fabs mask
+   0x22cb4c8  movss xmm4, [det+0x30]       ; cos 22.5 = 0.9238795
+   0x22cb5c8  andps  xmm3, xmm5
+   0x22cb5cb  ucomiss xmm3, xmm4
+   0x22cb5ce  sbb    edx, -1               ; count += (>= cos22.5)
+   0x22cb5e3  cmp    edx, r15d / jg        ; accept if count > bin minimum
+
+H. Merge pass tolerances (0x22d2b60 called with esi=6, xmm0=10.0f).
+   0x22d2c5e  movss [rbp-0x94], xmm0       ; 2*6 = 12.0f perpendicular
+   0x22d2c66  movaps xmm0, [0x2da3700]     ; -0.0 vector
+   0x22d2c6d  xorps  xmm0, [rbp-0x140]     ; -> -10.0f
+   0x22d2c74  movaps [rbp-0x150], xmm0
+   0x22d2dac  ucomiss xmm0, [rbp-0x94] / ja
+   0x22d2dcb  ucomiss xmm0, [rbp-0x150] / jbe
+   0x22d2df1  ucomiss xmm1, xmm0 / jbe     ; xmm1 == 10.0f

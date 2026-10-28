@@ -1,0 +1,3 @@
+PASS: exact production restoration; candidate only changes selection; 679/678/450/387/228 denominators;
+finite scored outputs; unchanged captured quality verdict; negative oracle-gap recovery;
+all three synthetic validation sets complete; 105 tests pass for final candidate and production.

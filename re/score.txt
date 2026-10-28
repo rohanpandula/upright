@@ -1,0 +1,84 @@
+macho magic 0xfeedfacf cputype 16777223 ncmds 38
+--- 0x22ec5aa residual math
+0x22ec5aa  addsd   xmm3, xmm1   
+0x22ec5ae  movsd   xmm4, qword ptr [rcx + r15*8 - 8]   
+0x22ec5b5  movsd   qword ptr [rbp - 0x80], xmm0   
+0x22ec5ba  addsd   xmm4, xmm0   
+0x22ec5be  movsd   xmm1, qword ptr [rax + r15*8]   
+0x22ec5c4  movsd   xmm5, qword ptr [rcx + r15*8]   
+0x22ec5ca  movsd   qword ptr [rbp - 0x70], xmm1   
+0x22ec5cf  addsd   xmm5, xmm1   
+0x22ec5d3  movsd   xmm1, qword ptr [rip + 0xab6835]   <0x2da2e10 f=0 d=0.5 ''>
+0x22ec5db  mulsd   xmm3, xmm1   
+0x22ec5df  mulsd   xmm4, xmm1   
+0x22ec5e3  mulsd   xmm5, xmm1   
+0x22ec5e7  movsd   xmm2, qword ptr [r14]   
+0x22ec5ec  movsd   xmm0, qword ptr [r14 + 8]   
+0x22ec5f2  movsd   xmm1, qword ptr [r14 + 0x10]   
+0x22ec5f8  movsd   qword ptr [rbp - 0x60], xmm4   
+0x22ec5fd  mulsd   xmm4, xmm1   
+0x22ec601  movsd   qword ptr [rbp - 0x48], xmm0   
+0x22ec606  mulsd   xmm0, xmm5   
+0x22ec60a  subsd   xmm0, xmm4   
+0x22ec60e  movapd  xmmword ptr [rbp - 0x90], xmm2   
+0x22ec616  mulsd   xmm5, xmm2   
+0x22ec61a  movsd   qword ptr [rbp - 0x68], xmm3   
+0x22ec61f  mulsd   xmm1, xmm3   
+0x22ec623  subsd   xmm1, xmm5   
+0x22ec627  movsd   qword ptr [rbp - 0x50], xmm0   
+0x22ec62c  movsd   qword ptr [rbp - 0x58], xmm1   
+0x22ec631  call    0x2c51174   
+0x22ec636  ucomisd xmm0, qword ptr [rip + 0xab8b7a]   <0x2da51b8 f=0 d=0 ''>
+0x22ec63e  movsd   xmm2, qword ptr [rbp - 0x30]   
+0x22ec643  movapd  xmm1, xmm2   
+0x22ec647  jne     0x22ec64f   
+0x22ec649  jnp     0x22ec560   
+0x22ec64f  movsd   xmm3, qword ptr [rbp - 0x68]   
+0x22ec654  mulsd   xmm3, qword ptr [rbp - 0x48]   
+0x22ec659  movapd  xmm1, xmmword ptr [rbp - 0x90]   
+0x22ec661  mulsd   xmm1, qword ptr [rbp - 0x60]   
+0x22ec666  subsd   xmm1, xmm3   
+0x22ec66a  movsd   xmm4, qword ptr [rbp - 0x50]   
+0x22ec66f  mulsd   xmm4, qword ptr [rbp - 0x78]   
+0x22ec674  addsd   xmm4, qword ptr [rip + 0xab8b3c]   <0x2da51b8 f=0 d=0 ''>
+0x22ec67c  movsd   xmm3, qword ptr [rbp - 0x58]   
+0x22ec681  mulsd   xmm3, qword ptr [rbp - 0x80]   
+0x22ec686  addsd   xmm3, xmm4   
+0x22ec68a  mulsd   xmm1, qword ptr [rbp - 0x70]   
+0x22ec68f  addsd   xmm1, xmm3   
+0x22ec693  andpd   xmm1, xmmword ptr [rip + 0xf2d055]   <0x32196f0 f=nan d=nan ''>
+0x22ec69b  divsd   xmm1, xmm0   
+0x22ec69f  minsd   xmm1, xmm2   
+0x22ec6a3  jmp     0x22ec560   
+0x22ec6a8  and     r13, 0xfffffffffffffffc   
+0x22ec6ac  xor     ecx, ecx   
+0x22ec6ae  nop        
+0x22ec6b0  mov     rdx, qword ptr [rbx]   
+0x22ec6b3  movsd   qword ptr [rdx + rcx*8], xmm0   
+0x22ec6b8  mov     rdx, qword ptr [rbx]   
+0x22ec6bb  movsd   qword ptr [rdx + rcx*8 + 8], xmm0   
+0x22ec6c1  mov     rdx, qword ptr [rbx]   
+0x22ec6c4  movsd   qword ptr [rdx + rcx*8 + 0x10], xmm0   
+0x22ec6ca  mov     rdx, qword ptr [rbx]   
+0x22ec6cd  movsd   qword ptr [rdx + rcx*8 + 0x18], xmm0   
+0x22ec6d3  add     rcx, 4   
+0x22ec6d7  cmp     r13, rcx   
+0x22ec6da  jne     0x22ec6b0   
+0x22ec6dc  test    rax, rax   
+0x22ec6df  je      0x22ec700   
+0x22ec6e1  nop     word ptr cs:[rax + rax]   
+0x22ec6f0  mov     rdx, qword ptr [rbx]   
+0x22ec6f3  movsd   qword ptr [rdx + rcx*8], xmm0   
+0x22ec6f8  inc     rcx   
+0x22ec6fb  dec     rax   
+0x22ec6fe  jne     0x22ec6f0   
+0x22ec700  add     rsp, 0x68   
+0x22ec704  pop     rbx   
+0x22ec705  pop     r12   
+0x22ec707  pop     r13   
+0x22ec709  pop     r14   
+0x22ec70b  pop     r15   
+0x22ec70d  pop     rbp   
+0x22ec70e  ret        
+0x22ec70f  mov     edi, 8   
+0x22ec714  call    0x2c50ebc   

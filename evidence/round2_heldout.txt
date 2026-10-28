@@ -1,0 +1,16 @@
+Held-out data ONLY (separate from fixture mean)
+H01                      V/H [0.00347241 0.00458503]; failures 0/5
+H02                      V/H [0.00875048 0.00697199]; failures 0/5
+H03                      V/H [0.01245163 0.00370791]; failures 0/5
+H04                      V/H [0.00608344 0.00329821]; failures 0/5
+H05                      V/H [0.00882183 0.00294207]; failures 0/5
+H06                      V/H [0.00833067 0.00716478]; failures 0/5
+H07                      V/H [0.00587701 0.00556429]; failures 0/5
+H08                      V/H [0.00874625 0.00324156]; failures 0/5
+H09                      V/H [0.05203309 0.03396016]; failures 0/5
+H10                      V/H [0.00995762 0.0032582 ]; failures 0/5
+H11                      V/H [0.01880209 0.00389166]; failures 0/5
+H12                      V/H [0.00490123 0.0022571 ]; failures 0/5
+H13_single_wall          V/H [0.00413606 0.00455838]; failures 0/5
+H14_near_frontal         V/H [0.00077405 0.00721076]; failures 0/5
+mean family 0.008777 deg; worst 0.113444; failures 0/70

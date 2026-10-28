@@ -1,0 +1,44 @@
+adobe 10 / 256
+adobe 20 / 256
+adobe 30 / 256
+adobe 40 / 256
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+adobe 50 / 256
+adobe 60 / 256
+adobe 70 / 256
+adobe 80 / 256
+adobe 90 / 256
+adobe 100 / 256
+adobe 110 / 256
+adobe 120 / 256
+adobe 130 / 256
+adobe 140 / 256
+adobe 150 / 256
+adobe 160 / 256
+adobe 170 / 256
+adobe 180 / 256
+adobe 190 / 256
+adobe 200 / 256
+adobe 210 / 256
+adobe 220 / 256
+adobe 230 / 256
+adobe 240 / 256
+adobe 250 / 256
+adobe 256 / 256

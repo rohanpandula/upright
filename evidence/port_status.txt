@@ -1,0 +1,77 @@
+upright_port -- port status (2026-10-28)
+======================================
+Python: python3.12 (numpy + cv2 only)
+Run:    cd port && python3.12 -m unittest test_port -v
+Result: 47 tests, including all 34 original tests unchanged; OK, no warnings
+Licence: MIT, clean-room implementation; no Adobe source copied
+
+ACCURACY GAP
+------------
+Full, independent ground-truth axis residuals (vertical / horizontal degrees):
+                 before             after
+A_clean          0.406 / 0.163      0.018 / 0.014
+B_strong         0.390 / 0.187      0.050 / 0.031
+C_noisy          0.212 / 0.403      0.020 / 0.022
+D_roll           0.090 / 0.339      0.014 / 0.001
+01_input_truth   0.192 / 0.162      0.014 / 0.062
+
+Four-TIFF mean: 0.274 -> 0.021 deg (92% lower).
+Energy alone on FROZEN OLD segments: 0.274 -> 0.106 deg (61% lower).
+B_strong energy alone: 0.390 / 0.187 -> 0.040 / 0.028 deg.
+Reproduce: cd port && python3.12 benchmark_accuracy.py
+Protocol, limitations, baseline homographies/segments: accuracy_gap.txt,
+accuracy_baseline.json, accuracy_after.json, accuracy_baseline_segments.npz.
+
+CHANGES
+-------
+* Detector: real log-space binomial NFA, M^4 tests and p=1/8; eight fixed
+  direction scans / cos22.5; float32 long-side bin formula; no 8px minimum
+  or density heuristic; quadratic subpixel edge localization; bounded support
+  splitting/refitting; containment-based merge with strict interval slack.
+* Energy: score the ACTUAL observed support lines with H^-T, using isotropic
+  pixel angles and globally mean-normalised source lengths. Robust Cauchy
+  loss at the recovered four-pixel scale reduces misassigned-line influence.
+  Remove the spurious soft Perkins penalty on arbitrary two-line crossings;
+  real three-ray fork detection is not implemented.
+* Keep solve(segments=...) as the detector seam; tested with OpenCV LSD.
+* No changes to camera algebra, source camera, guided solve, measured damping
+  functions or mode semantics. Existing model/round-trip/guided tests unchanged.
+
+EVIDENCE CORRECTIONS -- see detector_corrections.txt for raw addresses
+--------------------------------------------------------------------
+* Detector DOES compute a binomial NFA; +0x34=.125 is its Bernoulli probability.
+* Refinement loads float32 1.0, not float64 ~1/2048; signature (obj,10,1.0f).
+* Merge argument 6 is not doubled (a branch was misread): perpendicular 6px.
+  Interval endpoints must be within strict -10/+10 containment slack; it does
+  not bridge arbitrary 10px gaps.
+* ROUNDSS immediate 9 floors native significance bins, giving 15 at 4000.
+  The port retains the requested nearest-round rule (16 at 4000) so all 34
+  original tests remain unchanged. This is an explicit compatibility mismatch.
+* 01_input.png is synthetic (demo_synthetic.py), not a hard real photograph;
+  true focal=1400px. The older status used 1200px. Preserve that old diagnostic
+  on exactly its original inliers: 0.437/0.224 -> 0.190/0.270 with the new
+  pipeline. Horizontal worsens slightly with the wrong focal; no universal
+  improvement claimed.
+* Reported Adobe Full convergence is not universally zero; only Guided was
+  measured exactly zero. Port axis errors and report convergence differ as metrics.
+
+LIMITATIONS / WHAT REMAINS
+-------------------------
+* Exact Adobe pixel parity is NOT established: preprocessing, tracing and TLS
+  support refinement remain re-derived. Signature constants alone do not fully
+  specify their helpers. The coarse 320px curve payload is not implemented.
+* Camera tolerance literals (1/3600,1/8100,1/900,0.16) are retained as facts,
+  not repurposed into invented detector gates. Their entire downstream use
+  remains unresolved. Resolution scale is (4/(maxdim-1))^2.
+* The VP estimator is still the old RANSAC approximation; vp_resolution.txt
+  describes the distinct shipped stage. No claim that 2000 is a shipped RANSAC
+  iteration count, or sqrt(3) an Adobe inlier decision.
+* Energy is not Adobe's evaluator. Cauchy is a measured clean-room choice;
+  real Perkins barrier, E_img, lens distortion, crop/output policy unported.
+* Source K0 stays fixed: wrong focal can make the Manhattan rays nonorthogonal,
+  which no rotation/destination camera can fully rectify. This is not solely
+  "prior dominance" in the energy.
+* Broad real-photo corpus, new Lightroom runs and pixelwise detector output
+  were not checked. New tests cover NFA math/underflow/rejection, directions,
+  short lines, merge boundaries, unsorted gaps, refinement, scale, LSD seam,
+  pixel-angle loss and bundled accuracy on both old and new detections.

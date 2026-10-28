@@ -1,0 +1,211 @@
+ROUND 7 — OUTPUT FRAMING — 2026-10-28
+==============================================================================================================
+RESULT: Translation framing closes most of the raw gap, without any damping or geometry change.
+Every framed scene/mode/seed passes the supplied scene raw target; shape is unchanged to 1e-12.
+This recovers a precise output TRANSLATION policy. The complete destination scale policy is not recovered.
+
+1. DERIVATION FROM STORED MATRICES
+For each output axis, sort the four transformed source-corner coordinates: s0 <= s1 <= s2 <= s3.
+Outer bounds = [s0,s3]; inner bounds = [s1,s2]. The latter are order statistics, not an inscribed crop.
+Blend bounds = [.1*s0+.9*s1, .9*s2+.1*s3]. Adobe centres their midpoint at .5:
+  c = (s0 + 9*s1 + 9*s2 + s3)/20; translation = (.5,.5)-c; H_framed = T @ H.
+The 10% outer weight is inferred independently from (.5-inner_mid)/(outer_mid-inner_mid).
+Where a component is symmetric the weight is unidentifiable there, but the translation remains zero.
+All 16 active adobe_truth slots already satisfy c=(.5,.5) to the 9-decimal storage precision.
+Slots 0 and 5 are identity in every requested scene: zero framing translation, unit scale.
+This is neither ordinary bbox recentering, transformed-centre anchoring, a mean-centroid rule,
+nor moving a crop origin to zero. Sorting per axis also accounts for roll-dependent corner order.
+
+Controlled same-rotation comparison: K0 uses stored source focal and centred source principal point,
+matching the port source-centre convention. Stored-source-centre sensitivity is reported separately.
+RQ(diag(w,h,1) H K0) = K1 R. Keep native R and K1 focal/aspect/skew; replace only K1 centre
+with (w/2,h/2). Then H_adobe = T H_centred exactly. The proposed rule recovers that T.
+A general upper-triangular K1 avoids falsely calling aspect/skew errors framing or changing R.
+This decomposition fixes a source gauge; it does not uniquely recover Adobe internal cameras.
+Values below: H[:,2] is normalized origin translation; Delta is the constant post-map translation.
+Source dimensions are 1400x1000. Slots: 1 Auto, 2 Full, 3 Level, 4 Vertical.
+scene       slot  Adobe H02,H12        centred H02,H12       Delta x,y pixels       rule error px
+A_clean      1   0.00246700,-0.04274557   0.12301134, 0.38926622   -168.7621, -432.0118  7.12e-07
+A_clean      2   0.06465877,-0.01233082   0.17974725, 0.55655294   -161.1239, -568.8838  4.47e-07
+A_clean      3  -0.00291053,-0.01221480  -0.00291053,-0.01221480     -0.0000,    0.0000  8.6e-07
+A_clean      4   0.09025439,-0.00246698   0.09012098, 0.55751370      0.1868, -559.9807  9.58e-07
+B_strong     1  -0.00734109,-0.04398755   0.14409775, 0.24881962   -212.0144, -292.8072  4.53e-08
+B_strong     2   0.08914526,-0.07611885   0.31506087, 0.82245840   -316.2819, -898.5772  9.14e-07
+B_strong     3  -0.01294065,-0.06137013  -0.01294065,-0.06137013     -0.0000,   -0.0000  8.6e-07
+B_strong     4   0.17128730,-0.00011976   0.17116666, 0.79588121      0.1689, -796.0010  6.15e-07
+C_noisy      1   0.00239415,-0.04269160   0.12687662, 0.39889738   -174.2755, -441.5890  9.39e-07
+C_noisy      2   0.06400443,-0.01387638   0.18204854, 0.57205534   -165.2618, -585.9317  3.05e-07
+C_noisy      3  -0.00311379,-0.01310853  -0.00311379,-0.01310854      0.0000,    0.0000  5e-07
+C_noisy      4   0.09008654,-0.00281384   0.08993801, 0.57266266      0.2079, -575.4765  1.87e-07
+D_roll       1   0.00302211,-0.08044016   0.12390029, 0.36991372   -169.2295, -450.3539  5.91e-07
+D_roll       2   0.00875790,-0.11685561   0.13970372, 0.56367330   -183.3242, -680.5289  5.38e-07
+D_roll       3  -0.01696826,-0.08577357  -0.01696826,-0.08577357      0.0000,   -0.0000  7e-07
+D_roll       4   0.06936921,-0.06361662   0.06218808, 0.56057406     10.0536, -624.1907  7.62e-08
+
+Source-gauge sensitivity: using the stored source principal point instead of (.5,.5).
+The SAME 10/90 rule still recovers native H to <=2e-9, with no refit of weights.
+scene       slot  Delta x,y pixels (stored-source-centre gauge)  destination scale proxy
+A_clean      1     -172.27018,    -446.53395               1.03236761
+A_clean      2     -163.83293,    -579.71320               0.90098601
+A_clean      3       -4.28154,     -16.22509               1.01214600
+A_clean      4       -3.31493,    -570.48347               0.86008377
+B_strong     1     -209.71759,    -310.37346               1.04473245
+B_strong     2     -313.21584,    -904.38433               0.78194807
+B_strong     3        1.77804,     -18.88740               1.05959473
+B_strong     4        0.67547,    -801.01116               0.66586709
+C_noisy      1     -179.23255,    -452.78366               1.03126038
+C_noisy      2     -169.23886,    -594.18970               0.90064072
+C_noisy      3       -5.64482,     -12.61271               1.01302490
+C_noisy      4       -4.34359,    -583.54554               0.85908653
+D_roll       1     -171.00843,    -461.83861               1.04095146
+D_roll       2     -184.80658,    -690.04733               1.02471373
+D_roll       3       -2.43833,     -13.62858               1.08238525
+D_roll       4        7.94523,    -632.75218               0.91121896
+
+Shift prediction errors per scene/slot, Euclidean pixels (no scale/shape fitting):
+scene       slot bbox-mid source-centre corner-mean grid-mean crop-origin inner90/outer10
+A_clean      1   45.603416   40.263853   20.268185   21.739639  125.190961    0.000001
+A_clean      2   53.314459   50.068010   23.695315   24.437281   62.665583    0.000000
+A_clean      3    0.000001    0.000001    0.000001    0.000001   17.748086    0.000001
+A_clean      4    1.104164   59.974311    0.490740   38.380172   31.234215    0.000001
+B_strong     1   61.883708   50.700904   27.503870   37.901017  133.773569    0.000000
+B_strong     2  178.445794   86.450759   79.309241   34.153855  131.222294    0.000001
+B_strong     3    0.000001    0.000001    0.000001    0.000001   88.618041    0.000001
+B_strong     4    0.384840  101.352247    0.171040   65.286609    5.364101    0.000001
+C_noisy      1   45.538041   39.963179   20.239129   21.741245  124.037145    0.000001
+C_noisy      2   53.087053   49.743522   23.594246   24.271591   62.975347    0.000000
+C_noisy      3    0.000000    0.000000    0.000000    0.000001   19.043491    0.000000
+C_noisy      4    1.131929   59.528116    0.503079   38.086374   30.253356    0.000000
+D_roll       1   71.761772   56.630425   31.894120   41.699933  189.046679    0.000001
+D_roll       2   80.079968   69.496651   35.591097   44.252574  247.809138    0.000001
+D_roll       3    0.000001    0.000001    0.000001    0.000001  123.490679    0.000001
+D_roll       4   50.336805   64.490773   22.371914   43.149752  142.056101    0.000000
+
+Additional existing native sweep snapshot (not used to fit the rule):
+318/320 slots satisfy the rule to max matrix error <=2e-9.
+  Exception retained: V40S3 slot 2, max matrix change 0.069917888.
+  Exception retained: V40S3 slot 4, max matrix change 0.070056498.
+Both exceptions are V40S3 Full/Vertical; Round 6 already identifies its Full as a bad native solution.
+All 80 Auto and all 80 Level sweep slots satisfy the rule. No exception is omitted or fit away.
+
+2. SCALE: PerspectiveScale=100 IS NOT THE WHOLE DESTINATION SCALE
+All four photos store PerspectiveScale=100, PerspectiveX=0, PerspectiveY=0. There is no manual
+scale or shift to apply from those settings. But the native map still has an implicit destination
+focal/scale distinct from its source. Absolute focal and a post-uniform zoom are interchangeable
+in K1, so these matrices alone cannot identify an internal focal-vs-framing split.
+The exact translation law needs no output scale fit. We therefore ship that measured law with
+identity additional scale, and do not claim that native destination scale is generally identity.
+The stored-gauge RQ values show this directly (fx/fy/skew are NOT all forced to square pixels):
+scene       slot  source f px   dest fx px  dest fy px  sqrt(fx*fy)/f0  fx/fy   skew/fx
+A_clean      1    1549.5974   1601.4777   1610.7703       1.03647388  0.99423   0.003398
+A_clean      2    1549.5974   1397.6302   1409.7808       0.90584327  0.99138   0.004687
+A_clean      3    1549.5974   1568.4188   1568.4188       1.01214600  1.00000   0.000000
+A_clean      4    1549.5974   1333.3551   1345.7277       0.86443556  0.99081   0.000942
+B_strong     1    1590.3955   1663.1699   1668.5317       1.04744297  0.99679   0.002401
+B_strong     2    1590.3955   1241.2819   1264.0297       0.78760545  0.98200   0.009362
+B_strong     3    1590.3955   1685.1747   1685.1747       1.05959473  1.00000  -0.000000
+B_strong     4    1590.3955   1056.9748   1077.4126       0.67099331  0.98103  -0.000313
+C_noisy      1    1582.1484   1632.6392   1641.1169       1.03458849  0.99483   0.003467
+C_noisy      2    1582.1484   1425.4496   1436.8070       0.90454032  0.99210   0.004862
+C_noisy      3    1582.1484   1602.7558   1602.7558       1.01302490  1.00000   0.000000
+C_noisy      4    1582.1484   1358.6193   1370.3563       0.86241921  0.99144   0.001225
+D_roll       1    1585.5721   1650.8874   1660.0025       1.04406394  0.99451   0.002503
+D_roll       2    1585.5721   1624.4878   1638.5081       1.02895532  0.99144   0.003575
+D_roll       3    1585.5721   1716.1999   1716.1999       1.08238525  1.00000  -0.000000
+D_roll       4    1585.5721   1444.0459   1457.0311       0.91482685  0.99109  -0.000246
+
+3. IMPLEMENTATION AND SCOPE
+port/upright_port.py: public frame_output(H), plus solve/solve_ex(..., framing=True).
+Default framing=False preserves every unframed output. Opt-in solve_ex retains H_unframed.
+Framing runs after the original solve, gate and any explicit damping override; geometry core,
+detector, focal policy, all response constants and schedules remain unchanged. No native matrix
+or scene identifier is read by the solver. The helper uses only H and the unit source rectangle.
+It validates finite 3x3 input/nonzero H22 and rejects projective horizons across the source frame.
+Off and rejected solves remain identity. Documentation and tests cover automatic/guided modes,
+overrides, invariance, invalid input, off/rejection, and all 16 cached active native slots.
+AST comparison: all 41 pre-existing functions except solve_ex/solve are unchanged.
+
+4. FRESH MEASUREMENTS — ALL SCENES, MODES, BOTH FOCAL PROTOCOLS, FIVE SEEDS
+Raw/shape = fixed 25x25 source grid, percent SOURCE diagonal, same Round 4/6 metric.
+Shape removes positive uniform scale and translation only; it retains rotation/shear/perspective.
+Fresh default solves exactly reproduce all 160 Round 6 production matrices and decisions.
+Each opt-in solve is recomputed; H_unframed equals its paired default bit-for-bit, with identical
+rotation, damping, quality and source focal. All 160 attempts accepted; no identity/failure omitted.
+Each individual framed raw is <= its scene target, not just the following five-seed mean.
+START targets (Auto): A=23.55, B=25.38, C=23.52, D=24.08. Current unframed is the Round 6 baseline.
+prior               scene       mode      raw before raw framed shape before shape framed scale*  residual T*
+scene_focal         A_clean     auto      29.310565   0.846481     0.251394     0.251394  1.0249    0.834820
+scene_focal         A_clean     full      42.187198   3.779088     0.132699     0.132699  0.8892    3.771877
+scene_focal         A_clean     level      0.443765   0.443765     0.254004     0.254004  1.0121    0.443765
+scene_focal         A_clean     vertical  41.627985   5.078387     0.116500     0.116500  0.8499    5.049146
+scene_focal         B_strong    auto      42.367262   2.741454     1.907538     1.907538  0.9427    2.739394
+scene_focal         B_strong    full      74.113659  10.066457     0.234862     0.234862  0.7639   10.042274
+scene_focal         B_strong    level      2.226955   2.226955     1.362611     1.362611  1.0586    2.226955
+scene_focal         B_strong    vertical  71.831594  14.183147     0.159499     0.159499  0.6526   13.993914
+scene_focal         C_noisy     auto      28.710747   0.896073     0.280713     0.280713  1.0262    0.883020
+scene_focal         C_noisy     full      42.151463   3.747805     0.144793     0.144793  0.8901    3.739930
+scene_focal         C_noisy     level      0.476098   0.476098     0.272893     0.272893  1.0130    0.476098
+scene_focal         C_noisy     vertical  41.590743   5.081212     0.129146     0.129146  0.8498    5.050343
+scene_focal         D_roll      auto      29.029224   1.192645     0.368845     0.368845  1.0348    1.169732
+scene_focal         D_roll      full      42.303838   0.532715     0.132140     0.132140  1.0151    0.530977
+scene_focal         D_roll      level      2.518633   2.518633     0.483577     0.483577  1.0823    2.518633
+scene_focal         D_roll      vertical  41.366742   3.185163     0.221770     0.221770  0.9060    3.166346
+adobe_stored_focal  A_clean     auto      27.783338   0.929553     0.272672     0.272672  1.0276    0.922221
+adobe_stored_focal  A_clean     full      39.866302   3.585498     0.149020     0.149020  0.8943    3.578601
+adobe_stored_focal  A_clean     level      0.439977   0.439977     0.247244     0.247244  1.0121    0.439977
+adobe_stored_focal  A_clean     vertical  39.291100   4.878194     0.116457     0.116457  0.8549    4.850398
+adobe_stored_focal  B_strong    auto      42.022879   2.734433     1.913837     1.913837  0.9432    2.731909
+adobe_stored_focal  B_strong    full      73.380939   9.975965     0.250583     0.250583  0.7656    9.951644
+adobe_stored_focal  B_strong    level      2.225132   2.225132     1.359455     1.359455  1.0586    2.225132
+adobe_stored_focal  B_strong    vertical  71.068576  14.075714     0.164994     0.164994  0.6543   13.888646
+adobe_stored_focal  C_noisy     auto      28.176646   0.924023     0.287569     0.287569  1.0272    0.912790
+adobe_stored_focal  C_noisy     full      41.319370   3.677976     0.149073     0.149073  0.8919    3.670330
+adobe_stored_focal  C_noisy     level      0.474579   0.474579     0.270199     0.270199  1.0130    0.474579
+adobe_stored_focal  C_noisy     vertical  40.755017   5.009653     0.128080     0.128080  0.8516    4.979309
+adobe_stored_focal  D_roll      auto      28.591176   1.215481     0.371039     0.371039  1.0356    1.194268
+adobe_stored_focal  D_roll      full      41.613849   0.592439     0.137011     0.137011  1.0170    0.591627
+adobe_stored_focal  D_roll      level      2.517579   2.517579     0.477598     0.477598  1.0823    2.517579
+adobe_stored_focal  D_roll      vertical  40.673005   3.124095     0.221061     0.221061  0.9077    3.105886
+scale* = OFFLINE best uniform scale matching the framed port to Adobe; not used at runtime.
+residual T* = OFFLINE best translation-only raw lower bound; no scale is removed there.
+
+5. WHAT FRAMING EXPLAINS, AND THE HONEST REMAINING CLONE DISTANCE
+The raw framed column is the remaining returned-map clone distance, including scale and geometry.
+The shape column is its similarity-invariant geometry component; it is not the full clone distance.
+Full/Vertical retain substantial scale error despite small shape error; the best-fit scale is far
+from 1 on several slots. Therefore translation does NOT explain every raw point or make an exact clone.
+No scale is tuned against Adobe to improve the runtime scores.
+
+Auto, scene focal: raw before -> remaining raw, reduction in RMS / mean squared displacement:
+  A_clean     29.310565 -> 0.846481; 97.112% RMS / 99.917% squared reduction.
+  B_strong    42.367262 -> 2.741454; 93.529% RMS / 99.581% squared reduction.
+  C_noisy     28.710747 -> 0.896073; 96.879% RMS / 99.903% squared reduction.
+  D_roll      29.029224 -> 1.192645; 95.892% RMS / 99.831% squared reduction.
+  Aggregate scene_focal         all      raw 33.266029 -> 3.562255; shape 0.403312.
+  Aggregate scene_focal         auto     raw 32.354450 -> 1.419163; shape 0.702123.
+  Aggregate scene_focal         full     raw 50.189040 -> 4.531516; shape 0.161123.
+  Aggregate scene_focal         level    raw 1.416363 -> 1.416363; shape 0.593272.
+  Aggregate scene_focal         vertical raw 49.104266 -> 6.881977; shape 0.156729.
+  Aggregate adobe_stored_focal  all      raw 32.512466 -> 3.523768; shape 0.407243.
+  Aggregate adobe_stored_focal  auto     raw 31.643510 -> 1.450872; shape 0.711279.
+  Aggregate adobe_stored_focal  full     raw 49.045115 -> 4.457969; shape 0.171422.
+  Aggregate adobe_stored_focal  level    raw 1.414317 -> 1.414317; shape 0.588624.
+  Aggregate adobe_stored_focal  vertical raw 47.946924 -> 6.771914; shape 0.157648.
+
+6. VALIDATION AND REPRODUCTION
+python3.12 evidence/round7_probe.py > evidence/round7_probe_run.txt
+python3.12 -m pytest -q > evidence/round7_pytest.txt 2>&1
+Re-run the probe after pytest to copy its final result into this report.
+round7.json contains all native decompositions/hypothesis errors, 320 sweep slot checks and all
+160 paired fresh scene/focal/seed/mode results with H, H_unframed, raw, shape and scale diagnostics.
+SciPy is used only for offline RQ analysis; the runtime adds no dependency.
+Production SHA256: 10eb693bf1e54870d0752cba4c2b36b02a9e1408263e0eb548ee3c464d5bdc68
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 82%]
+...............                                                          [100%]
+87 passed in 82.84s (0:01:22)
+
+Limits: related synthetic scenes; no new native execution, catalog writes, GUI changes or
+real-photo validation. The 10/90 rule is empirically exact on the requested 16 slots and 318/320
+sweep controls, not a claim about Adobe source or every possible failure branch. The complete
+destination scale policy and the existing coupled-rotation/Auto branch errors remain unresolved.

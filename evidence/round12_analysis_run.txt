@@ -1,0 +1,47 @@
+{
+  "full_gap": {
+    "before": 3.6638185592356987,
+    "candidate": 3.671976818752238,
+    "oracle": 0.9323181979561714,
+    "reduction_pct": -0.2226709479369288,
+    "oracle_reduction_pct": 74.55337422193034,
+    "gap_closed_pct": -0.2986731992492819
+  },
+  "diagnostic": {
+    "before": {
+      "selected": 284,
+      "maps": 214,
+      "horizon": 70,
+      "rotation_norm_p50_p90_deg": [
+        26.030084462559397,
+        71.972900514737
+      ],
+      "purity_median_VH": [
+        0.3441067227094977,
+        0.21374370355875477
+      ],
+      "both_purity_ge80": 4
+    },
+    "candidate": {
+      "selected": 318,
+      "maps": 308,
+      "horizon": 10,
+      "rotation_norm_p50_p90_deg": [
+        19.302481214176755,
+        48.863247005884574
+      ],
+      "purity_median_VH": [
+        0.651649793055183,
+        0.4673572375786511
+      ],
+      "both_purity_ge80": 43
+    }
+  },
+  "errors": [
+    {
+      "image_id": 2116098,
+      "split": "calibration",
+      "error": "FileNotFoundError(2, 'No such file or directory')"
+    }
+  ]
+}

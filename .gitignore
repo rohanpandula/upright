@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Heavy working data, regenerate with the scripts in evidence/
+re/vp/*.bin
+lrtest/out/
+lrtest/abstain/
+lrtest/sweep/
+lrtest/dg/
+lrtest/limits/
+
+# Large per-round dumps
+evidence/*.json
+evidence/*.jsonl
+evidence/round9_sweep.json
+evidence/round10_geometry.json
+evidence/round10_supports/
+evidence/round11_supports/
+evidence/round12_supports/
+evidence/port_snapshot/
+evidence/port_fuzz_snapshot.py
+evidence/*_snapshot/
+
+# Lightroom
+*.lrcat
+*.lrcat-journal
+*.lrcat-data/
+
+# OS
+.DS_Store

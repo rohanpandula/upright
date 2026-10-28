@@ -1,0 +1,293 @@
+completed A_clean
+completed B_strong
+completed C_noisy
+completed D_roll
+completed NM_single_wall
+completed NM_railing
+completed NM_curves
+completed NM_three_plane
+completed CT_manhattan2
+{
+  "A_clean": {
+    "round4": {
+      "ideal_fraction": 0.7044525891928776,
+      "removed": 0.6878961456932389,
+      "raw_rms_pct": 29.310565143664245,
+      "shape_rms_pct": 0.25139392805635824
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.6918942110520175,
+      "removed": 0.6728362732432304,
+      "raw_rms_pct": 28.761682995046677,
+      "shape_rms_pct": 0.2524856314980381
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.6519257289590632,
+      "removed": 0.6243848195938748,
+      "raw_rms_pct": 27.020360738996914,
+      "shape_rms_pct": 0.3092429385638599
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.6405193755004598,
+      "removed": 0.6104146950192172,
+      "raw_rms_pct": 26.52537667570818,
+      "shape_rms_pct": 0.33617730019975356
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.47060408013127153,
+      "removed": 0.3954985496875224,
+      "raw_rms_pct": 19.376903023247134,
+      "shape_rms_pct": 0.8860201515305354
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.6964863027748665,
+      "removed": 0.6783522589061624,
+      "raw_rms_pct": 28.962306097296683,
+      "shape_rms_pct": 0.251032621638569
+    }
+  },
+  "B_strong": {
+    "round4": {
+      "ideal_fraction": 0.5483697450692835,
+      "removed": 0.561333574191592,
+      "raw_rms_pct": 42.36726202162185,
+      "shape_rms_pct": 1.907538304670247
+    },
+    "camera22_physical": {
+      "ideal_fraction": -0.16800612737729542,
+      "removed": 0.4558809921420939,
+      "raw_rms_pct": 36.605380132674156,
+      "shape_rms_pct": 1.5086518591024372
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.5232413460981447,
+      "removed": 0.5308129759969964,
+      "raw_rms_pct": 40.6368523319366,
+      "shape_rms_pct": 1.7720483639386218
+    },
+    "camera22_euler": {
+      "ideal_fraction": -0.17541418168117723,
+      "removed": 0.4320402145714527,
+      "raw_rms_pct": 35.39036274848907,
+      "shape_rms_pct": 1.4491688188990837
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": -0.2823899300678497,
+      "removed": 0.09724288845242084,
+      "raw_rms_pct": 23.471711691045574,
+      "shape_rms_pct": 1.9483371236700429
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.5563354182455289,
+      "removed": 0.5708833594778585,
+      "raw_rms_pct": 42.918971080457595,
+      "shape_rms_pct": 1.9528096288516665
+    }
+  },
+  "C_noisy": {
+    "round4": {
+      "ideal_fraction": 0.6909894219264189,
+      "removed": 0.6720619528503236,
+      "raw_rms_pct": 28.71074713347989,
+      "shape_rms_pct": 0.28071294119948487
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.6791470658377639,
+      "removed": 0.6577814158930785,
+      "raw_rms_pct": 28.193752239817535,
+      "shape_rms_pct": 0.2874453947154404
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.6507175594774544,
+      "removed": 0.6232161847515316,
+      "raw_rms_pct": 26.9559780024598,
+      "shape_rms_pct": 0.32882250603757984
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.6401192453112937,
+      "removed": 0.6102300711309909,
+      "raw_rms_pct": 26.495999837789753,
+      "shape_rms_pct": 0.35136165428036226
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.47048115954735925,
+      "removed": 0.3956159279865529,
+      "raw_rms_pct": 19.358295919325364,
+      "shape_rms_pct": 0.8822683656460331
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.6842704049782478,
+      "removed": 0.6639681547599386,
+      "raw_rms_pct": 28.417330096290165,
+      "shape_rms_pct": 0.28368218565743153
+    }
+  },
+  "D_roll": {
+    "round4": {
+      "ideal_fraction": 0.691572421976448,
+      "removed": 0.6727337639246352,
+      "raw_rms_pct": 29.029223944873983,
+      "shape_rms_pct": 0.36884518927225873
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.6987715972920393,
+      "removed": 0.6812749715018278,
+      "raw_rms_pct": 29.33647121396434,
+      "shape_rms_pct": 0.3673976958352664
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.6364711078161249,
+      "removed": 0.6065185489888639,
+      "raw_rms_pct": 26.692635883977676,
+      "shape_rms_pct": 0.440284491124344
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.6426067423701001,
+      "removed": 0.6139641974040797,
+      "raw_rms_pct": 26.95127589746532,
+      "shape_rms_pct": 0.4279314786481776
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.4727326604308574,
+      "removed": 0.4017336087761776,
+      "raw_rms_pct": 20.060526816302694,
+      "shape_rms_pct": 0.9257150701758226
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.705854220240347,
+      "removed": 0.6896526145194425,
+      "raw_rms_pct": 29.63910266995979,
+      "shape_rms_pct": 0.3679931837380695
+    }
+  },
+  "NM_single_wall": {
+    "round4": {
+      "ideal_fraction": 0.7061005889884955,
+      "removed": 0.6499597525176568
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.7328302956334585,
+      "removed": 0.6863633934278824
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.696795511788596,
+      "removed": 0.637236583511772
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.7237921161219529,
+      "removed": 0.674078583941269
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.6544194017036267,
+      "removed": 0.5789812825744041
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.8331929661364674,
+      "removed": 0.820986482081232
+    }
+  },
+  "NM_railing": {
+    "round4": {
+      "ideal_fraction": 0.701842478066961,
+      "removed": 0.6478073302037057
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.7298585053437124,
+      "removed": 0.6860416797755684
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.6943327413595246,
+      "removed": 0.6375183958024712
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.7224071320819381,
+      "removed": 0.6758960171740649
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.6524593126835848,
+      "removed": 0.5798525600818651
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.8314040186938412,
+      "removed": 0.8224945076854754
+    }
+  },
+  "NM_curves": {
+    "round4": {
+      "ideal_fraction": 0.7072558209191089,
+      "removed": 0.6594917563741005
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.7241114993006688,
+      "removed": 0.682530296383561
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.7001752287667102,
+      "removed": 0.6497864426858364
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.7160339346068341,
+      "removed": 0.6714989593907461
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.6479541391409473,
+      "removed": 0.5777726360103816
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.8306964543944713,
+      "removed": 0.8260687603345087
+    }
+  },
+  "NM_three_plane": {
+    "round4": {
+      "ideal_fraction": 0.7013138414963348,
+      "removed": 0.6421947563173187
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.7323461151046946,
+      "removed": 0.6844650856284126
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.6951115404573611,
+      "removed": 0.6337118475223227
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.725630582900809,
+      "removed": 0.6753424373758936
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.6557161479641825,
+      "removed": 0.5795755322132103
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.8331469303722999,
+      "removed": 0.8196309954563523
+    }
+  },
+  "CT_manhattan2": {
+    "round4": {
+      "ideal_fraction": 0.7256006976563949,
+      "removed": 0.6817223227189922
+    },
+    "camera22_physical": {
+      "ideal_fraction": 0.7264582629832917,
+      "removed": 0.6828905770185951
+    },
+    "keystone_euler": {
+      "ideal_fraction": 0.7201737584278728,
+      "removed": 0.6743239571451685
+    },
+    "camera22_euler": {
+      "ideal_fraction": 0.7210123250029407,
+      "removed": 0.6754677420234507
+    },
+    "wrong_sigma_camera_euler": {
+      "ideal_fraction": 0.6512877823403981,
+      "removed": 0.5796555933895086
+    },
+    "empirical_sweep_physical": {
+      "ideal_fraction": 0.8440005225420627,
+      "removed": 0.8407259109605082
+    }
+  }
+}

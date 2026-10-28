@@ -1,0 +1,57 @@
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: divide by zero encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: overflow encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+/Users/rohan/Projects/trichroma/research/upright/port/upright_port.py:241: RuntimeWarning: invalid value encountered in matmul
+  return (H @ np.asarray(p, dtype=float).T).T
+oracle 10 / 387
+oracle 20 / 387
+oracle 30 / 387
+oracle 40 / 387
+oracle 50 / 387
+oracle 60 / 387
+oracle 70 / 387
+oracle 80 / 387
+oracle 90 / 387
+oracle 100 / 387
+oracle 110 / 387
+oracle 120 / 387
+oracle 130 / 387
+oracle 140 / 387
+oracle 150 / 387
+oracle 160 / 387
+oracle 170 / 387
+oracle 180 / 387
+oracle 190 / 387
+oracle 200 / 387
+oracle 210 / 387
+oracle 220 / 387
+oracle 230 / 387
+oracle 240 / 387
+oracle 250 / 387
+oracle 260 / 387
+oracle 270 / 387
+oracle 280 / 387
+oracle 290 / 387
+oracle 300 / 387
+oracle 310 / 387
+oracle 320 / 387
+oracle 330 / 387
+oracle 340 / 387
+oracle 350 / 387
+oracle 360 / 387
+oracle 370 / 387
+oracle 380 / 387
+oracle 387 / 387

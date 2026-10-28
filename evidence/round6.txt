@@ -1,0 +1,461 @@
+ROUND 6 — TEST ROTATION SPACE, DO NOT INFER IT FROM RAW DISTANCE — 2026-10-28
+========================================================================================
+VERDICT: The proposed structural mechanism is NOT CONFIRMED. The narrow camera/Euler
+candidate's raw win is reproduced, but it does not establish Adobe's damping space.
+Its A/C/D shape loss is real and its B convergence removal undershoots Adobe. The
+requested camera22/Euler candidate is materially different and fails the requested
+B raw <=25.38 target. No production behavior change is retained under "nothing may
+regress". The original Auto over-correction is NOT fixed; it remains explicitly open.
+
+1. WHAT WAS ACTUALLY TESTED
+All work stays inside research/upright. No new dependency, quality threshold, focal
+policy, line detector, native executable invocation, GUI change, catalog write,
+target-H lookup in a solver, scene-specific rule, crop, zoom or fitted framing was
+introduced. Native matrices enter OFFLINE SCORING ONLY. The catalog was SELECTed
+with sqlite mode=ro to snapshot stored slots; Adobe was not re-run.
+
+The primary reproduction uses the frozen Round 5 production source and identical
+detected segments, source focal, random seed, shared undamped solve, K1 and gate.
+Six Auto candidates are run on all four cached scenes, seeds 0..4, BOTH the 1600px
+scene-focal protocol and stored-Adobe-focal sensitivity: 240 returned mappings.
+All candidates preserve L0_V (also called LAMBDA0_V)=2.64, LAMBDA0_H=76.73,
+SIGMA_YAW=11.64deg, SIGMA_PITCH_GATE=22.10deg, ROLL_AUTO=.928. No retuning.
+
+New neutral names (historical evidence is not rewritten):
+  keystone13_physical = current production: sigma=13.33deg on detected P95-P5
+                        vertical direction spread, then invert physical removal.
+  keystone13_euler    = same requested fraction, directly scale Euler rx.
+  camera22_physical  = sigma=22.26deg on undamped camera rx, invert physical removal.
+  camera22_euler     = sigma=22.26deg on undamped camera rx, directly scale Euler rx.
+  camera13_euler     = sigma=13.33deg on undamped camera rx, directly scale Euler rx;
+                       called wrong_sigma_camera_euler in Round 5.
+  zero_pitch         = rx scale zero; keep yaw and roll schedules. Diagnostic only.
+"Keystone units" means a spread of visible line directions in this report. It does
+not mean camera pitch, sqrt(rx^2+ry^2), an Euler rotation ratio, or an output tilt.
+
+The new harness reproduced all 100 matched Round 5 scene/seed/candidate rows to
+1e-12 on raw, shape and physical removal. Reproduction is not an improvement claim.
+
+2. CAUSAL RESULT: MOST OF THE RAW WIN IS NARROWER SIGMA, NOT EULER SCALING
+Ranked hypotheses, stated before probes:
+  (1) damping should act on rotation; (2) narrow sigma supplies most of the win;
+  (3) raw framing dominates; (4) shape regression is an alignment artefact.
+Controls below vary the argument and application space separately. Hypotheses
+(2) and (3) explain the headline raw win; (4) is falsified. (1) is a plausible
+approximation but is not identified as Adobe's implementation by these caches.
+
+For B_strong, current -> camera22/physical -> camera22/Euler -> camera13/Euler:
+  raw:       42.367262 -> 36.605380 -> 35.390363 -> 23.471712
+  shape:      1.907538 ->  1.508652 ->  1.449169 ->  1.948337
+  removed:    0.561334 ->  0.455881 ->  0.432040 ->  0.097243
+Holding the camera22 argument fixed, Euler scaling buys only 1.215017 raw points.
+Narrowing sigma then buys another 11.918651 points and REVERSES the shape gain.
+The requested 22.26deg schedule does not reproduce the candidate's 23.47 raw score.
+On A_clean the same final sigma change reduces raw 26.525377 ->19.376903, but
+degrades shape .336177 ->.886020. A label alone cannot explain this difference.
+
+Why raw falls: H=K1 R K0^-1 with the port's destination centre fixed at .5,.5.
+For the source principal point, H maps K0*[0,0,1] to K1*R*[0,0,1]. Consequently
+its output centre is c1 + (f1x*R02/R22, f1y*R12/R22). Reducing rx changes that
+translation substantially. Adobe's framing keeps the image in quite a different
+place. Suppressing rotation reduces this displacement without recovering Adobe's
+line geometry. The zero-pitch control improves raw still further on all scenes,
+and plain identity has raw 3.60/3.92/3.57/4.86 on A/B/C/D. Neither is an Auto clone.
+
+The cache-independent centre-anchor control reverses the narrow candidate's raw
+ranking on A/C/D: A 2.546712 ->2.979300; C 2.538438 ->2.952938;
+D 3.573867 ->3.955942. It changes only output translation, and shape is identical
+to 1e-12. This is a diagnostic, not a proposed Adobe framing model. A raw distance
+win under the current arbitrary framing is insufficient evidence for damping space.
+
+Why physical inversion and Euler scaling differ: visible convergence is a nonlinear
+function of residual camera rotation, focal/FOV, support positions, yaw and roll.
+Multiplying rx by f does not remove f of the line-direction spread. For seed-0 A,
+current physical inversion gives rx scale .695046; camera22 Euler gives .618528;
+camera13 Euler gives .404052. On B they are .577420, .447160 and .088833.
+All rebuild H from the SAME undamped camera. This is a response-transfer change,
+not a coordinate rename, and none establishes which transfer Adobe uses internally.
+
+3. DOES THE NATIVE EVIDENCE ESTABLISH A POST-HOC EULER ROTATION SCHEDULE?
+No. Section 3.8 establishes a rotation-dependent response, not the identity
+"physical fraction = Euler fraction" or an internal sequence of solve-then-scale.
+An adaptive objective keyed on camera rotation can yield the same observed curve.
+The original dense-sweep observable is 1-mean_signed_line_tilt_after/before.
+The comment equating it to corrected camera angle/true pitch is not an exact
+geometric identity. Its fitted sigma=22.26deg and CI [16.67,39.58] belong to THAT
+physical observable against known generating pitch. They are not an Euler-fit CI.
+
+We therefore decomposed Auto AND Full from native stored slots, without a port fit:
+  RQ(P H K0) = K1_general R, P=diag(w,h,1).
+Every reconstruction and Euler round trip is asserted to 1e-12. K0 is fixed under
+three explicit gauges: true 1600px/centred, stored focal/centred, and stored focal
+plus stored principal point. K1 is general upper triangular. Its aspect/skew are
+reported in JSON; RQ exactness is guaranteed for a nonsingular mapping, NOT proof
+of Adobe's constrained square-pixel model or uniquely identified physical cameras.
+Pitch ratios are stable across these gauges, but no internal stage is observable.
+
+On the ORIGINAL 76 sweep rows, refitting the original physical response recovers
+L0=2.638426, sigma=22.261080deg, RMS=.209669. Fitting native Auto/Full Euler rx
+ratios instead gives L0=3.475329, sigma=20.214849deg, RMS=.209016 using true K0;
+stored K0 gives 3.489633 /20.045877deg, RMS=.204443. These fits are descriptive,
+not proposed new production constants, and no inherited CI is claimed.
+With L0=2.64 fixed, camera22 RMS is .209666 for the physical observable and
+.215914 for Euler ratios (true K0). Camera13 is worse: .302749 and .319757.
+Thus the full sweep does not favor interpreting the physical fit as an Euler law.
+Comparable noisy residuals cannot identify Adobe's internal damping space.
+
+Another limitation of the older corpus claim: corpus_lambda_curve.py extracts
+polar(K^-1 H K), assuming one camera. That is not the two-camera R when K1 != K0.
+For A Auto, stored-K0 RQ pitch is -14.0015deg; same-K polar gives -6.2620deg.
+For B Auto they are -9.3565deg versus -4.3956deg. The older corpus's "keystone"
+bins are hypot(rx,ry) from that polar extraction, not visible convergence. It is
+useful behavioral evidence but cannot prove direct Euler scaling or its units.
+
+Native mixed-scene rotations also expose coupling the fixed schedules do not match:
+B's RQ Auto rotation (true K0) is (-9.428620,6.011923,2.616407)deg. Port Euler22
+applies (-15.310270,11.681419,.025958)deg; narrow Euler13 applies
+(-3.041537,11.681419,.025958)deg. Reducing pitch cannot repair this yaw/roll gap.
+
+Native rotations under all fixed-source gauges:
+scene       gauge                       Auto rx      Auto ry      Auto rz  Auto/Full rx
+A_clean     true_K0                       -14.477425     5.195362     0.578878      0.689993
+A_clean     stored_focal_centred_K0       -14.039675     5.042284     0.655932      0.689025
+A_clean     stored_K0                     -14.001518     5.028923     0.611832      0.689753
+B_strong    true_K0                        -9.428620     6.011923     2.616407      0.286032
+B_strong    stored_focal_centred_K0        -9.373029     5.977050     2.627741      0.285709
+B_strong    stored_K0                      -9.356528     5.966697     2.569217      0.286819
+C_noisy     true_K0                       -14.272293     5.195864     0.658045      0.684920
+C_noisy     stored_focal_centred_K0       -14.119456     5.141654     0.685183      0.684577
+C_noisy     stored_K0                     -14.088284     5.130592     0.651218      0.685145
+D_roll      true_K0                       -14.178760     5.011183     3.559979      0.674925
+D_roll      stored_focal_centred_K0       -14.055994     4.968885     3.579564      0.674641
+D_roll      stored_K0                     -14.027258     4.958980     3.551748      0.675224
+
+4. SHAPE TRADE-OFF: REAL, NOT A SCALE/TRANSLATION FIT ARTEFACT
+Raw and legacy shape use the fixed 625-point grid INCLUDING corners, in percent
+of SOURCE diagonal. Shape fits ONE positive uniform output scale and translation;
+rotation, anisotropy, shear and perspective remain. They measure different losses.
+The shape fit is asymmetric in pixel units, so we add a symmetric statistic:
+  A=a-mean(a), B=b-mean(b), rho=<A,B>/(||A|| ||B||)
+  symmetric_shape=100*sqrt(1-rho^2).
+This is invariant to translating/scaling EITHER mapping and to swapping them;
+it does not fit away roll. It is percent of target centred RMS radius, NOT percent
+of source diagonal. Both definitions agree on the regression. Reverse-alignment
+and centre-anchor invariance are asserted in the harness.
+We also measure RMS differences between the SAME independent world verticals'
+output directions (degrees, invariant to output scale/translation), and repeat
+legacy shape on a 13x13 grid restricted to the middle 60% of the source frame.
+
+A camera13 regression: legacy shape .251394 ->.886020; symmetric .766388 ->2.701081;
+vertical-direction RMS .478563 ->.875128deg; interior shape .142735 ->.456754.
+It is neither an asymmetric-scale artefact nor a corner-only effect. The smaller
+camera22 A loss also survives symmetric/interior scoring, although its vertical
+direction RMS improves: it trades other geometry components against verticals.
+
+FULL CANDIDATE TABLE, means across all five paired seeds. No rejected row omitted.
+raw/shape/interior/anchor/translation-only: percent SOURCE diagonal;
+sym: percent centred radius; Vdiff: degrees; removed: visible convergence fraction.
+camera13 is the user's highlighted Round 5 candidate, named neutrally here.
+scene_focal
+scene       candidate                 raw       shape       sym     Vdiff   removed  interior    anchor  transOnly rejects
+A_clean     keystone13_physical     29.310565  0.251394  0.766388  0.478563  0.687896  0.142735  2.546712  0.834820 0/5
+A_clean     keystone13_euler        27.020361  0.309243  0.942744  0.423298  0.624385  0.185729  2.594476  1.136886 0/5
+A_clean     camera22_physical       28.761683  0.252486  0.769716  0.456997  0.672836  0.148638  2.553888  0.905659 0/5
+A_clean     camera22_euler          26.525377  0.336177  1.024855  0.424989  0.610415  0.199777  2.610438  1.203047 0/5
+A_clean     camera13_euler          19.376903  0.886020  2.701081  0.875128  0.395499  0.456754  2.979300  2.100950 0/5
+A_clean     zero_pitch              11.580135  1.896333  5.781074  2.131244  0.004318  0.894290  3.592162  3.064014 0/5
+B_strong    keystone13_physical     42.367262  1.907538  5.881952  2.607311  0.561334  0.860196  4.865123  2.739394 0/5
+B_strong    keystone13_euler        40.636852  1.772048  5.464165  2.540224  0.530813  0.800858  4.635902  2.401460 0/5
+B_strong    camera22_physical       36.605380  1.508652  4.651974  2.417450  0.455881  0.702517  4.225572  1.742017 0/5
+B_strong    camera22_euler          35.390363  1.449169  4.468556  2.392012  0.432040  0.687155  4.137126  1.592470 0/5
+B_strong    camera13_euler          23.471712  1.948337  6.007757  2.765824  0.097243  1.103392  4.211194  2.195389 0/5
+B_strong    zero_pitch              22.945404  2.281914  7.036351  3.010057  0.020216  1.278957  4.385463  2.514552 0/5
+C_noisy     keystone13_physical     28.710747  0.280713  0.856725  0.492003  0.672062  0.165220  2.538438  0.883020 0/5
+C_noisy     keystone13_euler        26.955978  0.328823  1.003553  0.448394  0.623216  0.199737  2.576984  1.112661 0/5
+C_noisy     camera22_physical       28.193752  0.287445  0.877272  0.473734  0.657781  0.172927  2.547012  0.949790 0/5
+C_noisy     camera22_euler          26.496000  0.351362  1.072342  0.446486  0.610230  0.211982  2.591223  1.173539 0/5
+C_noisy     camera13_euler          19.358296  0.882268  2.692648  0.854616  0.395616  0.461615  2.952938  2.066474 0/5
+C_noisy     zero_pitch              11.573018  1.887023  5.759119  2.099925  0.004319  0.896945  3.565350  3.030310 0/5
+D_roll      keystone13_physical     29.029224  0.368845  1.116592  0.703592  0.672734  0.217410  3.573867  1.169732 0/5
+D_roll      keystone13_euler        26.692636  0.440284  1.332857  0.641277  0.606519  0.265146  3.640834  1.480145 0/5
+D_roll      camera22_physical       29.336471  0.367398  1.112210  0.716436  0.681275  0.213879  3.567565  1.129676 0/5
+D_roll      camera22_euler          26.951276  0.427931  1.295462  0.644637  0.613964  0.258394  3.631913  1.445671 0/5
+D_roll      camera13_euler          20.060527  0.925715  2.802384  0.896715  0.401734  0.494889  3.955942  2.321746 0/5
+D_roll      zero_pitch              12.917409  1.925479  5.828935  2.078241  0.013893  0.928115  4.483870  3.260530 0/5
+
+adobe_stored_focal
+scene       candidate                 raw       shape       sym     Vdiff   removed  interior    anchor  transOnly rejects
+A_clean     keystone13_physical     27.783338  0.272672  0.831257  0.465035  0.687996  0.152509  2.591379  0.922221 0/5
+A_clean     keystone13_euler        25.664857  0.333037  1.015282  0.409318  0.625106  0.198077  2.641636  1.206875 0/5
+A_clean     camera22_physical       27.482603  0.273829  0.834784  0.451623  0.679176  0.156531  2.596024  0.961796 0/5
+A_clean     camera22_euler          25.416772  0.346528  1.056411  0.409604  0.617621  0.205407  2.649974  1.240569 0/5
+A_clean     camera13_euler          19.072122  0.844750  2.575266  0.814404  0.414624  0.440055  2.976886  2.060926 0/5
+A_clean     zero_pitch              11.350068  1.894097  5.774257  2.130284  0.004594  0.892040  3.599771  3.058841 0/5
+B_strong    keystone13_physical     42.022879  1.913837  5.901375  2.602246  0.561328  0.860108  4.871884  2.731909 0/5
+B_strong    keystone13_euler        40.337836  1.780947  5.491605  2.535728  0.531208  0.802125  4.648164  2.401847 0/5
+B_strong    camera22_physical       36.474159  1.525106  4.702711  2.414787  0.458504  0.706552  4.250693  1.764727 0/5
+B_strong    camera22_euler          35.291758  1.465530  4.519008  2.388789  0.435046  0.690796  4.162389  1.615946 0/5
+B_strong    camera13_euler          23.460757  1.944108  5.994716  2.752090  0.099704  1.099019  4.218124  2.185012 0/5
+B_strong    zero_pitch              22.914430  2.285319  7.046851  3.002848  0.020440  1.278906  4.395999  2.512745 0/5
+C_noisy     keystone13_physical     28.176646  0.287569  0.877648  0.486597  0.672124  0.168513  2.553902  0.912790 0/5
+C_noisy     keystone13_euler        26.469894  0.336244  1.026203  0.442871  0.623471  0.203623  2.593129  1.137640 0/5
+C_noisy     camera22_physical       27.751941  0.293278  0.895074  0.470857  0.660117  0.175166  2.561281  0.968005 0/5
+C_noisy     camera22_euler          26.100572  0.354383  1.081564  0.440988  0.612799  0.213621  2.604752  1.186798 0/5
+C_noisy     camera13_euler          19.252615  0.867402  2.647277  0.833189  0.402392  0.455524  2.951645  2.052179 0/5
+C_noisy     zero_pitch              11.486573  1.885941  5.755819  2.099529  0.004415  0.895954  3.567911  3.028586 0/5
+D_roll      keystone13_physical     28.591176  0.371039  1.123234  0.694215  0.672782  0.218069  3.585503  1.194268 0/5
+D_roll      keystone13_euler        26.299683  0.443233  1.341784  0.631519  0.606560  0.266450  3.652775  1.500399 0/5
+D_roll      camera22_physical       28.968794  0.369212  1.117703  0.710600  0.683481  0.213538  3.577545  1.144738 0/5
+D_roll      camera22_euler          26.619267  0.427830  1.295154  0.635894  0.615938  0.257966  3.641613  1.457580 0/5
+D_roll      camera13_euler          19.962738  0.911808  2.760282  0.878039  0.407323  0.488466  3.955381  2.310665 0/5
+D_roll      zero_pitch              12.826485  1.922638  5.820333  2.077838  0.014046  0.925699  4.486247  3.259067 0/5
+
+5. DOES ADOBE ACTUALLY RETURN NEAR-IDENTITY AT 34 DEG?
+Sometimes on the pure-pitch sweep, not generally, and not literally on B_strong.
+B_strong's true pitch is 34.377468deg, yaw 12.032114deg; it is not pure-pitch V34.
+Its STORED normalized Auto matrix, H22 normalized to one, is:
+  [[ .93423568, -.07437278, -.00734109],
+   [ .04450717,  .93884879, -.04398755],
+   [-.08502842, -.09447370, 1.00000000]].
+||H-I||F=.183631484; max|H-I|=.094473700. Grid identity RMS=3.919597% diagonal;
+Full ||H-I||F=.586201244, grid RMS=7.110379%. Auto removes .264781 of convergence;
+it is weak compared with Full, but it is not an identity mapping or a .097 branch.
+
+At EXACT 34deg pure pitch, the stored Auto magnitudes are .469787451, .449204997,
+.453606813, .053050414. Three seeds remove .729-.763 of convergence, one .110.
+The native response is a mixture, not "high pitch => near-identity". At 38/40deg
+the weak branch can be genuinely tiny. The full native table below reports all
+80 sweep exposures plus the four mixed scenes, rather than selecting weak seeds.
+
+Cache-cohort audit: the current catalog contains all 80 slots; the saved original
+fit had 76. The additional names are V38S3,V38S4,V40S3,V40S4. All 76 pre-existing
+physical measurements are reproduced to 1e-12, so the old CI/fit remains attributed
+to that original cohort. No new native solve was performed. The extra current
+V40S3 has a BAD Full solution (negative removed convergence); it is retained in
+the native table and never counted as proof that Full always succeeds. The old
+"four missing/abstained" description is historical, not current catalog state.
+
+FULL NATIVE CACHE TABLE. norm = ||H/H22-I||F in normalized coordinates, NOT pixels;
+raw = 625-point RMS displacement from identity in percent source diagonal;
+removed = independent P95-P5 convergence removal, including negative values.
+name          f35mm  Auto norm Full norm   Auto raw  Full raw Auto removed Full removed
+A_clean       38.9696  0.214527  0.382334   3.603012  3.070417     0.652445     0.952793
+B_strong      39.9956  0.183631  0.586201   3.919597  7.110379     0.264781     0.957753
+C_noisy       39.7882  0.212730  0.378884   3.571406  3.068744     0.643217     0.946214
+D_roll        39.8743  0.243598  0.320215   4.855089  6.405254     0.640814     0.954116
+V02S1         32.4933  0.007853  0.019822   0.130446  0.306242     0.293390     0.719056
+V02S2         37.6744  0.008723  0.019390   0.148184  0.313074     0.319891     0.701046
+V02S3         34.2812  0.006668  0.016415   0.113651  0.259840     0.251675     0.599657
+V02S4         36.7945  0.009422  0.022683   0.158275  0.367735     0.350265     0.840373
+V04S1         34.8770  0.031992  0.043357   0.533566  0.714689     0.605959     0.816050
+V04S2         34.7254  0.037393  0.052334   0.622098  0.872354     0.712051     0.991751
+V04S3         39.0976  0.036222  0.047434   0.611417  0.793515     0.679991     0.894237
+V04S4         34.8526  0.034266  0.045067   0.568732  0.740511     0.644695     0.846013
+V06S1         38.8079  0.062713  0.073598   1.078468  1.265655     0.800320     0.939121
+V06S2         34.3151  0.065519  0.072453   1.115073  1.220190     0.833089     0.918076
+V06S3         38.6122  0.064943  0.074608   1.119933  1.284675     0.829875     0.952315
+V06S4         34.3321  0.063888  0.071587   1.085122  1.207026     0.814398     0.908568
+V08S1         33.6297  0.085141  0.099021   1.469281  1.710008     0.816850     0.953104
+V08S2         33.6367  0.086169  0.098659   1.489024  1.705255     0.831110     0.950594
+V08S3         39.8316  0.084946  0.097286   1.490041  1.723571     0.821405     0.943372
+V08S4         33.6504  0.084785  0.098240   1.464729  1.695235     0.816496     0.945572
+V10S1         39.2407  0.101609  0.120943   1.814165  2.191385     0.790926     0.945273
+V10S2         39.4294  0.106587  0.121970   1.916068  2.216163     0.832058     0.954950
+V10S3         39.7894  0.108651  0.119991   1.957351  2.177540     0.849187     0.937812
+V10S4         39.2783  0.105101  0.122061   1.891768  2.218290     0.820438     0.956137
+V12S1         39.6195  0.123287  0.144585   2.253589  2.690754     0.806172     0.949689
+V12S2         39.9399  0.122669  0.144314   2.245768  2.690445     0.801483     0.948542
+V12S3         39.3927  0.124872  0.144002   2.280561  2.677658     0.817326     0.946087
+V12S4         39.8803  0.121089  0.143868   2.214541  2.676316     0.791159     0.944376
+V14S1         31.4923  0.150004  0.169713   2.708960  3.099672     0.838670     0.954365
+V14S2         31.5083  0.152422  0.169176   2.761114  3.090497     0.854553     0.951385
+V14S3         39.2127  0.140827  0.236429   2.616789  2.040576     0.793942     0.955670
+V14S4         39.5486  0.137876  0.236491   2.562797  2.041725     0.776910     0.954989
+V16S1         39.5704  0.154804  0.271797   2.919881  2.395769     0.766570     0.953112
+V16S2         39.8893  0.149660  0.271950   2.815461  2.399945     0.739096     0.952552
+V16S3         30.8033  0.170867  0.262820   3.134044  2.249288     0.840767     0.950328
+V16S4         30.8251  0.169489  0.262344   3.102382  2.245322     0.833583     0.946709
+V18S1         30.1131  0.252114  0.296844   2.147787  2.570746     0.807135     0.950635
+V18S2         40.7985  0.156266  0.308614   2.981911  2.713621     0.687736     0.949497
+V18S3         40.3104  0.156305  0.308146   2.973548  2.782850     0.687902     0.954606
+V18S4         40.4937  0.155332  0.307702   2.958463  2.777823     0.682174     0.955165
+V20S1         39.6410  0.226261  0.344322   1.948913  3.169152     0.640881     0.953931
+V20S2         29.4534  0.276959  0.329936   2.384130  2.892497     0.796737     0.949885
+V20S3         29.1768  0.285180  0.331060   2.455573  2.902062     0.820979     0.954839
+V20S4         40.1530  0.160439  0.343237   3.063670  3.167708     0.633251     0.954956
+V22S1         28.8217  0.299361  0.363693   2.597018  3.228321     0.778969     0.949105
+V22S2         39.0805  0.152565  0.380462   2.897950  3.567065     0.543311     0.953585
+V22S3         39.8362  0.147057  0.384011   2.786808  3.583171     0.521755     0.957550
+V22S4         39.9693  0.226932  0.381998   1.958754  3.600485     0.578501     0.952956
+V24S1         40.4422  0.150429  0.421790   2.868256  4.077299     0.488433     0.958401
+V24S2         39.5622  0.229085  0.418216   1.976289  4.019926     0.533933     0.956942
+V24S3         41.0743  0.138956  0.422150   2.623825  4.094307     0.448956     0.957038
+V24S4         28.1811  0.320652  0.399840   2.792356  3.598343     0.765399     0.953487
+V26S1         39.9019  0.154305  0.460661   2.946258  4.517644     0.460826     0.956087
+V26S2         40.2079  0.152009  0.462124   2.890712  4.562836     0.452757     0.959566
+V26S3         27.6015  0.338303  0.434642   2.958059  3.958663     0.735635     0.952720
+V26S4         39.3862  0.154320  0.459866   2.931434  4.526623     0.459604     0.960256
+V28S1         27.0413  0.364896  0.470193   3.217648  4.343040     0.733129     0.952803
+V28S2         40.0895  0.137045  0.498962   2.570027  5.040911     0.372921     0.957524
+V28S3         39.3710  0.147956  0.497024   2.795770  4.992895     0.403018     0.958381
+V28S4         40.2690  0.145523  0.501695   2.759134  4.987468     0.399023     0.957707
+V30S1         26.5345  0.413464  0.504339   3.669041  4.717805     0.772175     0.948761
+V30S2         39.7499  0.130959  0.543762   2.448512  5.620272     0.328572     0.961170
+V30S3         26.9660  0.393151  0.508389   3.462814  4.776387     0.731508     0.954642
+V30S4         39.9938  0.122687  0.544472   2.273567  5.609638     0.306626     0.961190
+V32S1         40.0349  0.093624  0.586588   1.695313  6.154496     0.214274     0.961661
+V32S2         39.8274  0.096035  0.587062   1.738104  6.211552     0.219791     0.962928
+V32S3         40.2389  0.091398  0.585277   1.645046  6.157447     0.207744     0.959730
+V32S4         39.6334  0.102617  0.582905   1.867658  6.142289     0.235108     0.960396
+V34S1         25.4989  0.469787  0.581259   4.210366  5.597114     0.762876     0.952369
+V34S2         25.2119  0.449205  0.578778   4.025406  5.563680     0.728520     0.949863
+V34S3         25.6356  0.453607  0.580391   4.121297  5.594049     0.735101     0.950329
+V34S4         40.0088  0.053050  0.626677   0.930771  6.775363     0.109867     0.957072
+V36S1         40.0774  0.027237  0.673047   0.479637  7.443461     0.052372     0.960028
+V36S2         39.9076  0.028662  0.671090   0.503267  7.403299     0.055112     0.958651
+V36S3         39.8126  0.031027  0.666830   0.535079  7.334998     0.058664     0.956185
+V36S4         25.1567  0.494496  0.620974   4.537614  6.079672     0.751384     0.953164
+V38S1         39.9920  0.011702  0.721518   0.205597  8.144717     0.020947     0.965517
+V38S2         24.3419  0.528597  0.661765   4.818171  6.571015     0.755065     0.955682
+V38S3         24.8739  0.513975  0.664465   4.603085  6.618756     0.730940     0.957339
+V38S4         40.1707  0.011759  0.721342   0.203610  8.168177     0.020736     0.964226
+V40S1         24.1309  0.523523  0.706395   4.914536  7.146578     0.700019     0.958851
+V40S2         39.9970  0.005090  0.768274   0.106059  8.839626     0.008895     0.965893
+V40S3         40.1534  0.000197  1.765534   0.002089 10.807068    -0.000029    -0.474656
+V40S4         40.1869  0.004839  0.768095   0.092767  8.874561     0.008538     0.963980
+
+Native dense-sweep response fits, ALL targets explicitly distinguished:
+cohort       target                        L0    sigma(deg)    fitRMS  fixed13RMS fixed22RMS
+original76   physical_fraction            2.638426    22.261080  0.209669   0.302749   0.209666
+original76   physical_convergence_fraction  2.658651    21.609088  0.207215   0.292065   0.208152
+original76   euler_true_K0                3.475329    20.214849  0.209016   0.319757   0.215914
+original76   euler_stored_K0              3.489633    20.045877  0.204443   0.314356   0.211606
+current80    physical_fraction            2.713271    21.451290  0.217238   0.305168   0.218565
+current80    physical_convergence_fraction  2.723817    20.974964  0.214461   0.294901   0.217271
+current80    euler_true_K0                3.562311    19.717887  0.217880   0.322890   0.225669
+current80    euler_stored_K0              3.575970    19.565084  0.212882   0.317100   0.221196
+
+6. WHICH WOULD SHIP, AND THE MILD-REGIME CONTROL
+Ship the retained current implementation under the user's no-regression constraint.
+This is a conservative scope decision, not a claim that current Auto is correct.
+Camera13 wins raw but loses shape on ALL FOUR scenes, misses B's measured native
+convergence in the opposite direction, and suppresses the three strong 34deg slots.
+Camera22/Euler improves B raw and shape and improves aggregate Auto shape, but
+regresses A/C/D shape and fails B raw <=25.38. We cannot call that "nothing regressed".
+The condition for task 2 (confirmed mechanism) was not met: no falsely attributed
+22.26deg Euler CI or renaming of a physical fit as a rotation fit is shipped.
+LAMBDA0_V/L0_V, horizontal/gate/roll constants remain untouched.
+
+At the mild 15deg/6deg non-Manhattan/control scenes, narrow camera13/Euler moves
+AWAY from the earlier native .83-.91 ideal-shape response. Below is the report's
+own sim_residual fraction (max residual after output similarity against the best
+of Full and pitch-only ideal, normalized to that ideal's identity residual).
+This is neither raw/shape RMS nor physical convergence removal. Means of seeds
+0..4; all 150 candidate attempts are retained, no rejection.
+scene                ks13phys ks13Euler cam22phys cam22Euler cam13Euler zeroPitch
+CT_manhattan2          0.725601  0.720174  0.726458  0.721012  0.651288  0.241601
+NM_curves              0.707256  0.700175  0.724111  0.716034  0.647954  0.240209
+NM_railing             0.701842  0.694333  0.729859  0.722407  0.652459  0.242326
+NM_single_wall         0.706101  0.696796  0.732830  0.723792  0.654419  0.244151
+NM_three_plane         0.701314  0.695112  0.732346  0.725631  0.655716  0.244762
+
+7. FINAL PRODUCTION VALIDATION — ACTUAL ROUND 5 FINAL -> ROUND 6 FINAL
+The benchmark's internal "before" field is the OLD Round 4 START snapshot. It is
+not this round's baseline. Tables below pair Round 5 AFTER to Round 6 AFTER.
+All 320 benchmark records/summaries, including the historical control rows, are
+exactly equal between round5_adobe.json and round6_adobe.json. All 160 production
+H matrices/scores across four modes, four scenes, five seeds, two focal protocols
+are exactly equal; zero production rejections. No mode can regress unnoticed.
+
+FULL PER-SCENE/MODE FINAL TABLE, five seeds each; raw and shape are both reported.
+prior               scene       mode       raw before raw after shape before shape after
+scene_focal         A_clean     auto        29.310565   29.310565    0.251394    0.251394
+scene_focal         A_clean     full        42.187198   42.187198    0.132699    0.132699
+scene_focal         A_clean     level        0.443765    0.443765    0.254004    0.254004
+scene_focal         A_clean     vertical    41.627985   41.627985    0.116500    0.116500
+scene_focal         B_strong    auto        42.367262   42.367262    1.907538    1.907538
+scene_focal         B_strong    full        74.113659   74.113659    0.234862    0.234862
+scene_focal         B_strong    level        2.226955    2.226955    1.362611    1.362611
+scene_focal         B_strong    vertical    71.831594   71.831594    0.159499    0.159499
+scene_focal         C_noisy     auto        28.710747   28.710747    0.280713    0.280713
+scene_focal         C_noisy     full        42.151463   42.151463    0.144793    0.144793
+scene_focal         C_noisy     level        0.476098    0.476098    0.272893    0.272893
+scene_focal         C_noisy     vertical    41.590743   41.590743    0.129146    0.129146
+scene_focal         D_roll      auto        29.029224   29.029224    0.368845    0.368845
+scene_focal         D_roll      full        42.303838   42.303838    0.132140    0.132140
+scene_focal         D_roll      level        2.518633    2.518633    0.483577    0.483577
+scene_focal         D_roll      vertical    41.366742   41.366742    0.221770    0.221770
+adobe_stored_focal  A_clean     auto        27.783338   27.783338    0.272672    0.272672
+adobe_stored_focal  A_clean     full        39.866302   39.866302    0.149020    0.149020
+adobe_stored_focal  A_clean     level        0.439977    0.439977    0.247244    0.247244
+adobe_stored_focal  A_clean     vertical    39.291100   39.291100    0.116457    0.116457
+adobe_stored_focal  B_strong    auto        42.022879   42.022879    1.913837    1.913837
+adobe_stored_focal  B_strong    full        73.380939   73.380939    0.250583    0.250583
+adobe_stored_focal  B_strong    level        2.225132    2.225132    1.359455    1.359455
+adobe_stored_focal  B_strong    vertical    71.068576   71.068576    0.164994    0.164994
+adobe_stored_focal  C_noisy     auto        28.176646   28.176646    0.287569    0.287569
+adobe_stored_focal  C_noisy     full        41.319370   41.319370    0.149073    0.149073
+adobe_stored_focal  C_noisy     level        0.474579    0.474579    0.270199    0.270199
+adobe_stored_focal  C_noisy     vertical    40.755017   40.755017    0.128080    0.128080
+adobe_stored_focal  D_roll      auto        28.591176   28.591176    0.371039    0.371039
+adobe_stored_focal  D_roll      full        41.613849   41.613849    0.137011    0.137011
+adobe_stored_focal  D_roll      level        2.517579    2.517579    0.477598    0.477598
+adobe_stored_focal  D_roll      vertical    40.673005   40.673005    0.221061    0.221061
+
+Aggregate final raw / shape, unchanged:
+  scene_focal         all        33.266029 /  0.403312, rejects 0/80
+  scene_focal         auto       32.354450 /  0.702123, rejects 0/20
+  scene_focal         full       50.189040 /  0.161123, rejects 0/20
+  scene_focal         level       1.416363 /  0.593272, rejects 0/20
+  scene_focal         vertical   49.104266 /  0.156729, rejects 0/20
+  adobe_stored_focal  all        32.512466 /  0.407243, rejects 0/80
+  adobe_stored_focal  auto       31.643510 /  0.711279, rejects 0/20
+  adobe_stored_focal  full       49.045115 /  0.171422, rejects 0/20
+  adobe_stored_focal  level       1.414317 /  0.588624, rejects 0/20
+  adobe_stored_focal  vertical   47.946924 /  0.157648, rejects 0/20
+
+RE-RUNS AND TAILS:
+  python3.12 -m pytest -q: 75 passed (52.07s). Existing pytest-asyncio warning only.
+  This includes all 700 held-out Full seeds, 200 focal/seed combinations for
+  01_input, gate discrimination, Round 4 response invariants and guided tests.
+  Separate benchmark_quality.py: 400 fixture/focal +700 held-out Full attempts;
+  every candidate passes the gate AND independent V/H error <=.1deg; no dropped
+  identities, false passes, false rejections or missing fits.
+  fixtures: n=400, mean family=0.023107228deg, max-family p95=0.048486990deg, p99=0.048614200deg, worst=0.048783845deg.
+  heldout : n=700, mean family=0.006206693deg, max-family p95=0.018802000deg, p99=0.018802000deg, worst=0.018802000deg.
+  The complete quality JSON equals the prior round3_final.json exactly.
+  benchmark_accuracy fixtures and benchmark_sensitivity (loss/scale/support
+  variants, record-failures enabled) both equal their Round 3 JSON exactly.
+  Known bad sensitivity/control variants remain reported; they are not production
+  regressions and are not hidden by claiming every exploratory variant passes.
+  The diagnostic script asserts exact RQ/Euler reconstruction, symmetric/reverse
+  shape agreement, centre-anchor invariance and all 76 historical sweep values.
+Production SHA256: aa12229797d88f65a753ee3004d3e12235cb769ce0c0e345ecd0dcb2c5a1a967
+
+8. ARTIFACTS, REPRODUCTION AND LIMITS
+round6_native_slots.json: immutable offline snapshot of current 80 stored slot sets
+and only the needed metadata, exported via sqlite mode=ro. No live catalog needed
+to reproduce the analysis. Four mixed scenes still come from adobe_truth/img_*.lua.
+round6_probe.py / round6_probe.json: all 240 candidate scene mappings, 150 mild
+attempts, 84 native records with matrices/magnitudes/source gauges, 76/80 fits.
+round6_adobe.json: full 320 historical/current benchmark records, including every
+seed, both priors, all four modes and every returned H. Final-current rows=160.
+round6_quality.json: all 1100 independent-scoring attempts, including every tail.
+round6_accuracy.json, round6_sensitivity.json, round6_pytest.txt: separate checks.
+
+Reproduce from research/upright (python3.12 has the installed dependencies):
+  python3.12 evidence/round6_probe.py > evidence/round6_probe_run.txt
+  python3.12 port/benchmark_adobe.py --seeds 5 --output evidence/round6_adobe.json
+  python3.12 port/benchmark_quality.py --seeds 50 --output evidence/round6_quality.json
+  python3.12 port/benchmark_accuracy.py --output evidence/round6_accuracy.json
+  python3.12 port/benchmark_sensitivity.py --record-failures --output evidence/round6_sensitivity.json
+  python3.12 -m pytest -q
+  python3.12 evidence/write_round6_report.py
+
+Limits: synthetic related scenes only; no held-out Adobe homographies. RQ is a
+fixed-source-gauge diagnostic with general destination intrinsics, not unique
+recovery of Adobe's internal camera or proof of post-hoc Euler scaling. The new
+rotation fits are descriptive and have no newly bootstrapped CI. No native solver
+was re-run, no real-photo validation is claimed, and the output framing/branch/
+coupled-rotation gaps remain. We would need independent evidence discriminating
+those mechanisms before replacing the current response under a no-regression rule.

@@ -1,0 +1,40 @@
+SIGMA_V — PINNED, AND THE EARLIER SPREAD EXPLAINED (branch bimodality)
+
+Dense pure-pitch sweep, 2..40 deg step 2, 2 seeds (40 solves, all completed).
+Naive pooled fit gave sigma_v = 19.77 +- 2.92 and a badly non-monotonic curve:
+  34 deg 0.745 | 36 deg 0.053 | 38 deg 0.388 | 40 deg 0.354
+
+PER-SEED INSPECTION shows it is not noise. At high pitch the solver is BIMODAL,
+with two distinct solution branches that track the FOCAL ESTIMATE:
+
+  img     orig   corr  frac   |H-I|    f35    branch
+  V36S1  23.90  22.65  0.052  0.0229  40.08   weak / focal near truth
+  V36S2  23.90  22.59  0.055  0.0241  39.91   weak / focal near truth
+  V38S1  24.99  24.47  0.021  0.0098  39.99   weak
+  V38S2  24.99   6.13  0.755  0.3055  24.34   STRONG / focal far too short
+  V40S1  26.06   7.83  0.699  0.3042  24.13   STRONG / focal far too short
+  V40S2  26.06  25.83  0.009  0.0044  40.00   weak
+
+f35 > 32 pairs with WEAK correction; f35 <= 32 pairs with STRONG correction.
+True focal is 41.14 mm, so the short-focal branch is the estimator failing and
+the resulting over-correction following from it. Branch flips occur at 18, 20,
+22, 28, 30, 38 and 40 deg; both seeds agree at 32 and 36.
+
+BRANCH-SEPARATED FITS (same model, lambda/(lambda+1), lambda=L0 exp(-t^2/2s^2)):
+  correct-focal branch (n=18): sigma_v = 14.58 +- 1.41  CI [11.8, 17.3]  L0=3.56
+  short-focal   branch (n= 9): sigma_v = 35.20 +- 4.18  CI [27.0, 43.4]  L0=4.69
+  pooled         (n=20)      : sigma_v = 19.77 +- 2.92  CI [14.1, 25.5]
+
+CONCLUSION
+sigma_v = 14.58 deg (CI 11.8-17.3) on the physically sane branch, which BRACKETS
+the binary literal 0.2618 rad = 15.00 deg. The earlier 11.7-15.5 deg spread was
+an artefact of pooling across branches, not measurement error.
+
+CAVEATS, stated plainly
+- The correct-focal fit has max residual 0.473, so sigma is well determined but
+  the lambda/(lambda+1) SHAPE is only approximate. Do not present the shape as
+  exact; the constant is the trustworthy part.
+- L0 comes out ~3.5, well below the 12.0 used in upright_matched.py. The ported
+  Auto is therefore too aggressive, consistent with the known 40% over-correction.
+- n=18 across 2 seeds is thin for the good branch; 36 and 38 deg disagree in
+  branch membership between seeds, so the branch assignment itself is stochastic.

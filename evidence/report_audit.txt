@@ -1,0 +1,648 @@
+AUDIT — research/UPRIGHT-REVERSE-ENGINEERING.md
+================================================
+
+SNAPSHOT AUDITED
+  path   research/UPRIGHT-REVERSE-ENGINEERING.md
+  747 lines, 70,374 B, mtime 2026-10-27 23:58
+  sha256 602608f99548a526d8255627cb1e7a460f8bd1d89ca48cb8e5ce0dd008156f03
+  All line numbers below refer to that snapshot. The file was being edited while
+  this audit ran (it grew 609 -> 700 -> 721 -> 747 lines); §3.5f/3.5g/3.5h, §5a
+  and §6a were all inserted mid-audit. Re-check line numbers if it has moved
+  again. Everything up to §6a (l.648) is stable across the last revision; §6a and
+  §7-§9 shifted by +26, and the citations below reflect that.
+  The report itself was NOT edited.
+
+Verdict up front: the document is now internally inconsistent in four separate
+places, carries ~20 numbers that no evidence file supports, keeps two sections
+that newer evidence has explicitly superseded, and has one hard duplication of
+19 lines. The newest material (§3.5f, §3.5g, §3.5h) is the best-sourced part of
+the document and it contradicts the older material that was left in place.
+
+Severity: [BLOCKER] = a reader is actively misled / a section must be rewritten.
+[MAJOR] = wrong number or wrong claim. [MINOR] = wording, path, rounding.
+
+
+--------------------------------------------------------------------------------
+A. QUANTITATIVE CLAIMS ABSENT FROM EVIDENCE OR DIFFERING FROM IT
+--------------------------------------------------------------------------------
+
+D1 [BLOCKER] l.441, 454, 488 — "14.0%". Unsupported and contradicted by the
+   report's own table.
+   - l.449-450 give abstainers 1,422 and corrected 13,200. 1422/(1422+13200) =
+     9.73%. That is the 9.8% the correction was supposed to replace.
+   - 14.0% of the stated total 15,727 is 2,202 abstainers — not 1,422.
+   - No file in evidence/ contains "14.0", "15727" or "15,727". Neither does any
+     script or json in research/. The number has no provenance at all.
+   - abstention.txt l.32 still says "The 9.8-14% abstainers" — it carries both
+     values and resolves neither.
+   FIX: pick one population and make every figure follow from it. If 1,422/13,200
+   is the truth, write 9.7% (and say so in a "correction" note). If 14.0% is the
+   truth, publish the 2,202/15,727 derivation and add the file it came from.
+   Do not leave "9.8-14%" anywhere.
+
+D2 [BLOCKER] l.488 — "14.0% of 15,727 upright-applied photos". Total absent from
+   evidence. The two evidence files give 14,622 (1422+13200, abstention.txt) and
+   14,277 (12883+1394, lambda_curve.txt). 15,727 is neither.
+   FIX: state the corpus size once, in §3.5, with the query that produced it, and
+   reuse it everywhere.
+
+D3 [MAJOR] Evidence files disagree with each other and the report reconciles
+   nothing: abstention.txt says 1,422 abstainers / 13,200 corrected; lambda_curve.txt
+   l.1 says 1,394 skipped / 12,883 usable. Two different denominators, two
+   different populations, both quoted in the report (l.209 uses 12,883; l.449
+   uses 1,422).
+   FIX: add one line saying which corpus filter each came from, or re-derive both
+   from one query. As written a reader cannot tell whether abstention is 9.7% or
+   9.8%.
+
+D4 [BLOCKER] l.504 — σ_v = 11.71°, λ₀ = 12.0 presented as the current fit.
+   sweep_results.txt l.21 does contain l0=11.98 σ=11.71, so the number is real,
+   but it is a 7-point, 1-seed fit that §3.5f (l.373, 375) says is superseded.
+   Nothing in §3.8 flags it as stale.
+   FIX: replace with "σ_v = 14.58° on the correct-focal branch (§3.5f), 22.26° in
+   camera-pitch units; the 7-point fit gave 11.71° and is superseded".
+
+D5 [BLOCKER] l.535 — "σ_v ≈ 12.7°". Absent from every evidence file. grep for
+   12.7 in evidence/ hits only 12.71/12.716 (unrelated residuals). No file, no n,
+   no method.
+   FIX: either cite the file that produced 12.7 or delete it and use 14.58/22.26.
+
+D6 [MAJOR] l.504 — "Fitting a pure Gaussian instead is much worse (σ = 21.4°,
+   err 0.214)". The only 21.4 in evidence is sigma_v_precise.txt l.74, which is
+   the "mean conv0" column at 36°, not a σ. The 0.214 err matches adobe_model_fit.json
+   "maxerr" 0.21473, but that is a different experiment.
+   FIX: add the pure-Gaussian fit to sweep_results.txt, or drop the parenthetical.
+
+D7 [MAJOR] l.504 — "Model-free pairwise σ estimates drift from ~29° at low angle
+   to ~11° at high angle". No evidence file contains these. Unreproducible.
+   FIX: tabulate them in an evidence file or cut the sentence.
+
+D8 [MAJOR] l.250 — "Max fit error 0.007 / 0.009 on the fractions". Absent from
+   evidence. The whole §3.5b fit (15.47 / 13.47 / 6.33 / 50.98) exists only as
+   comments in upright/upright_matched.py l.37-38, never as a fit output.
+   FIX: dump the fit to evidence/sigma_fit_sparse.txt and cite it.
+
+D9 [MAJOR] l.267 — the held-out check (0.339 predicted, 0.569 measured, λ₀ = 75
+   vs 132) is absent from evidence and does not reproduce from the numbers the
+   report itself prints. §3.4/ground_truth_validation give the horizontal
+   reductions as 86.3% (A), 86.3% (C), 87.8% (D) at ~22.8° and 55.7% (B) at 36.4°
+   — i.e. the 22.8° point is ~0.868, not the 0.925 that "λ₀ = 75" implies.
+   FIX: show the fit arithmetic in evidence and reconcile 0.868 vs the implied 0.925.
+
+D10 [MAJOR] l.265 — "an exact match at float32 precision". It is not exact.
+   Actual bytes read at the claimed offsets:
+     75191352  -> 7.29513168  (claim 7.2951252; 13.5 ULP high)
+     187546999 -> 11.39864159 (claim 11.3986332; 8.8 ULP high)
+     104611133 -> 0.06853879  (claim 0.0685389; ~16 ULP)
+   These are authored decimal literals, not the computed constants.
+   FIX: "within 1.3e-5 relative" instead of "exact", and say they are authored
+   literals.
+
+D11 [MAJOR] l.265 — "duplicated .rodata blocks roughly 16 MB apart". The offsets
+   the report itself lists are 30.4 MB and 18.8 MB apart for σ_v², 3.6 MB and
+   57.7 MB apart for the reciprocal. 16 MB is not the spacing.
+   FIX: delete "roughly 16 MB" or quote the real gaps.
+
+D12 [MAJOR] l.265 — "6.325266 and −51.988926, matching the independently fitted
+   λ₀_v and λ₀_h to ~2%". 6.325266 vs 6.33 is 0.08%, not 2%; only the second pair
+   is ~2%. And the literal is negative while λ₀_h is positive.
+   FIX: "6.325266 matches λ₀_v to 0.08%; |−51.988926| matches λ₀_h to 2% (sign
+   difference unexplained)".
+
+D13 [MAJOR] l.340 — "squared arcminutes 1/3600, 1/8100, 1/900 (1, 1.5, 2′)".
+   1/8100 = (1/90°)² = 0.667′, not 1.5′. The triple is 1 / 0.67 / 2, which is
+   non-monotonic and itself worth remarking on. detector.txt repeats the same
+   error.
+   FIX: "(1, 0.67, 2′)" and note the ordering.
+
+D14 [MAJOR] l.171 — "Every estimate is within ≤5.3% of truth" and l.296
+   "1.54 mm (3.8%)" / "0.965×", l.361 and l.412 "true 41.14 mm": all computed with
+   the superseded f35/36·max(W,H) conversion that §3.5d itself condemns.
+   Correct truth for 1600 px on 1400×1000 is 1600·43.2666153/hypot(1400,1000) =
+   40.24 mm. Recomputed: max error 3.2% (not 5.3%); median error 0.54 mm / 1.33%
+   (not 1.54 mm / 3.8%); ratio 0.987× (not 0.965×); NM focal deficit 15.4% (not
+   17.5%).
+   FIX: recompute §3.4 R2, §3.5c table, §3.5f l.361, §3.5h l.412 and the truth
+   constant in k0_identification.txt / non_manhattan.txt with the diagonal form.
+
+D15 [MAJOR] l.158/160 — test_model_exact.py l.92 still computes
+   f35px = d["f35"]/36*max(W,H). So the §3.4 R1 table (l.164-167) is itself a
+   product of the bug §3.5d documents. Re-running with the diagonal form moves
+   the medians to 3.24e-01 / 3.06e-01 / 8.02e-03 / 5.49e-16.
+   FIX: patch the script, regenerate model_exactness.txt, update l.164-167, and
+   say in §3.5d that the orthogonality test was re-run (the conclusion survives,
+   but only by luck).
+
+D16 [MAJOR] l.215 vs table l.219-231 — n = 7,256 but the bin counts sum to
+   7,245. 11 photos unaccounted for.
+   FIX: reconcile or change 7,256 to 7,245.
+
+D17 [MAJOR] l.209 — "12,883 photos that already carry Adobe's stored Upright
+   results". 12,883 is lambda_curve's *usable* count; the population carrying
+   stored results is 14,277 (usable + 1,394 skipped).
+   FIX: "12,883 usable photos (of 14,277 with stored results)".
+
+D18 [MAJOR] l.435 — "Full now matches Adobe to within 0.25° on every scene".
+   C_noisy is 0.50° vs 0.83° = 0.324°. Three of three full-mode pairs: 0.23,
+   0.02, 0.32.
+   FIX: "within 0.35°", or "0.25° on two of three scenes".
+
+D19 [MAJOR] l.435 — "consistently ~40% too aggressive". A_clean is 22.3%
+   over-aggressive ((15.52−3.08)/(15.52−5.35) = 1.22); only B_strong is 41%.
+   "Consistently" is wrong for n=2.
+   FIX: "23–41% too aggressive (n=2)".
+
+D20 [MAJOR] l.412 — "0.00 on the Manhattan control at 34°/12°". The Manhattan
+   control CT_manhattan2 is at 15°/6° and scores 0.871; the 0.00 cell is
+   B_strong, which is not a control and is at 34°/12°. Two things conflated.
+   FIX: "0.00 on B_strong (34°/12°); the matched Manhattan control at 15°/6° scores 0.871".
+
+D21 [MINOR] l.412 — "17.5% low on three families" is arithmetically fine against
+   41.14 but becomes 15.4% against 40.24 (see D14).
+
+D22 [MINOR] l.231 — the 25-30° bin has n=36 and is quoted like the n>1,000 bins.
+   FIX: mark n<100 bins, or drop the last bin from the fitted claim.
+
+D23 [MINOR] l.233 — "tight quartiles". lambda_curve quartiles are not tight:
+   2-3° bin p25 0.428 to p75 0.928 (span 0.50).
+   FIX: "monotonic, with a wide per-bin spread (p25-p75 spans ~0.5 at low tilt)".
+
+D24 [MINOR] l.73-74, 86 — strings presented as verbatim are not.
+   - "Mcell is 3x3" does not exist; the literals are "Mcell is " + " x 3x3.".
+   - "Vc[ ... ] (vid ...)" does not exist; there is no "Vc[" and no "vid" string
+     (the Vc[ hits are float data).
+   - "l_rdiff_x = %.4f, l_rdiff_y = %.4f" is two separate literals, each with one
+     argument: "l_rdiff_x = %.4f\n" and "l_rdiff_y = %.4f\n".
+   FIX: quote the real literals; drop or re-label "Vc[ ... ] (vid ...)".
+   Everything else in the §2.3 blocks checks out byte-for-byte.
+
+D25 [MINOR] l.104 — "Upright-MakeGamma22". The string is
+   "Upright-MakeGrayGamma22". Also wrong at l.708.
+   FIX: fix both.
+
+D26 [MINOR] l.116 — "UprightDependentDigest hashes upstream geometry". digest.txt
+   l.40-41 proves it hashes {UprightVersion, profile-list, distortion} — not
+   geometry generally.
+   FIX: say what it actually hashes.
+
+
+--------------------------------------------------------------------------------
+B. INTERNAL CONTRADICTIONS (same quantity, two values)
+--------------------------------------------------------------------------------
+
+D27 [BLOCKER] σ_v now has FIVE values in one document:
+   l.247 15.47° (current tense) | l.252 14.58° | l.371 22.26° / 13.33° |
+   l.504 11.71° (current tense) | l.535 12.7° | l.688 π/12 = 15.00° (build spec).
+   §3.5f l.373 settles on "13–15° keystone units, ≈22° pitch units". Nothing
+   outside §3.5f uses that.
+   STALE SECTIONS: §3.5b (l.235 heading, 247-248, 250, 252, 273, 275), §3.8
+   (l.504, 514, 535), §8 (l.688). §3.5b's own l.252 already says it is superseded
+   but the table above it still reads as the answer.
+   FIX: rewrite §3.5b as history ("the sparse 2-point fit gave…"), promote
+   §3.5f's two-convention answer into §3.5b, and delete 11.71/12.7 or mark them
+   as the 7-point fit.
+
+D28 [BLOCKER] λ₀_v has THREE values: 6.33 (l.247), 12.0 (l.504, and l.375 says
+   "the 12.0 the current port uses"), 3.56 (l.367). upright_matched.py l.50 uses
+   3.56 and comments "was 10.12". The report never states which is live.
+   FIX: one value, with the others as history.
+
+D29 [BLOCKER] l.235 heading "reproduce the paper's published σ to within 3%".
+   The σ_h agreement is 12.2% (l.248). 3% applies to σ_v only, and only to the
+   superseded fit.
+   FIX: "…to within 12%" or "σ_v to 3%".
+
+D30 [BLOCKER] l.273/275 "What is not in doubt: the paper's σ_v and σ_h are
+   compiled into the shipping binary" and "the σ_v agreement (15.47 vs 15.00, 3%)
+   is strong". Both are contradicted by §3.5f l.373: in pitch units the CI
+   *excludes* 15.00 (σ/π12 = 1.484×) and 14.58 is 2.8% *below* 15.00, not "3%
+   high". l.275 also says the fitted σs are "3% and 12% high" when 15.47 is high
+   and 14.58 is low.
+   FIX: rewrite 273-275 to the two-convention result.
+
+D31 [BLOCKER] l.267 "invisible from the paper's text, which gives a single λ₀".
+   The paper's Eq. 5 has no λ₀ at all — λ_v = exp(−ψ²/2σ_v²), λ_h = exp(−θ²/2σ_h²),
+   i.e. λ₀ = 1. (upright_cvpr2012.txt l.216-225.)
+   FIX: "the paper sets λ₀ = 1 implicitly; the shipped product needs 6.3/51".
+
+D32 [BLOCKER] l.243 "θ is the same estimated rotation magnitude for both axes".
+   The paper's Eq. 5 keys λ_v on ψ (x-rotation/pitch) and λ_h on θ (y-rotation/
+   yaw) — different axes. §3.8 l.530-536 then presents the two-axis keying as a
+   discovery that is "a far better explanation of the mode than anything in the
+   paper", which is false: it is the paper's own Eq. 5.
+   FIX: delete "same … for both axes"; in §3.8 say the two-axis keying *is* Eq. 5
+   and what is new is the λ₀ and the pitch gate.
+
+D33 [BLOCKER] l.393 "which is why no metadata signal separates abstainers"
+   vs l.441 "The discriminator is the stored focal". Direct contradiction, six
+   lines apart in the same subsection pair.
+   FIX: "no metadata signal *predicts* abstention, though the stored focal
+   *reveals* it post hoc".
+
+D34 [BLOCKER] l.656 failure mode 2 "Abstains / does nothing on non-Manhattan
+   scenes (seascapes, foliage)" vs §3.5h l.397-414 "nothing breaks", "No
+   degenerate cell", every family solved, all four families corrected to Manhattan
+   standard. Also l.393 claims abstention comes from <2 VPs, yet NM_single_wall
+   has one VP family and still solved at 0.87.
+   FIX: change FM2 to "over-corrects on high-tilt scenes and fails the focal
+   estimate on single-plane scenes", and reconcile the VP-gate story in §3.5g.
+
+D35 [BLOCKER] l.543 "LSD / line extraction | standard (`[BINARY]` uses LSD)"
+   vs l.336 "The detector is bespoke … not stock LSD".
+   FIX: "bespoke a-contrario detector, not LSD".
+
+D36 [BLOCKER] l.338 "VP stage … → RANSAC … 2000 iterations, 2-line minimal
+   sample … Inlier iff residual < τ" vs l.381 "RANSAC with 2000 iterations is a
+   loose label: 2000 is the candidate cap … there is no inlier threshold in this
+   stage". §3.5e was not updated when §3.5g landed.
+   FIX: rewrite l.338 to line-dual candidates + ≥3 votes; move τ to the vote
+   kernel; or delete the RANSAC framing.
+
+D37 [BLOCKER] l.716 "→ extract rotation + focal → H = K R K⁻¹" vs l.128/547
+   "H = s·K₁·R·K₀⁻¹". The build sketch still draws the model the report says is
+   32% wrong, two paragraphs after l.676 tells you to keep K₁ ≠ K₀.
+   FIX: "H = s·K₁·R·K₀⁻¹".
+
+D38 [BLOCKER] l.717 "→ confidence gate → abstain if weak" vs l.454 "there is no
+   confidence gate". (It is defensible as a *clone* feature, but the sketch is
+   labelled as the pipeline.)
+   FIX: "→ optional confidence gate (the product has none)".
+
+D39 [BLOCKER] l.714 "(σ_v=π/12, σ_h=π/15)" vs §3.5f/§3.5g (σ_v 14.58/22.26; σ_h
+   governs yaw and is 11.6-13.5, not 12 with a pitch-independent θ).
+   FIX: "σ_v from §3.5f (keystone or pitch units — pick one), σ_yaw = 11.6°,
+   σ_gate = 22.1°".
+
+D40 [BLOCKER] l.207 "the paper's published constants are wrong for the shipped
+   build" vs §3.5b/§3.5f (they are present in the binary and bracketed by the
+   data). §3.5's own l.233 then says the 7.26/2.1× claim was the wrong one.
+   FIX: "the paper's constants are approximately right but the *response form*
+   and λ₀ differ".
+
+D41 [MAJOR] l.516 "inferred a large horizontal weight (λ₀_h ≈ 51) from a single
+   image" vs §3.5b l.237 "Using the four controlled images".
+   FIX: "from four controlled images at two angles".
+
+D42 [MAJOR] l.557/583 "proven to 1e-15" vs l.167 max residual 1.13e-09. Also
+   l.131/557 say 5.7e-16 while l.167 says 5.65e-16.
+   FIX: "median 5.7e-16, max 1.1e-9".
+
+D43 [MAJOR] l.143 E_img "concentrated on curved features" vs l.410 "none of it
+   is arc-specific". §3.2 states the paper's intent; §3.5h measured that the
+   shipped product does not target arcs.
+   FIX: "the paper's E_reg targets curved features; the product protects them
+   only as a side effect of the global warp (§3.5h)".
+
+D44 [MAJOR] l.124 "principal point fixed" vs l.166-167 (free principal points are
+   required: residual only reaches 5.65e-16 with both free) and l.169 (c₀ is read
+   from the stored settings).
+   FIX: delete "principal point fixed" or scope it to the paper's parameterisation
+   and say the shipped model frees it.
+
+D45 [MAJOR] l.547 "`H = s·K₁·R·K₀⁻¹` — Adobe-specific, and the deepest secret"
+   vs the paper's Eq. 2/3 (p' = K₁R₁(KR)⁻¹p + t₁, K₁ with f₁ₓ, f₁ᵧ, v₁). The
+   two-intrinsic model is in the paper; §5 l.609 also lists it as claimed.
+   FIX: "paper Eq. 2/3, claimed (460 c6/c13, 954 c5/c6) — not free, but not secret".
+
+D46 [MAJOR] l.549 "E_eye … Adobe-specific", l.553 "E_f … uncommon" — both are
+   paper terms (E_eye in §3.1, E_focal = λf(f₁ₓ−f₁ᵧ)²).
+   FIX: mark them paper contributions and reserve "Adobe-specific" for the λ₀ and
+   the pitch gate.
+
+D47 [MAJOR] l.603 lists "9,098,885 c1" twice and omits 9,519,954 from the
+   design-around list.
+   FIX: replace the duplicate with 954 c1.
+
+D48 [MAJOR] l.599 "9,098,885 claim 1: 'determining initial values for an energy
+   function according to the extracted line segments'" vs l.601 "No claim 1 in
+   the family recites a detector, a solver, or any named term". 885 c1 does
+   recite extracted line segments.
+   FIX: "no claim 1 recites a *specific* detector or solver".
+
+D49 [MAJOR] l.12 "not fully stripped" vs digest.txt l.13 "fully stripped (zero
+   `ura` symbols)". The report's "demangled typeinfo/vtable symbols" (l.34) are
+   RTTI names, and vp_clustering.txt §0 says the vtables were never resolved.
+   FIX: "fully stripped; only RTTI typeinfo names survive".
+
+D50 [MINOR] l.45 "the paper's `LSD → VP → calibration → homography`" vs the
+   pipeline the report itself proves, LSD → calibration → VP (l.62, l.334).
+   FIX: reorder.
+
+D51 [MINOR] l.597 "The shipped 0.2618f/0.2094f literals" vs l.260-262 (squared /
+   reciprocal forms). energy_function.txt says 0.2618f/0.2094f occur once each and
+   only inside fixture tables.
+   FIX: cite the squared forms in §5 too, or name both sets.
+
+D52 [MINOR] l.332 "The route in was not the RTTI name alone but the intact `cr_`
+   reflection metadata block". vp_clustering.txt §0 says the vtables are not
+   referenced and the pipeline was reached "from the trace-string block instead".
+   FIX: "the route in was the trace-string block".
+
+D53 [MINOR] l.158 "The six slots are recomputed together in one solve". version_slots.txt
+   l.173: slot 0 is Off and always written identity, and digest.txt l.35 says mode 0
+   never recomputes.
+   FIX: "slots 1-5".
+
+D54 [MINOR] l.488 "a single shared analysis is cached into every slot". version_slots.txt
+   l.171-172 explicitly corrects this: the analysis is shared, the per-mode
+   homographies are not.
+   FIX: "one shared analysis, per-mode homographies".
+
+
+--------------------------------------------------------------------------------
+C. TAG MISUSE — [MEASURED] inference and [PAPER] sold as product behaviour
+--------------------------------------------------------------------------------
+
+D55 [BLOCKER] §3.2 (tagged `[PAPER]`) is written as shipped behaviour throughout:
+   l.136-147 present the energy as the product's, l.145 marks the Perkins barrier
+   `[BINARY]` on the strength of one log-barrier string. The shipped energy was
+   never recovered (energy_function.txt §0: no symbols, must be recovered
+   behaviourally). §3.5f/§3.5h then contradict parts of it.
+   FIX: split §3.2 into "paper (§3)" and "what the binary confirms (log-barrier
+   exists, l_vx/l_rdiff_x are printed, λ₀≈6.3/51)"; mark the rest [PAPER].
+
+D56 [MAJOR] l.175 Result 4 tagged [MEASURED], but "r_y ≈ 0.6–1.3°" is not
+   reproducible from any cited file. From adobe_model_fit.json the only model with
+   r_y in that band is "freeKc" (0.63, 0.80, 1.25, **2.34**) — i.e. 3 of 4, and
+   only under one of three fits. With the constrained model the Vertical slot
+   gives r_y 2.86–3.79, i.e. only half the injected 6° is removed, not
+   "essentially zeroed".
+   FIX: cite adobe_model_fit.json, name the model, give the range as 0.6-2.3°,
+   and soften "essentially zeroed".
+
+D57 [MAJOR] l.300 "an independent confirmation of the degeneracy in §3.8 Result 3"
+   — but Result 3 has no body (see D59), so the confirmation points at nothing.
+
+D58 [MAJOR] l.482 "So Guided does not use the perceptual objective at all" —
+   inference from n=1 scene (A_clean), stated as fact. Same for l.480 "exactly
+   zero" (a single scene).
+   FIX: "on the one scene tested…".
+
+D59 [BLOCKER] l.539 "**Result 3 — two anomalies and a caveat.**" followed
+   immediately by "## 4." — Result 3 has NO body at all, and the `## 4` heading is
+   glued to the bold run-in with no blank line. This is the section the report
+   cross-references twice (l.300, l.488).
+   FIX: write Result 3 (Y06 and Y15: Full leaves 5.98° and 14.55° where neighbours
+   leave 0.48°; the caveat is the pitch=0 undefined-kh cells), and put `## 4` on
+   its own line.
+
+D60 [MAJOR] l.414 "Also confirmed independently: Auto and Full share one focal
+   per photo — one cached solve" and l.414 "Do not port a per-mode solver" —
+   inference, tagged [MEASURED].
+   FIX: tag as inference and cite §3.7's digest finding.
+
+D61 [MAJOR] §3.6 is tagged [MEASURED] but its core claim ("fixes all three
+   defects") is a design assertion, and its `2.8e-13` round trip is our own code,
+   not a measurement of Adobe. Also l.420 says it applies "the fractions of §3.5b"
+   when upright_matched.py actually uses §3.5f's 14.58/3.56 and 11.60.
+   FIX: re-point to §3.5f/§3.5g and tag the design claims as design.
+
+D62 [MAJOR] l.149 "`[ADOBE-DOC]` independently corroborates with the legacy help
+   text" — the Level/Vertical quotes are product-doc text, but the inference that
+   they are "weight settings on E_pic" is the report's own. Fine as written, but
+   the "independently corroborates" phrasing overstates: it corroborates the mode
+   semantics, not the equation.
+   FIX: "corroborates the mode semantics, not the energy form".
+
+D63 [MAJOR] l.143-144 E_f. The paper's E_focal = λf(f₁ₓ−f₁ᵧ)² with λf = (4/f)²
+   (upright_cvpr2012.txt l.283-285). The report prints `(f₁/f₀ − 1)²`, which is
+   the form of the *E_K prior* (l.288-291), a different term. §5's argument in
+   l.607 rests on E_f being the focal-relationship term.
+   FIX: `λf (f₁ₓ − f₁ᵧ)², λf = (4/f)²`.
+
+D64 [MAJOR] l.136 objective omits E_reg from the paper's Eq. 7
+   (Epic + Eeye + Ereg + Efocal) and renames it E_img; l.136 also folds the
+   Perkins *constraint* into the sum as a term.
+   FIX: "E = E_pic + E_eye + E_reg + E_focal, subject to Eq. 6 (Perkins)".
+
+D65 [MINOR] l.30 "301 MB" ✓ (301,590,512 B), and `cr_perspective.cpp` ✓ exists.
+
+
+--------------------------------------------------------------------------------
+D. ORDERING, DUPLICATION, ORPHANS
+--------------------------------------------------------------------------------
+
+D66 [BLOCKER] §4 is duplicated verbatim. l.541-559 and l.567-585 are the same
+   table, the same three bold paragraphs, the same numbers — 19 identical lines.
+   FIX: delete l.567-585 and one of the two `---`.
+
+D67 [BLOCKER] Three consecutive horizontal rules: l.561, l.563 and l.587.
+   FIX: keep one.
+
+D68 [MAJOR] l.484 `---` splits §3.7 mid-section: the "Mode semantics" paragraph
+   (l.486) and the "Abstention is mode-independent" paragraph (l.488) sit after a
+   rule, then another `---` at l.492. They read as orphans of §3.7.
+   FIX: drop the rules or promote those two paragraphs to their own subsection
+   (they are really §3.7b).
+
+D69 [MAJOR] §3.5b/3.5c/…/3.5h are siblings of §3.6, not children of §3.5, but the
+   numbering implies nesting. §3.5 itself has no letter, so it is the implicit
+   "a".
+   FIX: either renumber to §3.6…3.13, or retitle §3.5 as "3.5a".
+
+D70 [MAJOR] `### 5a.` (l.593) uses a different scheme from `### 3.5b`, and it
+   sits *before* its parent section's own content (the `## 5` body and the patent
+   table start at l.615, after a `---` at l.613). The `[PATENT]` table is thus
+   orphaned from its heading.
+   FIX: move the l.615-631 block directly under `## 5` and put 5a after it, or
+   drop the `---`.
+
+D71 [MAJOR] Near-duplicate σ paragraphs: l.233 ("first fitted with a
+   rotation-magnitude proxy … biased") and l.279-280 ("A previous revision …
+   reported σ ≈ 7.26 … the 2.1× claim was wrong") say the same thing twice.
+   FIX: keep one, in §3.5f where the supersession belongs.
+
+D72 [MAJOR] l.518 ("This re-frames Auto as a vertical-only corrector … explains
+   the 100% crop retention") and l.520-537 (Result 2b) both re-explain Result 2,
+   and Result 2b re-tabulates the pitch 10/25 rows already given in Result 1.
+   FIX: fold 2b's gate table into Result 1 and delete the restatement.
+
+D73 [MINOR] l.591 "Read §5a first" — then §5a precedes the section it is in, so
+   the instruction is redundant given D70's fix.
+
+D74 [MINOR] §8 l.704 "Original paper-derived sketch, still valid for Tier 3"
+   carries l.708/711/714/716/717 that are all now stale (D25, D36, D37, D38, D39).
+   FIX: after fixing those, keep it; otherwise delete the block and point at §3.5d/§3.5g.
+
+D75 [MINOR] l.3 "Date: 2026-10-25" while the newest evidence is 2026-10-27 and
+   §3.5f cites a 2026-10-27 23:01-23:19 run.
+   FIX: bump the date, or add "revised 2026-10-27".
+
+D76 [MINOR] l.6 "fully identified" vs §3.5f l.375 "σ is weak", residual 0.473,
+   and §3.5e l.344's speculative list.
+   FIX: "identified in structure and constants; the σ fit is weak".
+
+
+--------------------------------------------------------------------------------
+E. REPRODUCTION PATHS
+--------------------------------------------------------------------------------
+
+Verified present (do not re-check): research/upright_cvpr2012.pdf,
+upright/make_test_images.py, upright/test_model_exact.py,
+upright/test_model_orthogonality.py, upright/validate_vs_adobe.py,
+upright/upright_core.py, upright/upright_matched.py, upright/demo_synthetic.py,
+upright/corpus_lambda_curve.py, upright/nm_analyze.py, upright/nm_metrics.json,
+upright/adobe_truth/, upright/lrtest/abstain/ (80 tifs), lrplugin/uprightprobe.lrdevplugin/,
+and the CameraRaw binary (301,590,512 B, all offsets spot-checked above).
+`AgCameraRawControllerGuidedUpright.lua` exists at
+…/Develop.lrmodule/Contents/Resources/.
+
+D77 [BLOCKER] l.377 cites only `sigma_v_branch.txt` for §3.5f, but §3.5f's
+   headline numbers (22.26 / 13.33 / CIs / "24 of 80" / "4 abstained" / 0.475)
+   come from `sigma_v_precise.txt` and `sigma_v_precise.json`. Neither is cited
+   anywhere in the report. The cited file cannot reproduce the section.
+   FIX: cite both, and keep sigma_v_branch.txt for the branch table only.
+
+D78 [BLOCKER] l.490 cites `corpus_lambda_curve.py` + `lambda_curve.txt` for
+   §3.7, but §3.7's abstention numbers come from `abstention.txt` and its Guided
+   numbers from `guided_mode.txt`. Neither file is cited anywhere in the report.
+   FIX: split the reproduce lines per paragraph.
+
+D79 [MAJOR] §3.5b has NO reproduce line at all — the only measured section
+   without one. Its fit output does not exist in evidence/ (D8).
+   FIX: add one after dumping the fit.
+
+D80 [MAJOR] Uncited evidence files (19 of 28): abstention.txt, digest.txt,
+   energy_function.txt, ground_truth_validation.txt, guided_mode.txt,
+   k0_identification.txt, model_exactness.txt, orthogonality.txt,
+   sensor_constant.txt, sigma_v_precise.{txt,json,_trace.txt},
+   sweep2_resolution.txt, sweep_fit.json, sweep_fit_kh.json, sweep_results.txt,
+   version_slots.txt, dsa.py, dsx.py. Several are load-bearing (§3.4's table is
+   model_exactness.txt; §3.5's is lambda_curve; §3.5c's is k0_identification;
+   §3.5d's is focal_prior + sensor_constant).
+   FIX: cite them per section. dsa.py/dsx.py are tooling — one line in §2 covers
+   both.
+
+D81 [MAJOR] l.344 sends the reader to `detector.txt` for the whole of §3.5e,
+   but detector.txt's VP section is superseded by vp_resolution.txt, which says so
+   in its own l.25-28.
+   FIX: "detector.txt (detector) + vp_resolution.txt (VP)".
+
+D82 [MAJOR] Mixed path bases. l.24 and l.741 use repo-root-relative
+   `research/...`; l.158-203, 328-490, 723 use research-relative `upright/...`;
+   l.636, 654, 745 use repo-root files with no directory (`handoff/…`,
+   `LIGHTROOM-UPRIGHT-FORENSICS.md`, `patent-landscape-upright.md` — all three are
+   at the repo root, none under research/).
+   FIX: use repo-root-relative paths everywhere and prefix the others with
+   `research/`.
+
+D83 [MINOR] l.441 names `AgCameraRawControllerGuidedUpright.lua` with no path.
+   FIX: give the full path once.
+
+D84 [MINOR] l.30 elides the binary path with "…". Harmless, but it is the only
+   absolute path a reproducer needs.
+   FIX: print it in full once (it is already in focal_prior.txt l.3).
+
+
+--------------------------------------------------------------------------------
+F. CONFIDENCE LANGUAGE vs SAMPLE SIZE
+--------------------------------------------------------------------------------
+
+D85 [BLOCKER] §3.4 "Machine precision … recovered to 15 digits" / "proven" —
+   n = 4 images, 4 slots, one machine, one session. Also "Result 3 … proven",
+   "Result 4 … Confirms the mode taxonomy directly from the binary" (n=4, and D56).
+   FIX: "n=4 synthetic scenes; exact on all 16 fits" and drop "proven" where the
+   claim is a taxonomy inference.
+
+D86 [BLOCKER] §3.7 Guided (l.462, 480): "RESOLVED", "exactly zero on both families",
+   "strongest mode" — n = 1 scene, and the "fully drivable" recipe in
+   guided_mode.txt l.35-63 (zero the digest, one Update click) is missing
+   entirely, while l.468 still says the trigger is "unreachable from a plugin".
+   FIX: add the digest recipe, state n=1, and say the mode ordering rests on one
+   image.
+
+D87 [BLOCKER] l.460 "`PerspectiveScale` is 100.0 for every single photo". The
+   only evidence is lrtest/result.json (4 images × 4 modes). No corpus-wide output
+   exists for PerspectiveScale.
+   FIX: "100.0 on all 16 test writes"; or run it over the corpus and cite that.
+
+D88 [MAJOR] §3.5b "This is the strongest confirmation in the document" — 2 angles,
+   4 images, 1 seed, fit not in evidence, superseded in the same subsection.
+   FIX: "the sparsest but most direct confirmation" or demote.
+
+D89 [MAJOR] §3.8 Result 1: "the saturation is real" from 7 points, 1 seed each.
+   §3.5f shows the same sweep is bimodal at high tilt, i.e. the 7-point curve is
+   contaminated exactly where the "cliff" is claimed.
+   FIX: "the saturation is real in the low-angle range; the high-angle cliff is
+   partly branch flipping (§3.5f)".
+
+D90 [MAJOR] §3.5h "nothing breaks" / "No degenerate cell" — 4 families × 1 scene,
+   one pose, and the single-wall caveat (6° yaw only, untested at 20-30°) is in
+   the evidence but not the report.
+   FIX: state n and carry the caveat.
+
+D91 [MAJOR] §3.5e "recovered in full" — the section's own l.344 lists five
+   unresolved items, and §3.5g had to correct it.
+   FIX: "recovered, with the caveats in the last paragraph".
+
+D92 [MINOR] l.281-287 roll/keystone table: "bias-free in-plane displacement
+   metric" is never defined in the report and lambda_curve.txt does not define it
+   either (it just says "--- roll handling ---").
+   FIX: one sentence on the metric, or cite the script that computes it.
+
+D93 [MINOR] §3.5c n=29 is fine, but "these are the source camera" rests on a
+   median with sd 3.40 mm that the report's table omits.
+   FIX: add the sd.
+
+D94 [MINOR] §3.5f l.371 "confirms the bimodality" from 24/80 degenerate cases —
+   reasonable, but the branch assignment is stochastic (l.375 says so) while
+   l.361 states the f35>32 rule flatly.
+   FIX: "pairs with" → "is associated with".
+
+
+D96 [MAJOR] §6a l.656-659 table mixes a derived row with measured ones without
+   saying so. "Lightroom `Full` 0.51°" is not a measurement — it is §3.4's 0.73°
+   scaled by 10.77/15.52 (0.73 x 0.694 = 0.507). And "original vertical
+   convergence 10.77°" is a different metric from the 15.52° the report uses for
+   the same pose family in §3.4/ground_truth_validation. The "ratio-matched rather
+   than re-run" disclosure is one line in the caveat at l.672, after both numbers.
+   FIX: mark the derived row "(derived)" and say in the table caption that the
+   metric is calibrated, not the §3.4 convergence.
+
+D97 [MAJOR] §6a l.666 "and no patent exposure at all" — asserted, not argued, and
+   it sits in tension with §5a l.603's own warning that 855 c11 ("planar
+   transformation ... according to human perception-based criteria") could read on
+   a guided/constraint solve. NegPy's gates are structural, so the claim may hold,
+   but nothing in §6a tests it against the claims the way §5a tests Guided.
+   FIX: "no patent exposure on its face (structural gates, no perceptual
+   criterion) — same caveat as §5a for 855 c11".
+
+
+--------------------------------------------------------------------------------
+G. WHAT CHECKS OUT (so it does not get re-litigated)
+--------------------------------------------------------------------------------
+
+- §3.5 curve table (l.219-231) matches lambda_curve.txt value for value.
+- §3.8 Result 1 and Result 2 tables match sweep_results.txt exactly; Result 2b
+  table matches sweep2_resolution.txt; 11 rows there, and the "16 usable points"
+  claim needs the 5 Y-series points to be added to the report (they are not
+  tabulated — D95 [MAJOR] l.528: table shows 11 of 16 cells, Y15 excluded from
+  the fit but counted in n. FIX: print the Y series and say n=15 for the fit).
+- §3.5f branch table matches sigma_v_branch.txt; §3.5h table, ranges and arc
+  numbers match non_manhattan.txt / nm_metrics.json.
+- §3.4 R1 medians/maxes match model_exactness.txt (3.185e-01, 3.006e-01,
+  6.819e-03, 5.653e-16 — correctly rounded).
+- §3.4 R5 table matches ground_truth_validation.txt (15.52/5.32/1.000/100.0 etc.).
+- §3.6 table matches matched_validation.json.
+- §3.5g gates, offsets and rules match vp_resolution.txt / vp_clustering.txt.
+- §3.5d fallback 35.0, range [10,1000], four write sites, NaN retention, the
+  hypot conversion and the 0.2618/0.2094-versus-π/12 distinction all match
+  focal_prior.txt and sensor_constant.txt. The `0.0685389`/`7.2951252`/
+  `0.0438649`/`11.3986332` values really are at the listed offsets (only the
+  "exact" wording is wrong — D10).
+- §5's "100 claims", "zero of the 100 claims", the five patent numbers, the
+  2033-04-26 floor and the 9,088,885/9,098,885 correction all match
+  patent_map.txt and the l.615 table.
+- §2.1/2.2/2.3/2.4 string claims verified against the binary except D24, D25.
+- §3.5e detector constants (cos22.5, 8 directions, bin formula, 10 it / 2048,
+  99 cap, merge pass, no min length) match detector.txt and the bytes.
+- §6a's NegPy figures (10.77, 0.09, 4.29, 13397, 2680, 31°, 0.61/0.42, 41%/60%,
+  the 5→20 and ±15%→±30% stopgap) all match negpy_compare.txt; the 5°-40° sweep
+  is tabulated there. The section is well-sourced — only D96/D97 apply.
+
+Counts: 97 defects — 27 blocker, 49 major, 21 minor (D95 is defined inline in G).
+
+Priority order if only five things get done: D66/D67 (delete the duplicated §4),
+D1/D2 (fix or source 14.0%), D27/D28/D39 (one σ_v and one λ₀ everywhere),
+D36/D37/D38 (bring §3.5e and §8 into line with §3.5f/3.5g/§3.7), D59 (write
+Result 3).

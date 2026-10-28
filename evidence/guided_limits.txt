@@ -1,0 +1,192 @@
+GUIDED LIMITS — partial and malformed guide sets
+================================================
+Harness: lrplugin uprightprobe ImportSweep job mode (/tmp/uplim/job*.txt),
+one LR run 01:02:07-01:02:33, RUN_END ok, LOCK_RELEASED, no lock left.
+Raw: /tmp/uplim/results.txt, /tmp/uplim/job.txt, /tmp/uplim/job_dg.txt,
+lrtest/TRACE.txt (run id 20261028T010207-74527-2358).
+NOTE: the agent driving this was interrupted before finishing its own write-up;
+the analysis below is the parent's, from the raw rows. Coverage is therefore
+PARTIAL — see §5 for what was never reached.
+
+Reference: a correct 4-guide, count=4, digest-zeroed call on DG_fresh gives
+slot 5 max|H-I| = 0.21474 with slots 1-4 near-identity (guided_mode.txt).
+
+------------------------------------------------------------------
+1. HEADLINE — GUIDED REQUIRES count == 4 AND EXACTLY 4 SEGMENTS
+------------------------------------------------------------------
+Two failing shapes were captured, and they fail in DIFFERENT ways.
+
+(a) THREE SEGMENTS SUPPLIED, count=4  (case f3_good)
+    RESULT|f3_good|clicked=true| all six UprightTransform_* = nil;
+    UprightFocalLength35mm=35; PerspectiveUpright=5; UprightTransformCount=6;
+    UprightFourSegmentsCount=4; UprightVersion=151388160
+    → NOTHING was written. No slot, no focal. The Update click landed
+      (clicked=true) but the solve produced no transform at all.
+    → Partial sets do not fall back; they silently produce nothing.
+
+(b) FOUR SEGMENTS SUPPLIED BUT count=8  (case p8_good)
+    RESULT|p8_good|clicked=true| slot 5 = IDENTITY (1,0,0,0,1,0,0,0,1);
+    slots 1-4 carry a REAL unguided solve (max|H-I| 0.194 on slot 4);
+    focal = 39.8008; UprightFourSegmentsCount = 0.
+    → Guided did not run. The supplied guides were DISCARDED (count reset to 0)
+      and the host fell back to the ordinary Full/Level/Vertical/Auto path,
+      which then wrote slots 1-4 and a focal.
+    → So a count mismatch degrades to "unguided", it does not error.
+
+Interpretation: `UprightFourSegmentsCount` is the authority for how many
+segments to read, and the solver is compiled for exactly four. Supplying 4
+with count=8 makes it read 8 slots, find 4 empty, and abandon the guided
+path; supplying 3 with count=4 makes it read four slots, find one empty, and
+produce no homography. The silent-discard behaviour in (b) is the dangerous
+one: it looks like success (a focal was written, slots are populated) unless
+you specifically check slot 5.
+
+Practical rule for any port or harness: assert count == 4 AND all four
+segment keys non-empty, and verify slot 5 is non-identity afterwards. A
+successful-looking run with an identity slot 5 means guided did not execute.
+
+------------------------------------------------------------------
+2. CONFIRMS PRIOR RESULT
+------------------------------------------------------------------
+The p8_good row also independently reconfirms, on a second photo, that a
+normal unguided solve writes slots 1-4 and a focal in one pass — consistent
+with the shared-analysis finding in version_slots.txt.
+
+------------------------------------------------------------------
+3. NOT ESTABLISHED BY THIS RUN
+------------------------------------------------------------------
+- Whether 1 or 2 guides behave like 3 (expected, untested).
+- Contradictory guides: one bad among three good — average, pick, or fail?
+- Near-parallel guides (degenerate intersection).
+- Guides placed on the HORIZON — pitch inferred, or yaw only?
+- Slot contamination: does guided overwrite a prior Auto result? (The
+  p8_good fallback DID write slots 1-4, so a fallback can clobber a previous
+  solve; a true guided success writing only slot 5 is from the earlier run.)
+- Whether count=4 with 4 segments but a stale non-zero digest behaves
+  differently from the zeroed-digest recipe.
+
+The first four items above are now covered by §5; the stale-digest item is
+still open.
+
+------------------------------------------------------------------
+4. CONFIDENCE
+------------------------------------------------------------------
+n=1 per failing shape. Both are deterministic-looking (silent no-op and
+silent fallback), not statistical, so n=1 is weak but not meaningless.
+The 4-guide success path is n=2 across two photos (DG_fresh, A_clean).
+
+------------------------------------------------------------------
+5. DEGENERATE AND CONTRADICTORY GUIDES
+------------------------------------------------------------------
+Run 20261028T051751-89871-9075 (cases c1-c4, one pass), repeat run
+20261028T052257-90177-0920 (c1b, c3b) and repeat run 20261028T052739-90459-1896
+(c1c, c3c). All cases: mode 5, count=4, four segments, guided digest zeroed,
+one Update press. Photo DG_fresh throughout. The two hard failures were run
+three times each and reproduced every time.
+Raw: /tmp/uplim/results_run1.txt (c1-c4), /tmp/uplim/results_run2.txt (c1c,
+c3c), /tmp/uplim/results_c5.txt (c5 reference).
+Every case was preceded by a write of an IDENTITY matrix into slot 5, so
+"slot 5 absent after the press" cannot be confused with a stale earlier run;
+it means the solve ran and produced no transform.
+
+Headline: the two degenerate shapes do NOT behave alike. A contradictory
+guide and an all-collinear (horizon-only) set are HARD FAILURES that write
+nothing. Near-parallel guides SOLVE, exactly satisfy the guides, and silently
+under-correct the image.
+
+(a) c1_contradictory / c1b / c1c  -- 2 verticals + 1 horizontal + one
+    45-degree diagonal in slot 4 (0.200,0.950 -> 0.700,0.250; 700 px across,
+    700 px down on the 1400x1000 frame).
+      RESULT all three times: UprightTransform_0..5 = nil; UprightFocalLength35mm=35
+      (unchanged); PerspectiveUpright=5; UprightFourSegmentsCount=4;
+      UprightTransformCount=6; digest restamped (SOLVE_OK, not a lost click).
+      → NO transform, NO focal. It neither averages nor picks three-of-four.
+        One bad guide out of four kills the whole solve. Same failure shape as
+        the three-segment case in §1(a): the click lands, nothing is written.
+
+(b) c2_nearparallel -- two verticals with the same slope sign, 0.36 deg apart
+    (1.79 deg and 1.43 deg off vertical, VP effectively at infinity), plus two
+    normal horizontals.
+      slot 5 = 0.972891552,0.025576621,-0.040383669,
+               0.014098877,1.030376794,-0.021008209,
+              -0.081863295,0.010827841,1.000000000
+      max|H-I| = 0.081863
+      vertical convergence 0.2386 -> 0.0000 ; horizontal 1.1062 -> 0.0000
+      (all four guides land at exactly 0.000 deg tilt)
+      focal unchanged at 35.
+      → It SOLVES and fits the supplied lines exactly, but the correction is
+        only 38% of the reference 0.214742 for the same scene. The degenerate
+        pair pins both verticals parallel-to-vertical without resolving yaw,
+        so the solution is a weak, under-determined homography that still
+        reports success. Unlike (a) and (c) this one looks fine afterwards.
+
+(c) c3_horizon / c3b / c3c -- all four segments collinear on the scene
+    horizon (slope -0.056, y 0.6325..0.5894), four short pieces of one line.
+      RESULT all three times: identical to (a) — every UprightTransform_* nil,
+      focal 35 unchanged, count/mode/version untouched, digest restamped.
+      → HARD FAILURE. It does not infer pitch from horizon offset, and it does
+        not fall back to yaw-only. Four constraints that are all the same line
+        are simply not enough. (Input horizontal convergence is 0.0000, so
+        there is also nothing for the horizontal family to converge.)
+
+(d) c4_contam -- prior Auto solve, then the standard four good guides.
+      PRE_AUTO (before the guided call): slots 1-4 carry a real unguided
+      solve (slot 1 max|H-I| 0.102, slot 2 0.114, slot 3 0.0135, slot 4
+      0.1946); UprightFocalLength35mm = 36.0503; PerspectiveUpright=1.
+      After the guided Update: slots 1-4 are ALL nil, focal back to 35,
+      PerspectiveUpright=5, slot 5 =
+        0.795372863,-0.102950040,0.061452701,
+        0.010282084,0.785833824,-0.010282084,
+       -0.084572726,-0.214742439,1.000000000
+      max|H-I| = 0.214742 — identical to the known-good reference to 9 dp;
+      vertical and horizontal convergence both 0.0000.
+      → Guided WIPES slots 1-4 rather than leaving them. The "writes slot 5
+        only and leaves slots 1-4 untouched" line in guided_mode.txt holds
+        only on a photo whose slots 1-4 were already empty; after any real
+        solve they are destroyed. A guided call is not additive with an Auto
+        or Full result, and there is no way to keep both.
+
+Summary table (n=3 for the two hard failures, n=1 for the other two):
+
+  case                 slot5            max|H-I|   vert conv  horiz conv
+  c1 contradictory     ABSENT (nil)      —          10.5002*    3.7697*
+  c2 near-parallel     real             0.081863    0.2386->0   1.1062->0
+  c3 horizon-only      ABSENT (nil)      —            —         0.0000*
+  c4 after Auto        real             0.214742   10.5002->0   1.1062->0
+  (* = input value; output unchanged because nothing was written)
+
+Two more passes (c5_reference, c5b_reference) re-ran the plain
+four-good-guide recipe after the degenerate cases and reproduced 0.214742
+exactly each time, so the good path on DG_fresh is now n=4 and the photo is
+left holding that matrix.
+
+Practical consequences
+  * A guided success is not self-evidently correct. c2 returns success, writes
+    a plausible-looking matrix and zero residual on the guides, yet corrects
+    only 0.082 where the scene needs 0.215. Residual-on-guides is a useless
+    quality signal for degenerate input; check max|H-I| against a normal
+    reference too.
+  * One contradictory guide is enough to lose the whole solve. Do not expect
+    robustness to a single bad line.
+  * Slot 5 absent (nil) — not identity — is the marker of a guided solve that
+    ran and produced nothing. An identity slot 5 means the solve never ran
+    (§1b); nil means it ran and failed.
+  * Guided overwrites slots 1-4. Capture any prior Auto/Full result before
+    invoking guided if it is wanted.
+
+Harness notes from this run
+  * The AX press from inside LR is dead on this build: every osascript issued
+    by the plugin fails with -1743 (Not authorized to send Apple events to
+    System Events). pressUpdate/ensureUpdateVisible/panelState therefore never
+    work from inside the plugin, and panelState additionally has a compile
+    error (-2741). All Update presses in this run came from an external
+    clicker running outside LR (AXPress on the button, no OCR).
+  * Menu path is three levels, not flat siblings:
+    Library > Plug-in Extras > Upright Probe > Import Sweep. AXPress on a
+    submenu parent does not instantiate the next submenu; the reliable
+    sequence is click the Library menu bar item, AXPress "Plug-in Extras",
+    then arrow-key down/right to the target and press Return.
+  * pressUpdate was changed to search all windows instead of window 1
+    (window 1 is a 900x150 strip, never the panel). The job flow now also
+    wipes slot 5 to identity before arming and early-outs once the digest is
+    restamped.

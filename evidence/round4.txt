@@ -1,0 +1,237 @@
+ROUND 4 — FIDELITY TO ADOBE, NOT TO PERFECT RECTIFICATION — 2026-10-28
+========================================================================================
+VERDICT: YES, on the four available Adobe scenes and the four cached automatic modes,
+the port is closer to Lightroom than a naive always-full rectification baseline.
+It is NOT an exact clone. Auto still over-corrects B_strong substantially, Full retains
+better geometry than Adobe, and Adobe's output framing is missing. This round improves
+shape agreement but REGRESSES raw mapping agreement relative to the starting port.
+
+1. SCOPE, ORACLES AND METRICS
+All work stays inside research/upright/. No new dependency, native Adobe code, network,
+image, ground-truth scene, focal calibration policy, or quality threshold was introduced.
+Four adobe_truth/img_*.lua files exist. All four are scored; slots Auto=1, Full=2,
+Level=3, Vertical=4. Off/Guided identity cache slots are not automatic-solver evidence.
+No held-out raster has an Adobe cache here; the 70/700 geometric attempts cannot establish
+Adobe fidelity. A/C are related clean/noisy renderings; these are not four independent
+real photographs. Adobe is fixed cached output, not re-run for our RANSAC seeds.
+The actual port, port/upright_port.py, is evaluated. Existing validate_vs_adobe.py and
+compare_prototype_vs_adobe.py target upright_core.py, not this port; the former scores
+geometry. Their cache parsing/slot convention is reused, not their prototype results.
+Primary input: existing TIFFs, bundled detector, known generating focal 1600px, seeds
+0..4. Sensitivity: the SAME images/segments with each stored Adobe focal converted by
+the proven sensor-diagonal convention. This is an input sensitivity check, not tuning.
+Both versions receive the same segments/prior/seed; native H never enters the solver.
+80 returned mappings/version/prior = 4 scenes x 4 modes x 5 seeds; 320 paired rows total.
+Rejected identities are included. No scene, slot, or failing seed is omitted.
+
+Raw: RMS Euclidean distance between Adobe and port output coordinates for the SAME
+625 source points on a 25x25 uniform grid including corners, in pixels, divided by
+source image diagonal and multiplied by 100. No crop/translation/zoom is removed.
+Shape: same output points after fitting ONE positive uniform output scale and a 2-D
+translation from the candidate to Adobe by least squares. Rotation, shear, aspect,
+and projective differences remain. This is explicitly a partial fidelity metric; it
+does not establish agreement with the whole stored H. Both metrics ignore H scalar gauge.
+This avoids comparing raw matrix coefficients, ground-truth residuals, or treating an
+area-normalized inverse composition as a complete Adobe homography agreement score.
+All sample mappings are finite and remain on one side of the projective horizon.
+Naive baseline: exact K(true) R(true) K(true)^-1, applied identically for EVERY mode,
+with centered K and no framing. It has perfect geometric knowledge. It is deliberately
+the requested full-rectification baseline, not a mode-aware competitor. The shape score
+removes arbitrary baseline output translation/zoom, so the verdict does not rest on its
+poor framing alone. All scenes/modes/seeds have equal weight; seeds are not independent
+Adobe observations. Small Full-only gains do not imply native Full has been recovered.
+
+Stored native metadata (reported for provenance; source centers are not used by port):
+scene      f35_mm    diagonal_fpx    center_norm_x/y
+A_clean     38.9696    1549.597408    0.496879/0.484007
+B_strong    39.9956    1590.395542    0.500647/0.482119
+C_noisy     39.7882    1582.148434    0.495937/0.487602
+D_roll      39.8743    1585.572137    0.497853/0.487567
+
+2. PER SCENE / MODE AGREEMENT WITH ADOBE H (mean over seeds 0..4)
+All distances below are percent of source image diagonal; lower is closer to Adobe.
+scene      mode        raw_before raw_after raw_naive | shape_before shape_after shape_naive
+A_clean    auto       23.547886 29.310565 41.664917 |     0.540736    0.251394    1.152761
+A_clean    full       42.187198 42.187198 42.259489 |     0.132699    0.132699    0.140364
+A_clean    level       0.436649  0.443765 41.061152 |     0.241199    0.254004    2.800691
+A_clean    vertical   41.625571 41.627985 43.326509 |     0.117121    0.116500    1.323295
+B_strong   auto       25.379550 42.367262 73.826541 |     1.645814    1.907538    5.076133
+B_strong   full       74.113659 74.113659 74.464898 |     0.234862    0.234862    0.257857
+B_strong   level       2.234726  2.226955 73.494244 |     1.376013    1.362611    6.191118
+B_strong   vertical   71.847152 71.831594 77.852582 |     0.160185    0.159499    3.765580
+C_noisy    auto       23.523973 28.710747 41.645985 |     0.543686    0.280713    1.169058
+C_noisy    full       42.151463 42.151463 42.246903 |     0.144793    0.144793    0.153885
+C_noisy    level       0.468412  0.476098 41.058636 |     0.259069    0.272893    2.799264
+C_noisy    vertical   41.588317 41.590743 43.310655 |     0.129893    0.129146    1.319827
+D_roll     auto       24.077375 29.029224 41.840791 |     0.602922    0.368845    1.201972
+D_roll     full       42.303838 42.303838 42.378044 |     0.132140    0.132140    0.136878
+D_roll     level       2.518473  2.518633 40.937299 |     0.482677    0.483577    2.998564
+D_roll     vertical   41.368854 41.366742 43.390568 |     0.221978    0.221770    1.444483
+
+Aggregate by mode (same equal-weight protocol):
+mode         raw_before raw_after raw_naive | shape_before shape_after shape_naive
+all         31.210819 33.266029 50.297451 |     0.435362    0.403312    1.995733
+auto        24.132196 32.354450 49.744558 |     0.833289    0.702123    2.149981
+full        50.189040 50.189040 50.337333 |     0.161123    0.161123    0.172246
+level        1.414565  1.416363 49.137833 |     0.589739    0.593272    3.697409
+vertical    49.107473 49.104266 51.970079 |     0.157294    0.156729    1.963296
+Against naive: raw RMS 33.266029% vs 50.297451% (33.86% lower); shape 0.403312% vs 1.995733% (79.79% lower).
+Against starting port: raw WORSE by 6.58%; shape better by 7.36%.
+The larger raw error is real: stronger pitch correction with the same centered K1
+moves the output farther from native framing. Shape alignment must not hide this.
+
+3. DISAGREEMENT CLASSIFICATION — COMPONENTS, NOT ONE LABEL FOR AN ENTIRE H
+(a) implementation bug; (b) port geometrically better; (c) damping/mode semantics;
+(d) port worse/incomplete. A single H can have better pitch and worse roll/framing.
+Evidence used to distinguish them: native H is the fidelity target, independent world
+lines diagnose axis alignment, a world X/Z horizon diagnoses roll, and controlled changes
+separate damping from the full solve. A small homography distance alone proves none of these.
+
+Shared findings:
+  (a) Different undamped objectives/gates per mode: Adobe-focal A/C accepted Full but
+      rejected Level (10/80 mode attempts). Fixed by using the unchanged Full objective
+      for every automatic mode before damping. All 80/80 now return a valid mapping.
+  (c) Auto used a branch-conditioned 14.58deg/3.56 curve on camera pitch, although the
+      requested pooled 13.33deg/2.64 curve is in visible-keystone units. Fixed the
+      constants and the x-axis, and converted physical convergence removal to pitch
+      rotation by a bounded scalar solve. Merely replacing constants on Euler pitch
+      made Auto under-correct still more; that is not the adopted change.
+  (d) All modes lack native destination camera/framing policy. The port fixes destination
+      principal point at 0.5/0.5; native maps include different translation, scale and
+      mild shape effects. Large raw errors are retained. No empirical per-scene recenter,
+      zoom, cache lookup, or invented Adobe crop policy was added. This was an explicit
+      pre-existing limitation, not evidence that the two-camera algebra itself is broken.
+  (c, residual) A pooled Auto response is not a native branch model. Coupled yaw/roll,
+      support distribution and focal branch behavior remain approximate. The requested
+      formula is implemented; exact recovery of these native choices is NOT claimed.
+
+Per scene/mode diagnosis (the common framing class d applies to EVERY row):
+  A_clean    auto      c fixed response/units; remaining V=b (slightly stronger), H=d (more axis bias).
+  A_clean    full      b: both families are much straighter than Adobe; retained, no weakening fit.
+  A_clean    level     a fixed gate at Adobe focal; b: native introduces ~0.50deg horizon tilt; port ~0.02deg.
+  A_clean    vertical  b in pitch: native leaves ~0.37deg V, port ~0.02deg; yaw intentionally retained.
+  B_strong   auto      c fixed response/units; branch mismatch persists: V=b but over-corrects as a clone; H=d.
+  B_strong   full      b: native V/H ~0.49/0.15deg, port ~0.05/0.01deg; retained.
+  B_strong   level     b: native introduces ~2.48deg horizon tilt; port ~0.02deg; retained.
+  B_strong   vertical  b: native V ~0.52deg, port ~0.05deg; similar intended uncorrected yaw.
+  C_noisy    auto      c fixed response/units; remaining V=b (slightly stronger), H=d (more axis bias).
+  C_noisy    full      b: native V/H ~0.41/0.20deg, port ~0.02/0.03deg; retained.
+  C_noisy    level     a fixed gate at Adobe focal; b: native horizon ~0.53deg, port ~0.02deg.
+  C_noisy    vertical  b in pitch: native V ~0.42deg, port ~0.02deg; yaw intentionally retained.
+  D_roll     auto      c fixed response/units; remaining V=b, H=d; coupled yaw/roll is not native-equivalent.
+  D_roll     full      b: native V/H ~0.36/0.08deg, port ~0.014/0.001deg; retained.
+  D_roll     level     d: port horizon residual ~0.61deg vs Adobe ~0.25deg; fixed 0.87 roll is approximate.
+  D_roll     vertical  d: port V ~0.41deg vs Adobe ~0.36deg, despite straighter convergence; roll bias remains.
+Class (b) differences are documented differences from Lightroom, NOT clone successes.
+They are preserved as requested. Matching native weakness would require an explicitly
+evidenced native model; no hand-tuned weakening of Full/Vertical/Level was introduced.
+Unresolved class (c) behavior is stated openly: the evidence supports a fitted response,
+not a deterministic rule for native branch selection or coupled axes. No new branch rule
+is inferred from these four target matrices. Class (d) behavior is not modified this round.
+
+Independent world axis residuals, degrees, seed 0, primary focal (diagnosis only):
+scene      mode          Adobe_V   Adobe_H     Port_V    Port_H   horizon_Adobe/Port
+A_clean    auto        2.677477  0.365034   2.401907  0.716719   0.106793/0.654639
+A_clean    full        0.363467  0.179190   0.020622  0.027500   0.120276/0.020646
+A_clean    level       7.761314  2.661527   7.761314  2.661527   0.498234/0.019962
+A_clean    vertical    0.367257  2.981998   0.017323  2.996125   0.123175/0.019962
+B_strong   auto        8.628484  2.399299   5.080733  2.987940   0.173671/2.994554
+B_strong   full        0.490028  0.145577   0.048784  0.010856   0.212704/0.000965
+B_strong   level      11.860099  5.417679  11.860099  5.417679   2.477960/0.024336
+B_strong   vertical    0.524060  5.948179   0.052459  5.919481   0.007094/0.024336
+C_noisy    auto        2.748464  0.363303   2.523739  0.749294   0.046379/0.687137
+C_noisy    full        0.414154  0.196918   0.021287  0.030453   0.194265/0.021326
+C_noisy    level       7.761314  2.661527   7.761314  2.661527   0.534745/0.021480
+C_noisy    vertical    0.418653  2.983628   0.017614  2.995806   0.140435/0.021480
+D_roll     auto        2.794740  0.278780   2.542797  0.905692   0.135303/0.956501
+D_roll     full        0.356850  0.084158   0.013863  0.000611   0.088818/0.000080
+D_roll     level       7.824602  2.128677   7.824602  2.128677   0.245081/0.606791
+D_roll     vertical    0.362529  2.964107   0.409240  2.981072   0.005584/0.367489
+Axis residuals use the original four independent world lines (two per family). Their
+symmetric absolute medians can hide roll errors in Level; the world horizon is therefore
+reported separately. These values never replace the native-H agreement metric.
+
+4. AUTO: MEASURED CURVE AND ACTUAL ADOBE UNDER-CORRECTION
+Requested constants now used: sigma_V=13.33deg [9.94,22.72], L0_V=2.64, L0_H=76.73,
+sigma_yaw=11.64deg, sigma_pitch_gate=22.10deg, roll_auto=0.928. Vertical x-axis is
+P95-P5 signed vertical line direction spread in PIXEL angles, not Euler camera pitch.
+The response is lambda/(1+lambda), lambda=2.64*exp(-keystone^2/(2*13.33^2)).
+A bounded 32-step scalar inversion matches that removal fraction on selected observed
+vertical supports while retaining the separate yaw and roll schedules. If a target lies
+outside endpoint spreads, the pitch scale clips to [0,1]. This is our implementation,
+not recovered native source. Full/guided and explicit damping= reconstruction are retained.
+Observed edge fragments approximate the visible world lines used in the fit; sampling,
+noise, quantile ordering and native detector differences prevent exact transfer to world lines.
+The test checks physical removal on noiseless projected lines with both pitch signs.
+
+seed 0: pitch = recovered undamped camera pitch; ks = observed keystone; requested =
+fitted removal on observed supports. Adobe/before/after fractions below instead use the
+SAME independent visible world verticals and P95-P5 angular spread, with the dense-sweep
+visibility filter (>=8 of 41 samples in frame). They are physical fractions, not H norms.
+scene       pitch_deg     ks_deg requested  Adobe_frac before_frac after_frac  after-minus-Adobe
+A_clean    -21.979446  12.339633  0.632351    0.652445    0.524583   0.687900          +0.035455
+B_strong   -34.238902  16.675166  0.546946    0.264781    0.183508   0.561333          +0.296552
+C_noisy    -21.969152  12.392680  0.631492    0.643217    0.524598   0.672064          +0.028846
+D_roll     -21.962845  13.570907  0.611244    0.640814    0.529350   0.672734          +0.031920
+Answer: starting Auto UNDER-corrected versus Adobe on all four scenes. Final Auto is
+still strongly damped relative to full rectification, but OVER-corrects versus Adobe:
+about 3 percentage points on A/C/D and about 30 points on B. It does NOT reproduce the
+complete Adobe Auto response. In particular B is NOT an implementation success just
+because its verticals are straighter. Its worse Auto shape score is retained in the mean.
+The constants alone cannot establish fidelity, and the direction was not assumed in advance.
+
+Provenance cautions: evidence/sigma_v_precise.txt reports 80 exposed, 76 solved, 4 total
+abstentions. Its keystone fit C has sigma=13.33 but L0=2.474; L0=2.638 belongs to the
+camera-pitch fit A (sigma=22.26). The requested pair 13.33/2.64 is used verbatim, not
+misrepresented as one jointly fitted parameter pair. The pooled fit has ~0.210 fraction
+RMS error, a low-angle shoulder and high-angle branch bimodality. Its CI is not a per-image
+prediction bound. No new fit or bootstrap was run; the actual stored transforms remain
+the final target. The old branch-conditioned sigma evidence remains untouched.
+The corpus roll extraction and the port Euler decomposition also use different rotation
+conventions; independent axis scaling is consequently an approximation. Changing all mode
+axes to a different convention is not justified by the physical yaw sweep or these four
+matrices, and would change Level/Vertical semantics. This is an unresolved modeling limit.
+
+5. STORED-FOCAL SENSITIVITY (mean over all seeds; no discarded identities)
+scene      mode         raw_after shape_after raw_naive shape_naive rejected_before/after
+A_clean    auto       27.783338    0.272672 41.664917    1.152761 0/5 -> 0/5
+A_clean    full       39.866302    0.149020 42.259489    0.140364 0/5 -> 0/5
+A_clean    level       0.439977    0.247244 41.061152    2.800691 5/5 -> 0/5
+A_clean    vertical   39.291100    0.116457 43.326509    1.323295 0/5 -> 0/5
+B_strong   auto       42.022879    1.913837 73.826541    5.076133 0/5 -> 0/5
+B_strong   full       73.380939    0.250583 74.464898    0.257857 0/5 -> 0/5
+B_strong   level       2.225132    1.359455 73.494244    6.191118 0/5 -> 0/5
+B_strong   vertical   71.068576    0.164994 77.852582    3.765580 0/5 -> 0/5
+C_noisy    auto       28.176646    0.287569 41.645985    1.169058 0/5 -> 0/5
+C_noisy    full       41.319370    0.149073 42.246903    0.153885 0/5 -> 0/5
+C_noisy    level       0.474579    0.270199 41.058636    2.799264 5/5 -> 0/5
+C_noisy    vertical   40.755017    0.128080 43.310655    1.319827 0/5 -> 0/5
+D_roll     auto       28.591176    0.371039 41.840791    1.201972 0/5 -> 0/5
+D_roll     full       41.613849    0.137011 42.378044    0.136878 0/5 -> 0/5
+D_roll     level       2.517579    0.477598 40.937299    2.998564 0/5 -> 0/5
+D_roll     vertical   40.673005    0.221061 43.390568    1.444483 0/5 -> 0/5
+Aggregate stored-focal raw=32.512466% vs naive=50.297451%; shape=0.407243% vs naive=1.995733%; 0/80 rejected.
+Both focal protocols give the same baseline verdict. They are reported separately.
+
+6. VERIFICATION AND REPRODUCTION
+Before: python3.12 -m pytest -q port -> 71 passed (round4_tests_before.txt).
+Regression red: three new tests fail before implementation (round4_regression_red.txt):
+wrong curve/units, missing physical-response conversion, and mode candidate inconsistency.
+Final: python3.12 -m pytest -q -> 75 passed (round4_pytest.txt), including original geometry,
+700 held-out full-mode seeds, 200 input/focal/seed combinations, gate discrimination,
+new physical damping checks, shared mode/gate checks, and independent mapping metric checks.
+The pre-existing pytest_asyncio configuration deprecation warning remains; no test fails.
+Primary Full homographies before/after: maximum coefficient change 0 over all 20 pairs.
+The geometry fixes from Rounds 1–3 are preserved; no native weakness was injected into Full.
+To regenerate canonical data and report:
+  python3.12 port/benchmark_adobe.py --seeds 5
+  python3.12 evidence/write_round4_report.py
+  python3.12 -m pytest -q
+Artifacts: round4_original_port.py (exact starting port), round4_adobe.json (all 320 rows,
+returned and native matrices, per-seed scores and diagnostics), round4_adobe_run.txt,
+round4_before.json (initial seed-0 probe), regression/test logs, port/benchmark_adobe.py,
+port/test_round4.py, and updated port documentation. Historical round evidence is unchanged.
+
+Final boundary: YES versus the specified naive baseline on the available caches. NO claim
+of exact native-H reproduction, complete Auto damping fidelity, improved raw fidelity this
+round, matched native crop/framing, held-out Adobe agreement, or real-photo generalization.

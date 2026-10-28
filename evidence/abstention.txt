@@ -1,0 +1,42 @@
+ABSTENTION — RESOLVED: it is not a veto, it is "nothing to correct"
+
+LAYER SPLIT (the test that mattered)
+Abstention can live at the input (detector), solver, or output (gate) layer.
+Discriminator: a real UprightFocalLength35mm means the detector AND estimator ran;
+the default 35 means they never got that far.
+
+PROBE: 17 degradations of one 18deg-pitch / 6deg-yaw scene, four axes
+  noise  sigma 4/12/28/55
+  blur   radius 2/4/7/11 px
+  contrast 45/25/12/5 %
+  crop   keep 55/35/22/12 % width
+  + untouched control
+
+RESULT: ZERO abstentions. Every image produced a real focal estimate (31.6-40.8 mm)
+and a strong correction. Auto/Full magnitude ratio stayed 0.58-0.90 throughout --
+Auto never collapsed relative to Full, even at 12% width.
+=> noise, blur, contrast and crop are NOT the trigger, and it is not an output gate.
+
+CORPUS TEST (the decisive one)
+For every photo with both slots stored, compare Full's own transform magnitude:
+  abstainers (Auto identity)  n=1422 : Full |H-I| median 0.0000, p90 0.0000
+  corrected                   n=13200: Full |H-I| median 0.1657, p90 0.6802
+  Full ALSO identity in 100.0% of abstainers, vs 9.7% of corrected.
+
+Full's magnitude distribution is a smooth continuum, not a step:
+  p10 0.0004 | p25 0.0261 | p50 0.1363 | p75 0.3623 | p90 0.6434
+
+CONCLUSION
+The solver decides ONCE per photo, not per mode. When the required correction is
+negligible it emits identity into every slot, and all six slots inherit it. The
+9.8-14% "abstainers" are not hard photos being given up on -- they are photos that
+are already upright. There is no confidence gate, no content test and no metadata
+signal because there is nothing to gate: abstention is the objective function
+correctly returning "no work to do".
+
+The residual band where Full does ~0.0045 and Auto rounds to identity is just the
+floor of the same continuum.
+
+PORTING IMPLICATION: do not implement an abstention heuristic. Emit identity when
+the solved correction is below noise, and let the magnitude do the work. The
+14% figure is a property of the photo population, not of a hidden rule.

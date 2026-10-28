@@ -1,0 +1,178 @@
+completed A_clean
+completed B_strong
+completed C_noisy
+completed D_roll
+{
+  "scene_focal": {
+    "before": {
+      "all": {
+        "attempts": 80,
+        "rejected": 0,
+        "raw_port": 31.21081857142344,
+        "raw_naive": 50.297450855517454,
+        "shape_port": 0.43536162868401435,
+        "shape_naive": 1.9957331729190586
+      },
+      "auto": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 24.132196308407774,
+        "raw_naive": 49.74455846510497,
+        "shape_port": 0.8332893582280996,
+        "shape_naive": 2.149980870127539
+      },
+      "full": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 50.18903957958781,
+        "raw_naive": 50.337333467247475,
+        "shape_port": 0.1611233056231468,
+        "shape_naive": 0.1722463165546782
+      },
+      "level": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 1.41456492581754,
+        "raw_naive": 49.13783275493448,
+        "shape_port": 0.5897394420228661,
+        "shape_naive": 3.6974092541506303
+      },
+      "vertical": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 49.10747347188065,
+        "raw_naive": 51.970078734782895,
+        "shape_port": 0.1572944088619449,
+        "shape_naive": 1.9632962508433878
+      }
+    },
+    "after": {
+      "all": {
+        "attempts": 80,
+        "rejected": 0,
+        "raw_port": 32.11834326706423,
+        "raw_naive": 50.297450855517454,
+        "shape_port": 0.3973668253606085,
+        "shape_naive": 1.9957331729190586
+      },
+      "auto": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 27.763704675823135,
+        "raw_naive": 49.74455846510497,
+        "shape_port": 0.6783436742613682,
+        "shape_naive": 2.149980870127539
+      },
+      "full": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 50.18903957958781,
+        "raw_naive": 50.337333467247475,
+        "shape_port": 0.1611233056231468,
+        "shape_naive": 0.1722463165546782
+      },
+      "level": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 1.4163627928867393,
+        "raw_naive": 49.13783275493448,
+        "shape_port": 0.5932715097088336,
+        "shape_naive": 3.6974092541506303
+      },
+      "vertical": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 49.104266019959226,
+        "raw_naive": 51.970078734782895,
+        "shape_port": 0.1567288118490855,
+        "shape_naive": 1.9632962508433878
+      }
+    }
+  },
+  "adobe_stored_focal": {
+    "before": {
+      "all": {
+        "attempts": 80,
+        "rejected": 10,
+        "raw_port": 30.563216510519844,
+        "raw_naive": 50.297450855517454,
+        "shape_port": 0.43479018425517024,
+        "shape_naive": 1.9957331729190586
+      },
+      "auto": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 23.84597610924632,
+        "raw_naive": 49.74455846510497,
+        "shape_port": 0.815660860250069,
+        "shape_naive": 2.149980870127539
+      },
+      "full": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 49.04511489602349,
+        "raw_naive": 50.337333467247475,
+        "shape_port": 0.17142171720808197,
+        "shape_naive": 0.1722463165546782
+      },
+      "level": {
+        "attempts": 20,
+        "rejected": 10,
+        "raw_port": 1.417822148726462,
+        "raw_naive": 49.13783275493448,
+        "shape_port": 0.5929558593645349,
+        "shape_naive": 3.6974092541506303
+      },
+      "vertical": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 47.943952888083125,
+        "raw_naive": 51.970078734782895,
+        "shape_port": 0.15912230019799528,
+        "shape_naive": 1.9632962508433878
+      }
+    },
+    "after": {
+      "all": {
+        "attempts": 80,
+        "rejected": 0,
+        "raw_port": 31.45230761575318,
+        "raw_naive": 50.297450855517454,
+        "shape_port": 0.4005262503673184,
+        "shape_naive": 1.9957331729190586
+      },
+      "auto": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 27.402874601228895,
+        "raw_naive": 49.74455846510497,
+        "shape_port": 0.6844115674954119,
+        "shape_naive": 2.149980870127539
+      },
+      "full": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 49.04511489602349,
+        "raw_naive": 50.337333467247475,
+        "shape_port": 0.17142171720808197,
+        "shape_naive": 0.1722463165546782
+      },
+      "level": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 1.414316532848979,
+        "raw_naive": 49.13783275493448,
+        "shape_port": 0.5886238682999437,
+        "shape_naive": 3.6974092541506303
+      },
+      "vertical": {
+        "attempts": 20,
+        "rejected": 0,
+        "raw_port": 47.94692443291135,
+        "raw_naive": 51.970078734782895,
+        "shape_port": 0.15764784846583618,
+        "shape_naive": 1.9632962508433878
+      }
+    }
+  }
+}

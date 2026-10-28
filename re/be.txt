@@ -1,0 +1,75 @@
+macho magic 0xfeedfacf cputype 16777223 ncmds 38
+--- 0x22be000 ctor
+0x22be000  push    rbp   
+0x22be001  mov     rbp, rsp   
+0x22be004  push    r15   
+0x22be006  push    r14   
+0x22be008  push    rbx   
+0x22be009  push    rax   
+0x22be00a  mov     rbx, rdi   
+0x22be00d  mov     qword ptr [rdi], rsi   
+0x22be010  movsd   xmm0, qword ptr [rip + 0xae5758]   <0x2da3770 f=1 d=0.0078125 ''>
+0x22be018  movsd   qword ptr [rdi + 8], xmm0   
+0x22be01d  mov     qword ptr [rdi + 0x10], 0x3f800000   
+0x22be025  mov     qword ptr [rdi + 0x18], 0   
+0x22be02d  movss   xmm0, dword ptr [rip + 0x6baf0b7]   <0x8e6d0ec f=0.0443675 d=0.0078125 ''>
+0x22be035  movlps  qword ptr [rdi + 0x20], xmm0   
+0x22be039  mov     dword ptr [rdi + 0x28], 2   
+0x22be040  movsd   xmm0, qword ptr [rip + 0x6baf0a8]   <0x8e6d0f0 f=1 d=0.00348061 ''>
+0x22be048  movsd   qword ptr [rdi + 0x2c], xmm0   
+0x22be04d  mov     dword ptr [rdi + 0x34], 0x3e000000   
+0x22be054  xorps   xmm0, xmm0   
+0x22be057  movups  xmmword ptr [rdi + 0x38], xmm0   
+0x22be05b  movups  xmmword ptr [rdi + 0x48], xmm0   
+0x22be05f  mov     qword ptr [rdi + 0x58], 0   
+0x22be067  mov     dword ptr [rdi + 0x60], 3   
+0x22be06e  lea     r14, [rdi + 0x68]   
+0x22be072  movups  xmmword ptr [rdi + 0x68], xmm0   
+0x22be076  mov     qword ptr [rdi + 0x78], 0   
+0x22be07e  mov     esi, 3   
+0x22be083  mov     rdi, r14   
+0x22be086  call    0xaf2340   
+0x22be08b  mov     rax, qword ptr [rbx + 0x68]   
+0x22be08f  mov     rcx, qword ptr [rax]   
+0x22be092  mov     qword ptr [rax + 8], rcx   
+0x22be096  mov     rax, qword ptr [rbx + 0x68]   
+0x22be09a  mov     rcx, qword ptr [rax + 0x18]   
+0x22be09e  mov     qword ptr [rax + 0x20], rcx   
+0x22be0a2  mov     rax, qword ptr [rbx + 0x68]   
+0x22be0a6  mov     rcx, qword ptr [rax + 0x30]   
+0x22be0aa  mov     qword ptr [rax + 0x38], rcx   
+0x22be0ae  xorps   xmm0, xmm0   
+0x22be0b1  movups  xmmword ptr [rbx + 0x100], xmm0   
+0x22be0b8  movups  xmmword ptr [rbx + 0xf0], xmm0   
+0x22be0bf  movups  xmmword ptr [rbx + 0xe0], xmm0   
+0x22be0c6  movups  xmmword ptr [rbx + 0xd0], xmm0   
+0x22be0cd  movups  xmmword ptr [rbx + 0xc0], xmm0   
+0x22be0d4  movups  xmmword ptr [rbx + 0xb0], xmm0   
+0x22be0db  movups  xmmword ptr [rbx + 0xa0], xmm0   
+0x22be0e2  movups  xmmword ptr [rbx + 0x90], xmm0   
+0x22be0e9  movups  xmmword ptr [rbx + 0x80], xmm0   
+0x22be0f0  add     rsp, 8   
+0x22be0f4  pop     rbx   
+0x22be0f5  pop     r14   
+0x22be0f7  pop     r15   
+0x22be0f9  pop     rbp   
+0x22be0fa  ret        
+0x22be0fb  mov     r15, rax   
+0x22be0fe  mov     rsi, qword ptr [r14]   
+0x22be101  test    rsi, rsi   
+0x22be104  je      0x22be111   
+0x22be106  mov     rdi, rbx   
+0x22be109  mov     rdx, r14   
+0x22be10c  call    0x2c49570   
+0x22be111  mov     rdi, rbx   
+0x22be114  call    0x2c49550   
+0x22be119  mov     rdi, r15   
+0x22be11c  call    0x2c50982   
+0x22be121  nop     word ptr cs:[rax + rax]   
+0x22be130  push    rbp   
+0x22be131  mov     rbp, rsp   
+0x22be134  push    r15   
+0x22be136  push    r14   
+0x22be138  push    rbx   
+0x22be139  push    rax   
+0x22be13a  mov     rbx, rdi   

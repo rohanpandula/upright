@@ -1,0 +1,18 @@
+23:17:03  === non-manhattan probe ===
+23:17:03  found 1
+23:17:04  imported 1
+23:17:09    CT_manhattan reset ok=true
+23:17:10    CT_manhattan auto ok=true
+23:17:20  CT_manhattan AUTO f35=33.9439
+23:17:21    CT_manhattan full ok=true
+23:17:33  CT_manhattan FULL f35=33.9439
+23:17:33  === nm done ===
+23:22:00  === non-manhattan probe ===
+23:22:00  found 1
+23:22:01  imported 1
+23:22:07    CT_manhattan2 reset ok=true
+23:22:08    CT_manhattan2 auto ok=true
+23:22:18  CT_manhattan2 AUTO f35=34.212
+23:22:18    CT_manhattan2 full ok=true
+23:22:30  CT_manhattan2 FULL f35=34.212
+23:22:30  === nm done ===

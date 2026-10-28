@@ -1,0 +1,86 @@
+macho magic 0xfeedfacf cputype 16777223 ncmds 38
+--- 0x22cb4b5 angle binning
+0x22cb4b5  movsd   qword ptr [rbp - 0x100], xmm0   
+0x22cb4bd  movaps  xmm5, xmmword ptr [rip + 0x10c083c]   <0x338bd00 f=nan d=nan ''>
+0x22cb4c4  mov     rax, r14   
+0x22cb4c7  mov     qword ptr [rbp - 0x58], r14   
+0x22cb4cb  movss   dword ptr [rbp - 0x8c], xmm4   
+0x22cb4d3  jmp     0x22cb51f   
+0x22cb4d5  nop     word ptr cs:[rax + rax]   
+0x22cb4e0  mulss   xmm0, dword ptr [rbp - 0x64]   
+0x22cb4e5  mov     r14, qword ptr [rbp - 0xe0]   
+0x22cb4ec  movss   dword ptr [r14], xmm0   
+0x22cb4f1  mov     r13, qword ptr [rbp - 0xf0]   
+0x22cb4f8  add     r13, 0x18   
+0x22cb4fc  mov     r12, qword ptr [rbp - 0xe8]   
+0x22cb503  add     r12, 0xc   
+0x22cb507  add     r14, 4   
+0x22cb50b  cmp     r13, qword ptr [rbp - 0xd8]   
+0x22cb512  mov     rbx, qword ptr [rbp - 0xb8]   
+0x22cb519  je      0x22cb794   
+0x22cb51f  mov     qword ptr [rbp - 0xe0], r14   
+0x22cb526  mov     rcx, qword ptr [r13]   
+0x22cb52a  mov     qword ptr [rbp - 0xf0], r13   
+0x22cb531  mov     rax, qword ptr [r13 + 8]   
+0x22cb535  mov     r15, rax   
+0x22cb538  sub     r15, rcx   
+0x22cb53b  sar     r15, 3   
+0x22cb53f  mov     edx, 0   
+0x22cb544  sub     rax, rcx   
+0x22cb547  je      0x22cb5d9   
+0x22cb54d  movss   xmm0, dword ptr [r12]   
+0x22cb553  movss   xmm1, dword ptr [r12 + 4]   
+0x22cb55a  movaps  xmm2, xmm1   
+0x22cb55d  mulss   xmm2, xmm1   
+0x22cb561  movaps  xmm3, xmm0   
+0x22cb564  mulss   xmm3, xmm0   
+0x22cb568  addss   xmm3, xmm2   
+0x22cb56c  xorps   xmm2, xmm2   
+0x22cb56f  sqrtss  xmm2, xmm3   
+0x22cb573  divss   xmm0, xmm2   
+0x22cb577  divss   xmm1, xmm2   
+0x22cb57b  mov     rdx, qword ptr [rbp - 0xd0]   
+0x22cb582  mov     rsi, qword ptr [rdx + 0x18]   
+0x22cb586  mov     rdi, qword ptr [rdx + 0x30]   
+0x22cb58a  cmp     r15, 1   
+0x22cb58e  mov     r8, r15   
+0x22cb591  adc     r8, 0   
+0x22cb595  xor     edx, edx   
+0x22cb597  xor     r9d, r9d   
+0x22cb59a  nop     word ptr [rax + rax]   
+0x22cb5a0  movsxd  r10, dword ptr [rcx + r9*8 + 4]   
+0x22cb5a5  movsxd  r11, dword ptr [rcx + r9*8]   
+0x22cb5a9  imul    r10, rbx   
+0x22cb5ad  add     r10, r11   
+0x22cb5b0  movss   xmm2, dword ptr [rdi + r10*4]   
+0x22cb5b6  mulss   xmm2, xmm1   
+0x22cb5ba  movss   xmm3, dword ptr [rsi + r10*4]   
+0x22cb5c0  mulss   xmm3, xmm0   
+0x22cb5c4  addss   xmm3, xmm2   
+0x22cb5c8  andps   xmm3, xmm5   
+0x22cb5cb  ucomiss xmm3, xmm4   
+0x22cb5ce  sbb     edx, -1   
+0x22cb5d1  inc     r9   
+0x22cb5d4  cmp     r8, r9   
+0x22cb5d7  jne     0x22cb5a0   
+0x22cb5d9  mov     qword ptr [rbp - 0xe8], r12   
+0x22cb5e0  xorps   xmm0, xmm0   
+0x22cb5e3  cmp     edx, r15d   
+0x22cb5e6  jg      0x22cb4e0   
+0x22cb5ec  shr     rax, 3   
+0x22cb5f0  cdqe       
+0x22cb5f2  mov     qword ptr [rbp - 0xc0], rax   
+0x22cb5f9  mov     r14d, edx   
+0x22cb5fc  mov     eax, r15d   
+0x22cb5ff  mov     qword ptr [rbp - 0x110], rax   
+0x22cb606  lea     rax, [r14 - 1]   
+0x22cb60a  mov     qword ptr [rbp - 0xf8], rax   
+0x22cb611  xor     ebx, ebx   
+0x22cb613  jmp     0x22cb6a4   
+0x22cb618  xor     edx, edx   
+0x22cb61a  div     esi   
+0x22cb61c  nop     dword ptr [rax]   
+0x22cb620  movsxd  r12, eax   
+0x22cb623  lea     r13, [r14 + 1]   
+0x22cb627  xorps   xmm1, xmm1   
+0x22cb62a  cvtsi2sdxmm1, r14d   

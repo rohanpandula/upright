@@ -1,0 +1,195 @@
+/Users/rohan/.local/lib/python3.12/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+___________________ test_same_rotation_native_scale_recovery ___________________
+
+    def test_same_rotation_native_scale_recovery():
+        rows = json.loads((ROOT/'evidence/round8.json').read_text())['rows']
+        for r in rows:
+            if r['group'] != 'four_scene':
+                continue
+>           actual = up.scale_output(up.frame_output(np.array(r['base'])))
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:20: AttributeError
+___________ test_scaling_preserves_angles_and_commutes_with_framing ____________
+
+    def test_scaling_preserves_angles_and_commutes_with_framing():
+        K = up._intrinsics_norm(1800, W, H)
+        for rotation in ((-.35, .12, .04), (.35, -.12, -.04), (0, 0, .3), (-.1, .2, -.1)):
+            matrix = K @ up._rotation(*rotation) @ np.linalg.inv(K)
+            matrix /= matrix[2, 2]
+>           scaled = up.scale_output(matrix)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:29: AttributeError
+_________ test_opt_in_scale_follows_override_and_preserves_solve[auto] _________
+
+mode = 'auto'
+
+    @pytest.mark.parametrize('mode', ['auto', 'full', 'vertical', 'level', 'guided'])
+    def test_opt_in_scale_follows_override_and_preserves_solve(mode):
+        segments, _, kind = project_scene(-20, 6, 3, 1800)
+        if mode == 'guided':
+            segments = np.concatenate([segments[kind == axis][:2] for axis in (0, 1)])
+        for framing in (False, True):
+            original = up.solve_ex(segments, W, H, 1800, mode, framing=framing, damping=(.6, .7, .8))
+>           scaled = up.solve_ex(segments, W, H, 1800, mode, framing=framing,
+                                 scaling=True, damping=(.6, .7, .8))
+E           TypeError: solve_ex() got an unexpected keyword argument 'scaling'
+
+port/test_round8.py:48: TypeError
+_________ test_opt_in_scale_follows_override_and_preserves_solve[full] _________
+
+mode = 'full'
+
+    @pytest.mark.parametrize('mode', ['auto', 'full', 'vertical', 'level', 'guided'])
+    def test_opt_in_scale_follows_override_and_preserves_solve(mode):
+        segments, _, kind = project_scene(-20, 6, 3, 1800)
+        if mode == 'guided':
+            segments = np.concatenate([segments[kind == axis][:2] for axis in (0, 1)])
+        for framing in (False, True):
+            original = up.solve_ex(segments, W, H, 1800, mode, framing=framing, damping=(.6, .7, .8))
+>           scaled = up.solve_ex(segments, W, H, 1800, mode, framing=framing,
+                                 scaling=True, damping=(.6, .7, .8))
+E           TypeError: solve_ex() got an unexpected keyword argument 'scaling'
+
+port/test_round8.py:48: TypeError
+_______ test_opt_in_scale_follows_override_and_preserves_solve[vertical] _______
+
+mode = 'vertical'
+
+    @pytest.mark.parametrize('mode', ['auto', 'full', 'vertical', 'level', 'guided'])
+    def test_opt_in_scale_follows_override_and_preserves_solve(mode):
+        segments, _, kind = project_scene(-20, 6, 3, 1800)
+        if mode == 'guided':
+            segments = np.concatenate([segments[kind == axis][:2] for axis in (0, 1)])
+        for framing in (False, True):
+            original = up.solve_ex(segments, W, H, 1800, mode, framing=framing, damping=(.6, .7, .8))
+>           scaled = up.solve_ex(segments, W, H, 1800, mode, framing=framing,
+                                 scaling=True, damping=(.6, .7, .8))
+E           TypeError: solve_ex() got an unexpected keyword argument 'scaling'
+
+port/test_round8.py:48: TypeError
+________ test_opt_in_scale_follows_override_and_preserves_solve[level] _________
+
+mode = 'level'
+
+    @pytest.mark.parametrize('mode', ['auto', 'full', 'vertical', 'level', 'guided'])
+    def test_opt_in_scale_follows_override_and_preserves_solve(mode):
+        segments, _, kind = project_scene(-20, 6, 3, 1800)
+        if mode == 'guided':
+            segments = np.concatenate([segments[kind == axis][:2] for axis in (0, 1)])
+        for framing in (False, True):
+            original = up.solve_ex(segments, W, H, 1800, mode, framing=framing, damping=(.6, .7, .8))
+>           scaled = up.solve_ex(segments, W, H, 1800, mode, framing=framing,
+                                 scaling=True, damping=(.6, .7, .8))
+E           TypeError: solve_ex() got an unexpected keyword argument 'scaling'
+
+port/test_round8.py:48: TypeError
+________ test_opt_in_scale_follows_override_and_preserves_solve[guided] ________
+
+mode = 'guided'
+
+    @pytest.mark.parametrize('mode', ['auto', 'full', 'vertical', 'level', 'guided'])
+    def test_opt_in_scale_follows_override_and_preserves_solve(mode):
+        segments, _, kind = project_scene(-20, 6, 3, 1800)
+        if mode == 'guided':
+            segments = np.concatenate([segments[kind == axis][:2] for axis in (0, 1)])
+        for framing in (False, True):
+            original = up.solve_ex(segments, W, H, 1800, mode, framing=framing, damping=(.6, .7, .8))
+>           scaled = up.solve_ex(segments, W, H, 1800, mode, framing=framing,
+                                 scaling=True, damping=(.6, .7, .8))
+E           TypeError: solve_ex() got an unexpected keyword argument 'scaling'
+
+port/test_round8.py:48: TypeError
+_____________________ test_invalid_scale_is_rejected[bad0] _____________________
+
+bad = array([[1., 0.],
+       [0., 1.]])
+
+    @pytest.mark.parametrize('bad', [np.eye(2), np.full((3, 3), np.nan),
+        [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+        [[1, 0, 0], [0, 1, 0], [-2, 0, 1]],
+        [[0, 0, 0], [0, 1, 0], [0, 0, 1]]])
+    def test_invalid_scale_is_rejected(bad):
+        with pytest.raises(ValueError):
+>           up.scale_output(bad)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:69: AttributeError
+_____________________ test_invalid_scale_is_rejected[bad1] _____________________
+
+bad = array([[nan, nan, nan],
+       [nan, nan, nan],
+       [nan, nan, nan]])
+
+    @pytest.mark.parametrize('bad', [np.eye(2), np.full((3, 3), np.nan),
+        [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+        [[1, 0, 0], [0, 1, 0], [-2, 0, 1]],
+        [[0, 0, 0], [0, 1, 0], [0, 0, 1]]])
+    def test_invalid_scale_is_rejected(bad):
+        with pytest.raises(ValueError):
+>           up.scale_output(bad)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:69: AttributeError
+_____________________ test_invalid_scale_is_rejected[bad2] _____________________
+
+bad = [[1, 0, 0], [0, 1, 0], [0, 0, 0]]
+
+    @pytest.mark.parametrize('bad', [np.eye(2), np.full((3, 3), np.nan),
+        [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+        [[1, 0, 0], [0, 1, 0], [-2, 0, 1]],
+        [[0, 0, 0], [0, 1, 0], [0, 0, 1]]])
+    def test_invalid_scale_is_rejected(bad):
+        with pytest.raises(ValueError):
+>           up.scale_output(bad)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:69: AttributeError
+_____________________ test_invalid_scale_is_rejected[bad3] _____________________
+
+bad = [[1, 0, 0], [0, 1, 0], [-2, 0, 1]]
+
+    @pytest.mark.parametrize('bad', [np.eye(2), np.full((3, 3), np.nan),
+        [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+        [[1, 0, 0], [0, 1, 0], [-2, 0, 1]],
+        [[0, 0, 0], [0, 1, 0], [0, 0, 1]]])
+    def test_invalid_scale_is_rejected(bad):
+        with pytest.raises(ValueError):
+>           up.scale_output(bad)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:69: AttributeError
+_____________________ test_invalid_scale_is_rejected[bad4] _____________________
+
+bad = [[0, 0, 0], [0, 1, 0], [0, 0, 1]]
+
+    @pytest.mark.parametrize('bad', [np.eye(2), np.full((3, 3), np.nan),
+        [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+        [[1, 0, 0], [0, 1, 0], [-2, 0, 1]],
+        [[0, 0, 0], [0, 1, 0], [0, 0, 1]]])
+    def test_invalid_scale_is_rejected(bad):
+        with pytest.raises(ValueError):
+>           up.scale_output(bad)
+E           AttributeError: module 'upright_port' has no attribute 'scale_output'. Did you mean: 'frame_output'?
+
+port/test_round8.py:69: AttributeError
+=========================== short test summary info ============================
+FAILED port/test_round8.py::test_same_rotation_native_scale_recovery - Attrib...
+FAILED port/test_round8.py::test_scaling_preserves_angles_and_commutes_with_framing
+FAILED port/test_round8.py::test_opt_in_scale_follows_override_and_preserves_solve[auto]
+FAILED port/test_round8.py::test_opt_in_scale_follows_override_and_preserves_solve[full]
+FAILED port/test_round8.py::test_opt_in_scale_follows_override_and_preserves_solve[vertical]
+FAILED port/test_round8.py::test_opt_in_scale_follows_override_and_preserves_solve[level]
+FAILED port/test_round8.py::test_opt_in_scale_follows_override_and_preserves_solve[guided]
+FAILED port/test_round8.py::test_invalid_scale_is_rejected[bad0] - AttributeE...
+FAILED port/test_round8.py::test_invalid_scale_is_rejected[bad1] - AttributeE...
+FAILED port/test_round8.py::test_invalid_scale_is_rejected[bad2] - AttributeE...
+FAILED port/test_round8.py::test_invalid_scale_is_rejected[bad3] - AttributeE...
+FAILED port/test_round8.py::test_invalid_scale_is_rejected[bad4] - AttributeE...
+12 failed in 0.62s

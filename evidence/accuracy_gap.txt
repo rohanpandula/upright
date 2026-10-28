@@ -1,0 +1,114 @@
+PORT ACCURACY CHANGE — 2026-10-28 [MEASURED unless marked otherwise]
+==================================================================
+Scope: upright/port only, plus these evidence artifacts. MIT clean-room Python
+3.12, numpy + cv2. No source camera/model, guided solve, or damping/mode changes.
+Original module SHA256:
+  5d1f3bb922d06c9d3c23a75d1e3d1844b232f7122825b76d3a62bd75275e14ac
+
+Protocol
+--------
+Run: cd port && python3.12 benchmark_accuracy.py
+Then: python3.12 -m unittest test_port -v
+Baseline recorded BEFORE edits on the exact bundled files. No image regeneration.
+Numbers: median absolute axis deviation of the two extreme ground-truth wall-A
+verticals and two extreme lateral horizontals, in isotropic PIXEL coordinates.
+These are axis deviations, not the report's angle BETWEEN two lines (convergence).
+Depth lines are not scored as horizontal. Truth uses the actual generating poses
+in make_test_images.py / validate_vs_adobe.py, not rounded degree descriptions.
+Full mode, seed=0, default 1200px detector working side, true source focal.
+No detector-selected inliers are used to measure the primary accuracy result.
+
+Artifacts:
+  accuracy_baseline.json: measured old outputs
+  accuracy_after.json: measured final outputs
+  accuracy_baseline_segments.npz: OLD detector output, old homographies, and old
+    01_input VP inliers, frozen before changes. Tests reuse the original segments
+    to isolate energy changes from detector changes. Old H matrices allow the
+    baseline metric to be independently recomputed without the old implementation.
+
+End-to-end Full residual (vertical / horizontal degrees)
+-------------------------------------------------------
+scene             before                 after
+A_clean           0.405936 / 0.162876      0.018089 / 0.013658
+B_strong          0.389957 / 0.187229      0.050251 / 0.030752
+C_noisy           0.211753 / 0.403242      0.019954 / 0.022318
+D_roll            0.089687 / 0.338729      0.013845 / 0.000620
+01_input_truth    0.191564 / 0.161858      0.013563 / 0.061668
+
+Mean of the 8 family scores on the four TIFF scenes: 0.273676 -> 0.021186 deg
+(92.3% lower). Including 01_input: 0.254283 -> 0.024472 deg (90.4% lower).
+No new output is identity/failure. The original 34 tests pass unchanged, plus
+13 regressions, total 47 tests. Runtime about 1.8s; no warnings.
+
+Energy ONLY, with frozen ORIGINAL detector segments
+---------------------------------------------------
+scene             before                 after
+A_clean           0.405936 / 0.162876      0.089706 / 0.117399
+B_strong          0.389957 / 0.187229      0.039998 / 0.028218
+C_noisy           0.211753 / 0.403242      0.061515 / 0.384904
+D_roll            0.089687 / 0.338729      0.030676 / 0.096809
+01_input_truth    0.191564 / 0.161858      0.023264 / 0.038064
+
+Four-TIFF mean: 0.273676 -> 0.106153 deg (61.2% lower), independently of the
+new detector. Old C_noisy horizontal support remains poor; it needs the detector
+improvement too. The benchmark preserves rather than hides that case.
+
+Changes to the objective
+------------------------
+[PAPER structure / clean-room derivation] E_pic transforms the OBSERVED support
+line with H^-T, not a fictional line through the fitted VP and segment midpoint.
+[PROVEN weights] Use mean-normalised source-pixel lengths (detector.txt 3.4),
+normalised across all source segments, rather than treating every chain equally.
+[PAPER geometry] Convert directions back to pixels before angle normalisation;
+normalised x/y have different scales on a non-square image.
+[MEASURED robust choice] Cauchy loss rho(r)=s^2*log(1+(r/s)^2), with
+s=4/(maxdim-1); sum-of-squares residual is sign(r)*sqrt(rho(r)). The scale is
+from the resolution tolerance in detector.txt 4.2; Cauchy itself is OUR choice,
+not recovered Adobe code or a claim about its energy. It suppresses residual
+misassignments without changing the camera family or damping semantics.
+[PAPER fork domain] The previous _junctions invented 120 forks by intersecting
+infinite pairs of lines anywhere in the frame. A two-line crossing is not a
+three-ray fork. Its soft angle-to-90 penalty is removed; no true fork detector
+exists here. This is not a recovered log barrier. E_img also remains unported.
+The existing per-mode scalar energy weights (1,4,30 etc.) are inherited choices,
+not newly fitted/claimed Adobe constants. The f1/f0 term regulates DESTINATION
+focal; source f0 remains fixed, exactly as before.
+
+Detector implementation choices
+-------------------------------
+See detector_corrections.txt for the recovered NFA and corrected call constants.
+The existing blur sigma=1.2, 85th magnitude percentile and 1200px working policy
+are retained, not measured Adobe literals. Quadratic interpolation of gradient
+maxima uses the mathematical half-step formula, clipped to half a pixel. This
+removes staircase bias in short raster supports. TLS refinement splits bent
+supports until within the recovered 1px distance, bounded by 99 passes. The
+connected-support/TLS choices are re-derived and explicitly not pixel parity.
+There is no fixed 8px minimum, density gate, or invented minimum VP-inlier count
+in detector validation. Strict length-bin support and NFA decide significance.
+
+Corrections to prior conclusions
+-------------------------------
+1. 01_input.png is NOT a hard real photograph. demo_synthetic.py generates it,
+   with F=1400px, pose=(-0.38,0.10,0.04). The old status number used f0=1200px.
+   On the exact ORIGINAL inliers and wrong 1200px focal, preserve this diagnostic:
+     old:              0.436578 / 0.223640
+     energy only:      0.205170 / 0.327228
+     new end-to-end:   0.189513 / 0.270213
+   Horizontal gets worse under that protocol. Do not report universal improvement
+   or silently substitute a different focal to claim a win. With the known correct
+   focal, independent ground-truth results improve both families (table above).
+2. Fixing K0 with a wrong focal can make source Manhattan directions nonorthogonal.
+   A rotation cannot make two nonorthogonal rays into the orthogonal output axes
+   at infinity; free destination focal/centre does not remove that obstruction.
+   This is not solely a tunable energy-prior problem. K0 is unchanged by this task.
+3. The report's Adobe numbers do NOT say automatic Full reaches zero on all these
+   scenes: e.g. section 3.4 gives 0.73/0.36 convergence, section 3.6 gives about
+   0.98/0.23 on B. Guided is the measured exactly-zero mode. Do not compare these
+   axis scores numerically to the report's different convergence metric.
+4. Detector notes have byte-width/branch/rounding/NFA errors, documented separately
+   in detector_corrections.txt. Exact detector equivalence cannot honestly be
+   claimed from those notes alone. Nearest bins are retained to honour the user's
+   explicit formula and original tests; float1.0/6px follow the actual instructions.
+
+Not checked: new Lightroom UI runs, broad real-photo corpus, or pixel-by-pixel
+Adobe detector output (no such detector oracle fixture was supplied).

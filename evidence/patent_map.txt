@@ -1,0 +1,438 @@
+================================================================================
+ADOBE UPRIGHT PATENT FAMILY  ->  SHIPPED PRODUCT MECHANISM MAP
+Claim-by-claim FTO map for a clean-room open-source clone
+================================================================================
+FAMILY     US 9,008,460 B2 · US 9,582,855 B2 · US 9,098,885 B2 · US 9,519,954 B2
+           · US 9,727,787 B2.  Assignee Adobe.  Shared provisional 61/639,721,
+           priority 2012-04-27.  All Active.  Est. expiry 2033-04-26 .. 2033-06-25.
+BASE ART   Lee, Shechtman, Wang, Lee, "Automatic Upright Adjustment of
+           Photographs", CVPR 2012, DOI 10.1109/CVPR.2012.6247761.
+PRODUCT    Lightroom Classic 15.5 / CameraRaw 15.5, namespace `ura`.
+           Mechanism facts taken from ../evidence/*.txt (binary RE), not assumed.
+CLAIM TEXT Fetched and quoted verbatim from Google Patents, 2026-10-27.
+
+ENGINEERING GUIDANCE, NOT LEGAL ADVICE.  No claim chart has been served, no
+prosecution history was read, no doctrine-of-equivalents analysis was done, and
+no foreign counterpart (GB 2516405 B, CN 105453131 B, DE 112013002200 T5,
+WO 2013/163579 A2) was examined.  Confirm before relying on it transactionally.
+
+--------------------------------------------------------------------------------
+0. BOTTOM LINE
+--------------------------------------------------------------------------------
+1. The brief's two risk hypotheses are HALF RIGHT, and the correction matters:
+   - "energy with adaptive weights" is NOT claimed anywhere.  The sigma values
+     are paper Eq. 5 AND patent spec Eq. A5, but they appear in no claim.  Using
+     them changes nothing about infringement.
+   - "VP-selection ordering" IS covered, but not structurally.  No claim recites
+     RANSAC, iteration counts, inlier thresholds or candidate ordering.  The
+     ordering is covered only functionally, by 954 claim 1's "determining initial
+     values for an energy function according to the extracted line segments".
+2. The real risk is not any mechanism.  It is 460 claim 1 / 855 claim 1: a
+   functional limitation ("homography ... computed at least in part according to
+   one or more human perception-based criteria") with no structural hook.  Any
+   auto-upright that damps the correction instead of fully rectifying reads on it.
+3. Guided mode is the one mode with ZERO claim text over it.  The words "user",
+   "guide" and "guide line" appear in none of the 100 claims of the five patents.
+4. Two different intrinsics in H is claimed (460 c6/c13, 954 c5/c6) and is also
+   published in paper Eq. 1-2.  Keep it: it is worth 32% of output error.
+5. The Atlanta-world "additional orthogonal frame" is the one thing that is
+   PATENTED-ONLY (885 c1/c12, 787 c1).  The shipped product only partially does
+   it.  Dropping it entirely is both a design-around and a parity loss.
+
+--------------------------------------------------------------------------------
+1. CORRECTIONS TO THE BRIEF
+--------------------------------------------------------------------------------
+1.1  "9,088,885" is not an Adobe patent.
+     US 9,088,885 B2 = "Implicit registration for multiple identities", telecom,
+     MDN/HSS/IMS.  Verified: https://patents.google.com/patent/US9088885B2/en
+     The family member is US 9,098,885 B2 only.
+     https://patents.google.com/patent/US9098885B2/en
+1.2  Adaptive weights are spec-and-paper, not claim.  See §3.1.
+1.3  RANSAC parameters are nowhere in the claims.  See §3.2.
+
+--------------------------------------------------------------------------------
+2. INDEPENDENT CLAIMS, LIMITATION BY LIMITATION
+--------------------------------------------------------------------------------
+Classification key, per limitation:
+  (a) ESSENTIAL to match shipped output   -> dropping it visibly breaks parity
+  (b) OPTIONAL DETAIL                      -> implementable either way, no parity cost
+  (c) ARTEFACT                             -> incidental, no output or legal weight
+
+--------------------------------------------------------------------------------
+2.1  US 9,008,460 B2  (method; also media c14, system c19 - same scope)
+     https://patents.google.com/patent/US9008460B2/en
+--------------------------------------------------------------------------------
+CLAIM 1 (verbatim):
+  "A method implemented by one or more computing devices, the method comprising:
+   obtaining camera information for an image of a scene that includes one or more
+   features having lines;
+   computing a homography based on the camera information that is to be applied
+   to the image to adjust alignment of the one or more features of the scene in
+   relation to an axis of the image, the homography computed at least in part
+   according to one or more human perception-based criteria; and
+   reprojecting the image according to the homography to generate an adjusted
+   image of the scene having the adjusted alignment of the lines of the one or
+   more features of the scene with the axis of the image."
+
+ L1 "obtaining camera information ... features having lines"
+    PRODUCT: yes.  Detector emits segments; K0 from focal metadata; R from
+    estimate_MKR.                                          CLASS (a)
+ L2 "computing a homography ... according to one or more human perception-based
+     criteria"
+    PRODUCT: yes, and this is the whole feature.  Energy over E_pic/E_eye/E_img
+    with adaptive lambda_v/lambda_h, minimised by opt_H5.
+    CLASS (a)  <-- THE LIMITATION THAT MATTERS
+ L3 "reprojecting the image according to the homography"
+    PRODUCT: yes, renderer applies the cached 3x3.               CLASS (a)
+
+Dependents, all practised:
+ c2 axis vertical/horizontal, features substantially aligned ...... (a)
+ c3 homography describes new camera information .................. (b)
+ c4 camera info = intrinsic matrix + 3D rotation matrices ........ (b)
+ c5 camera info further includes vanishing point information ..... (b)
+ c6 homography includes NEW intrinsic matrix + NEW rotations ..... (a)  [K0 != K1]
+ c7 homography includes a translation ............................ (b)
+ c8 obtaining applies a camera calibration technique ............. (b)
+ c9 calibration is optimization-based, joint over intrinsics,
+    rotation and VP "in conjunction with each other" .............. (a)  [joint solve]
+ c10 picture frame alignment criterion ........................... (a)  [E_pic]
+ c11 eye-level criterion via line joining two VPs ................ (a)  [E_eye]
+ c12 image distortion criterion .................................. (a)  [E_img]
+ c13 focal lengths in vertical AND horizontal, allowed to vary ... (a)  [K1x != K1y]
+
+READ: a faithful clone practises claim 1 and all thirteen dependents.  There is
+no structural escape.  Only a clone with no perceptual term at all (pure full
+rectification) leaves claim 1 on its face.
+
+--------------------------------------------------------------------------------
+2.2  US 9,582,855 B2  (apparatus - the broadest and the latest-expiring)
+     https://patents.google.com/patent/US9582855B2/en
+--------------------------------------------------------------------------------
+CLAIM 1 (verbatim):
+  "A computing device implemented to adjust perspective of one or more features
+   in an image of a scene consistent with human perception, the computing device
+   comprising:
+   a memory configured to maintain camera information for the image of the scene
+   that includes the one or more features having lines;
+   a processor system configured to execute one or more modules of an image
+   processing application that is implemented to:
+   compute a homography based on the camera information that is to be applied to
+   the image to adjust alignment of the one or more features of the scene in
+   relation to an axis of the image, the homography computed at least in part
+   according to one or more human perception-based criteria; and
+   reproject the image according to the homography to generate an adjusted image
+   of the scene having the lines of the one or more features of the scene
+   adjusted for alignment with the axis of the image."
+
+ L1 memory maintaining camera information ....................... (b)
+ L2 "compute a homography ... according to human perception-based criteria"
+    PRODUCT: yes.                                                CLASS (a)
+ L3 reproject .................................................... (a)
+ Dependents c2 (axis), c6 (joint optimisation), c7-c9 (the three criteria),
+ c10 (two focals) all map as in §2.1.
+
+WHY IT IS WORSE THAN 460: apparatus framing reaches a shipped binary or library
+as such, and its expiry (2033-06-25) is the latest in the family.
+
+CLAIM 11 is a second, independent, BROADER apparatus claim - it needs only a
+"planar transformation ... for an upright adjustment ... computed at least in
+part according to one or more human perception based criteria" and does not even
+require reprojection.  PRODUCT: yes.  CLASS (a).  This is the claim that most
+limits a guided-mode-only design-around (§5.1).
+
+CLAIM 14 is the one place the mode semantics are claimed:
+  "the alignment of the feature is adjusted to maintain a vertical perspective of
+   the feature and correct a horizontal perspective of the feature ... or ...
+   maintain the horizontal perspective ... and correct the vertical perspective"
+PRODUCT: yes - exactly Vertical (zeroes pitch and yaw) and Level (pure roll).
+CLASS (a).
+
+--------------------------------------------------------------------------------
+2.3  US 9,098,885 B2  (calibration via multiple non-aligned orthogonal frames)
+     https://patents.google.com/patent/US9098885B2/en
+--------------------------------------------------------------------------------
+CLAIM 1 (verbatim):
+  "A method implemented by one or more computing devices, the method comprising:
+   applying, by the one or more computing devices, a camera calibration technique
+   to estimate camera parameters for an image of a scene by identifying a first
+   orthogonal frame having a first set of orthogonal directions and one or more
+   additional orthogonal frames having orthogonal directions that do not align to
+   the first set of orthogonal directions; and
+   adjusting, by the one or more computing devices, alignment of one or more
+   features of the image using the estimated camera parameters."
+
+ L1 "first orthogonal frame ... ADDITIONAL orthogonal frames ... that do not
+     align"
+    PRODUCT: PARTIAL.  The VP stage accepts up to 9 candidates with no
+    orthogonality constraint and then tournament-selects; it never builds a second
+    orthogonal triple as such.  Non-Manhattan scenes still solve (see
+    non_manhattan.txt), so behaviour is close without it.
+    CLASS (b) for parity / (a) for legal exposure.  <-- PATENTED-ONLY ELEMENT
+ L2 "adjusting alignment ... using the estimated camera parameters" .. (a)
+
+CLAIM 12 (system) states the same thing more explicitly: "a second set of
+orthogonal directions ... including a vertical direction aligned with a vertical
+direction of the first set ... and two horizontal directions that do not align
+with the first set".  This is the Atlanta-world two-horizontal-VP model, spelled
+out.  PRODUCT: partial, same as above.
+
+READ: if the clone clusters VPs freely without ever asserting a second orthogonal
+frame, 885 does not read.  If it explicitly fits two Manhattan frames, it does.
+
+--------------------------------------------------------------------------------
+2.4  US 9,519,954 B2  (line segments -> energy init -> joint calibration)
+     https://patents.google.com/patent/US9519954B2/en
+--------------------------------------------------------------------------------
+CLAIM 1 (verbatim):
+  "A method implemented by one or more computing devices, the method comprising:
+   extracting, by the one or more computing devices, line segments from an input
+   image;
+   determining, by the one or more computing devices, initial values for an energy
+   function according to the extracted line segments; and
+   calibrating, by the one or more computing devices, camera parameters by
+   iteratively optimizing the energy function to estimate a camera intrinsic
+   parameter matrix, an orientation matrix, and a set of vanishing points for the
+   input image in conjunction with each other."
+
+ L1 extracting line segments ..................................... (a)
+ L2 "determining INITIAL VALUES for an energy function ACCORDING TO the
+     extracted line segments"
+    PRODUCT: yes - VP RANSAC -> estimate_init_M -> the M seed.  This single
+    limitation is the entire VP-selection stage, functionally.  CLASS (a)
+    <-- THIS IS WHERE "VP-SELECTION ORDERING" IS ACTUALLY CLAIMED
+ L3 iterative optimisation joint over K, R and VP set ............. (a)
+
+Dependents:
+ c2 four named energy terms (picture frame / eye level / perspective
+    distortion / image distortion) .............................. (a)
+ c4 Perkins fork-juncture > pi/2 ................................ (b)  [E_perk]
+ c5 x and y focal lengths, y different from x ................... (a)
+ c6 "energy term describing a relationship between the x-axis focal
+    length and the y-axis focal length" ......................... (b)  [E_focal prior]
+ c7 eye level via orthogonal frame with extra horizontal direction  (b)
+ c17 init assumptions: f == image width, principal point == image centre,
+    rotation angles approximate zero ............................ (b)
+
+NOTE - the product does NOT practise c6.  Paper Eq. 6 has
+E_focal = lambda_f (f1x - f1y)^2; the shipped estimator has NO prior weight and
+switches on metadata instead (focal_prior.txt: "no weighted prior term ... the
+prior weight is effectively infinite").  It also diverges from c17: fallback is
+35.0 mm, not image width, and the clamp [10, 1000] applies to metadata only.
+So the product practises c1 and c2 but not c6 or c17 as written.
+
+CLAIM 17 is a third independent claim and is the narrowest - it requires the
+f == W / cp == centre / zero-rotation initialisation triple.  A clone that
+initialises f from metadata escapes c17 while still hitting c1.
+
+--------------------------------------------------------------------------------
+2.5  US 9,727,787 B2  (line segments -> orthogonal frame -> eye level)
+     https://patents.google.com/patent/US9729787B2/en
+--------------------------------------------------------------------------------
+CLAIM 1 (verbatim):
+  "In a digital medium environment to adjust alignment of at least one feature in
+   a digital image of a scene consistent with human perception, a computing device
+   comprising:
+   a memory configured to maintain the digital image;
+   a processor system configured to execute an image processing application that is
+   implemented to perform operations including:
+   extracting line segments from the digital image;
+   identifying an orthogonal frame of the digital image based on the extracted line
+   segments, the orthogonal frame having an ADDITIONAL HORIZONTAL DIRECTION THAT
+   SHARES A SAME VERTICAL DIRECTION;
+   estimating an eye-level of the scene based on the orthogonal frame having an
+   additional horizontal direction; and
+   calibrating camera parameters as a basis to adjust alignment of the at least one
+   feature in relation to an axis of the digital image according to one or more
+   human perception-based criteria that INCLUDE THE ESTIMATED EYE-LEVEL."
+
+ L1 extract line segments ....................................... (a)
+ L2 orthogonal frame with an additional horizontal direction
+    PRODUCT: PARTIAL, same gap as §2.3.                            (b)/(a)
+ L3 estimate eye level from that frame
+    PRODUCT: yes - E_eye uses the line joining vx and vz.  The "frame" framing is
+    the difference, not the geometry.                              (a)
+ L4 calibrate per criteria INCLUDING the estimated eye level
+    PRODUCT: yes, E_eye is in the objective.                       (a)
+
+READ: narrower than 460/855 because it needs the explicit frame construction and
+the eye-level term.  A clone with no eye-level term escapes 787 outright.
+Dependents c2/c10 recite the Atlanta assumption by name.
+
+--------------------------------------------------------------------------------
+3. WHERE THE ACTUAL INFRINGEMENT RISK IS
+--------------------------------------------------------------------------------
+3.1  ADAPTIVE WEIGHTS - risk LOW, and it is the wrong thing to worry about.
+     The sigma values are not in any claim.  They are in paper Eq. 5:
+       "lambda_v = exp(-psi^2 / 2 sigma_v^2) and lambda_h = exp(-theta^2 / 2 sigma_h^2) ...
+        We fix them as sigma_v = pi/12 and sigma_h = pi/15 in our implementation."
+     and in the spec of all five patents, identical, as Eq. A5:
+       "the weights 'lambda_v' and 'lambda_h' may be adaptively determined using
+        initial rotation angles ... sigma_v = pi/12 and sigma_h = pi/15."
+     The shipped literals 0.2618f / 0.2094f (15.00 deg / 12.00 deg) are exactly
+     those disclosed values, stored as 4-decimal authored floats
+     (energy_function.txt §1).  So the clone is copying PUBLISHED numbers into an
+     UNCLAIMED slot.
+     CONSEQUENCE: swapping sigma, changing the decay shape, or dropping the
+     weights altogether does not avoid any claim.  It does change output.
+3.2  VP-SELECTION ORDERING - risk MEDIUM, and it is covered functionally only.
+     No claim recites 2000 iterations, >=3 inliers, tau = sqrt(3), the 9-candidate
+     cap, the count-ratio-then-residual-sum tournament, or the "detect -> cluster
+     -> select -> solve" order.  All of that is unclaimed implementation detail.
+     What is claimed is the role of the output:
+       954 c1  "...determining initial values for an energy function according to
+                the extracted line segments..."
+       885 c1  "...identifying a first orthogonal frame ... and one or more
+                additional orthogonal frames..."
+       787 c1  "...identifying an orthogonal frame ... having an additional
+                horizontal direction that shares a same vertical direction..."
+     So a different RANSAC does not design around 954; a different *ordering of
+     the VP families*, or dropping the second frame, does change 885/787 exposure.
+3.3  THE REAL RISK - 460 c1 and 855 c1/c11, and it is functional.
+     "the homography computed at least in part according to one or more human
+     perception-based criteria"
+     There is no structural hook: no named energy term, no named criterion, no
+     detector, no solver.  Every dependent claim's mechanism is optional.  The
+     claim is therefore read by *behaviour*: does the transform get computed
+     under a criterion that trades full rectification against looking wrong?
+     The product's Auto is exactly that (damped, pitch-gated, abstains at the
+     noise floor).  Any clone that reproduces Auto's damping reproduces the
+     limitation.  Swapping LSD for the bespoke detector, or Powell for
+     Levenberg-Marquardt, is irrelevant to it.
+3.4  WHY THE PRODUCT IS NOT ITSELF SAFE FROM 885/787 - and a clone need not be
+     either.  The shipped product does not build a second orthogonal frame, yet
+     it corrects non-Manhattan scenes.  So "we didn't implement Atlanta" is a
+     weak non-infringement argument for 885/787, but it is an argument.
+3.5  Everything in the family is independent-claim-functional.  There is no
+     structural limitation anywhere in the five claim 1s.  This is why the
+     "just reimplement the paper differently" instinct fails.
+
+--------------------------------------------------------------------------------
+4. PUBLISHED vs PATENTED-ONLY
+--------------------------------------------------------------------------------
+4.1  PUBLISHED (paper, citable prior art against third parties; NOT free, because
+     Adobe also claimed the same subject matter with an earlier priority date).
+     The paper was published June 2012; the provisional was 2012-04-27, so the
+     paper does not invalidate the patents.  Published and re-embodied in spec:
+       - H = K1 R K0^-1 with two DIFFERENT focal lengths (paper Eq. 1-2; the
+         paper's "our reprojection model ... allows different focal lengths along
+         x- and y-axes").  Re-claimed as 460 c6/c13, 954 c5/c6.
+       - E_pic, E_eye, E_perk (Perkins Eq. 6), E_img (Jacobian), E_reg, E_focal.
+         Re-claimed as 954 c2/c4.
+       - Adaptive lambda_v/lambda_h with sigma_v = pi/12, sigma_h = pi/15.
+         NOT re-claimed.  Spec only.
+       - f == image width, cp == image centre, zero-rotation init.  Re-claimed as
+         954 c17.
+       - Joint MAP over K, R, M "in conjunction with each other".  Re-claimed as
+         460 c9, 855 c6, 954 c1.
+4.2  PATENTED-ONLY (no paper counterpart - genuinely new matter added in the
+     applications, which is why they were continuations):
+       - The Atlanta-world framing: "additional orthogonal frames having
+         orthogonal directions that do not align" (885 c1/c12) and "an additional
+         horizontal direction that shares a same vertical direction" (787 c1,
+         c2/c10 "Atlanta world assumption").  The paper assumes a single Manhattan
+         world throughout and never mentions a second horizontal VP.
+       - 954 c6's "energy term describing a relationship between the x-axis focal
+         length and the y-axis focal length" as a claim element (the paper has the
+         term, so this is thin, but it is claimed).
+       - 954 c17 as a packaged initialisation triple.
+       - 855 c11's reprojection-free "planar transformation" claim - broader than
+         anything the paper states.
+4.3  PRODUCT-ONLY (neither paper nor claims - free to copy in the copyright sense,
+     and irrelevant to patent exposure):
+       - detector: gradient + a-contrario, 8 directions, +-22.5 deg, significance
+         bins round(4*log8(maxdim)), 12 px / +-10 px merge tolerances
+       - RANSAC 2000 / >=3 / tau = sqrt(3) / cap 9 / count-ratio 1.0 tournament
+       - the 4-decimal float literals 0.2618f and 0.2094f (as authored values)
+       - guided mode's 4 hard user segments
+       - abstention-by-identity across all six slots
+       - metadata-first DISCRETE focal switch, 35.0 fallback, clamp [10, 1000] on
+         metadata only, no prior weight
+       - degenerate retry, digest-gated recompute, UprightVersion ABI stamp
+       - all six mode slots and the crop reset behaviour
+
+--------------------------------------------------------------------------------
+5. MITIGATION - what actually reduces exposure while holding output
+--------------------------------------------------------------------------------
+Ranked by legal value per unit of parity lost.
+
+5.1  GUIDED-FIRST.  Highest value.  "user", "guide" and "guide line" appear in
+     ZERO of the 100 claims.  Guided takes 4 segments as hard constraints, solves
+     s*K1*R*K0^-1, and never touches the energy model.  On its face it escapes
+     954 c1 (no energy function), 460 c1 (no perceptual criterion), 787 c1 (no
+     frame, no eye level) and 885 c1 (no frame).  Output is also *better*: guided
+     reached 0.00 deg on both families at LOWER distortion than Full (1.476 vs
+     1.486 p99 stretch) on the A_clean probe.
+     RESIDUAL RISK: 855 c11.  "planar transformation ... computed at least in part
+     according to one or more human perception based criteria" needs no
+     reprojection and no energy.  A court can call user-drawn world edges
+     "perception-based criteria".  Mitigate by never describing guided in
+     perception terms in the docs, and by making the guided solve purely
+     algebraic (constraint satisfaction, zero weights).
+5.2  DROP THE EYE-LEVEL TERM.  Escapes 787 c1 outright (c1 requires criteria
+     "that include the estimated eye-level"), and 460 c11 / 855 c8 / 885 c5.
+     Parity cost is real: eye-level is what keeps a pitched shot from looking
+     like a falling-building shot.  Partial mitigation: fold eye-level into the
+     picture-frame term as a single horizon-angle residual, and do not expose a
+     separate eye-level quantity.
+5.3  DIFFERENT ENERGY FORMULATION, and do not use the four paper names.
+     954 c2 lists "picture-frame alignment energy term, eye-level alignment energy
+     term, perspective distortion energy term, and image distortion energy term".
+     A formulation that is one combined residual over line-direction dispersion
+     plus a single Jacobian-area penalty, and that never uses the four names, does
+     not read on c2.  It still reads on 954 c1 (init from segments, then iterate).
+     Realistic parity loss: moderate, and it is the honest way to differentiate.
+5.4  NO ADAPTIVE WEIGHTS.  Zero legal value (§3.1) but two practical ones: it
+     breaks the "same Eq. A5 as the spec" narrative a claim chart would like, and
+     it is where the prototype is already known to be wrong (the ported L0 = 12.0
+     over-corrects by ~40% against the fitted L0 ~ 3.5).  A single fitted damping
+     curve is closer to output AND not the spec's curve.
+5.5  DROP PERKINS.  Escapes 954 c4.  Cheap: E_perk only bites on cuboid corners
+     and the product already has no measured arc protection (non_manhattan.txt:
+     the arc residual never fitted, curves are the worst Auto family at 0.32-0.75
+     deg post).  Parity cost near zero.
+5.6  INITIALISE FOCAL FROM METADATA, NOT IMAGE WIDTH.  Escapes 954 c17 and the
+     product already does it (35.0 fallback, clamp [10,1000] on metadata only).
+     Free.
+5.7  AVOID BUILDING A SECOND ORTHOGONAL FRAME.  Escapes 885 c1/c12 and 787 c1.
+     Cluster VPs freely, cap the candidates, tournament-select, and pick one
+     Manhattan triple.  This is what the product already does, so parity holds.
+     Cost: worse on Atlanta-world scenes - which the product is already bad at.
+5.8  KEEP TWO DIFFERENT INTRINSICS.  Do NOT design around 460 c6/c13 or 954 c5/c6.
+     A shared K is off by ~32% on the homography; the two-intrinsic form is the
+     single most load-bearing structural fact in the whole mechanism.
+5.9  KEEP THE MODE SEMANTICS (Level = pure roll, Vertical zeroes pitch and yaw).
+     855 c14 claims both.  Free to keep and free of parity cost.
+
+WHAT DOES NOT WORK AS A DESIGN-AROUND:
+  - swapping the line detector (LSD / EDLines / deep)      -> functional claims
+  - swapping the optimiser (Powell / LM / Nelder-Mead)     -> functional claims
+  - different sigma values, different weight shape         -> unclaimed anyway
+  - different RANSAC iteration count or inlier threshold   -> unclaimed anyway
+  - "we wrote it from the paper"                           -> the claims were
+    drafted around the paper, with an earlier priority date
+
+REALISTIC CONCLUSION: with 5.1-5.7 applied, a clone has a defensible
+non-infringement position on 885, 787 and 954 c2/c4/c17, and a genuinely
+arguable one on 460 c1 / 855 c1.  It does not have a clean position on 855 c11
+unless guided is the *only* mode shipped.  Shipping Auto as well re-exposes
+460/855.  There is no configuration in which this is free before 2033-04-26.
+
+--------------------------------------------------------------------------------
+6. WHAT WAS VERIFIED, AND HOW
+--------------------------------------------------------------------------------
+VERIFIED by direct fetch of the granted claims, 2026-10-27:
+  - all five claim 1s, verbatim, plus every dependent claim cited above
+  - claim counts (20/20/20/20/20), assignee, status Active, expiry fields
+  - 9,088,885 is an unrelated telecom patent
+  - the absence of "user" / "guide" / "guide line" from all 100 claims
+  - the absence of any weight, sigma, RANSAC or iteration language from all claims
+  - spec Eq. A5 and the pi/12, pi/15 literals, present in all five specs
+VERIFIED from the local paper text: Eq. 1-2, Eq. 4-6, Eq. 7, the f = W prior, the
+  sigma literals, the joint MAP, and the absence of Atlanta / RANSAC / guided.
+VERIFIED from local binary RE evidence: every PRODUCT line in §2, and the
+  4-decimal literal storage, the no-prior-weight finding, and the [10,1000] clamp.
+NOT VERIFIED: prosecution history and any narrowing amendment or terminal
+  disclaimer; doctrine of equivalents; GB / CN / DE grant status and annuities;
+  whether 855 c11 has been asserted or construed anywhere.
+
+================================================================================

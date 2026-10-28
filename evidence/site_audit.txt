@@ -1,0 +1,348 @@
+SITE ACCURACY AUDIT — research/upright/site/index.html
+Audited 2026-10-28 00:20 PDT against 597 lines / md5 1e0906bf86a9078f0aec45a2104032ce.
+The page was edited four times during the audit (23:39, 23:59, 00:08, 00:15), so every
+item carries a quoted anchor as well as a line number; if the line has moved, search
+the quote. Site NOT edited by me. "report" = research/UPRIGHT-REVERSE-ENGINEERING.md.
+
+VERDICT: 65 outstanding defects. The page is improving under the audit — 8 items were
+fixed while it ran (listed at the end of §C) — but two of the five known corrections are
+still outstanding or have regressed: the focal conversion (never stated) and the
+abstention rate (14.0% regressed to 13.5%). The other three propagated correctly.
+
+=========================================================================
+A. NUMBERS THAT DO NOT MATCH THE EVIDENCE (task 1)
+=========================================================================
+
+A1 [TOP] L334 "13.5% of photos carrying any upright transform data get identity", L523
+   "13.5% abstain", L577 "Abstention trigger (13.5% of photos)".
+   13.5% is in NO evidence file and matches nothing computable. The brief and the
+   report (3.7, 4.2) say 14.0%. abstention.txt:22-24 gives n=1422 of 14,622 = 9.7%.
+   Recomputing from redteam/real.jsonl (14,697 rows) gives 1,422 Auto-identity rows =
+   9.68%. So 13.5% is between the two and supported by neither. Fix: use 14.0% with
+   the report's population (15,727), or 9.7% with 1,422/14,622 — and say which.
+   The change from 14.0 to 13.5 at 00:15 was a regression, not a correction.
+
+A2 L348-349 "focal solves 17.5% low, which is what leaves a ~1.1% aspect error".
+   Now internally inconsistent too: the page's own truth is 40.24 mm (L233), against
+   which 33.94 is 15.7% low, not 17.5%. Only three of four families are that far out;
+   non_manhattan.txt:150-151 puts the railing at 3.3% (1.2% against 40.24). Fix:
+   "15-16% low on three families, 1.2% on the fourth".
+
+A3 L259 "Twenty-nine controlled solves give a vertical decay of σ_v".
+   n is 80 (76 solved) — the page says so itself in the very next sentence (L262,
+   "measured on 80 images"). 29 is the unrelated K0 scene count. Fix: "80 images
+   (76 solved)" and drop 29 here.
+
+A4 L308-309 "median Auto/Full roll ratio 0.928 across 12,883 real photos".
+   The roll ratio is n=5854 (lambda_curve.txt:26-27); 12,883 is the Level-semantics n
+   (lambda_curve.txt:36). Fix: "across 5,854 real photos".
+
+A5 L134 badge and L546 stat "29 controlled solves". 29 is a scene count; the
+   controlled-angle evidence is 7 + 7 + 11 + 40 + 80 solver runs plus a 17-image
+   probe. Fix: "29 synthetic scenes / 155 solver runs", or list them.
+
+A6 L139 and L403 "proven to 1e-15". The table's own max column is 1.13e-09
+   (model_exactness.txt:72). Only the median is 1e-15. Fix: "median 5.65e-16
+   (max 1.13e-09)".
+
+A7 L229 "Fifteen digits of agreement". 1.13e-09 is 9 digits. Fix: "fifteen at the
+   median, nine worst case".
+
+A8 L289-290 "while Full removes 96%". At 3 deg yaw Full removes 84% (3.00 -> 0.48,
+   sweep_results.txt:12); the range is 84-96% (report 3.8 says "95-96%", also high).
+   Fix: "84-96%".
+
+A9 L572 "14.66° → 14.55°". That is Full's outcome; Auto went 14.66 -> 7.69
+   (sweep_results.txt:16), a 48% reduction. Fix: "Auto reaches 7.69; Full leaves 14.55
+   where its neighbours reach 0.48".
+
+A10 L124 "26 Oct 2026". Evidence runs to 2026-10-27 23:56 (negpy_compare.txt). The
+   page is dated before its own evidence. Fix: 27 Oct.
+
+A11 L522 "hard-clamped to ±10° skew, ±5% keystone". NegPy rejects, it does not clamp:
+   `if abs(angle) > _MAX_SKEW_DEGREES: return None` (skew.py:255), and the source
+   comment at :239 says "rejected here, not clamped". Fix: "rejected outside".
+
+A12 L470 "two-line strip must be admitted". The real gates in `trusted_frame_skew` are
+   `has_opposite_pair` AND (`from_film_box` OR `at_canvas_edges`), plus confidence >=
+   0.5 (skew.py:304-312). The structural gates are omitted. Name them.
+
+A13 L498 "a ~5%-of-frame corrector". "Of-frame" implies measured frame loss; nothing
+   measures it (negpy_compare.txt:289-290). Fix: "~5% keystone corrector (frame loss
+   unmeasured)".
+
+A14 L299 caption "n=16" but the table shows 11 numeric cells. Show all 16 or write
+   "n=16 (11 shown)".
+
+A15 L490 header cell carries data as well as a label ("at 15° pitch / 6° yaw, 10.77°
+   original"). Move "10.77° original" into a first body row; keep the header a label.
+
+Verified correct (re-checked against source): 3.19e-01 / 6.90e-01 / 3.01e-01 /
+7.09e-01 / 6.82e-03 / 2.78e-01 / 5.65e-16 / 1.13e-09 (L223-227); 0.004° (L206); the
+four sigma literals 0.0685389 / 7.2951252 / 0.0438649 / 11.3986332 (L252-255, verified
+by reading the bytes at the report's offsets); all seven chart values and bar heights;
+26° (L279); σ 21.4 / error 2× (L283); all twelve pitch/yaw cells (L295-297); max err
+0.09 / L0h 76.7 / σ_gate 22.1 / σ_yaw 11.64 (L299); both mode tables (L321-324,
+L372-375); 65% / 86% / 1.11× / 23% / 1.49× (L328-331); 100% Full-identity (L335);
+0.83-0.96 / 1.00→0.34 px / 360 vs 350 / ~1.1% (L344-349); 3.8% median (L574); 100
+claims / five specifications (L425-426); 2033-04-26 (L437); every NegPy constant
+(skew.py:27-43), `a, b = cv*0.005` (logic.py:556), the ±15% slider cap
+(models.py:122-123); all §06 cells 0.00 / 0.51 / 0.09 / 4.29 / 10.63 / 5.0% / 41% /
+0.61 / 0.42 (negpy_compare.txt:114-123,148-150); and now 38.97 / 40.00 / 39.79 /
+39.87 against 40.24 / 3.2% (L232-233).
+
+=========================================================================
+B. STATED MORE CONFIDENTLY THAN THE EVIDENCE (task 2)
+=========================================================================
+
+B1 L176, L229, L403 — the exact-model result reads as decisive, but the winning fit
+   has 10 unknowns against 8 DOF, so a near-zero residual is partly guaranteed by
+   construction. Report 3.4 concedes "formally a 2-parameter family". Add: "10
+   parameters, 8 DOF — the residual alone does not identify them".
+
+B2 L212-216 / L231-233 "K0 = intrinsics of the source camera (focal estimated per
+   image)" / "genuinely estimated per image". The fit's own f0 is wildly unstable
+   within one image across slots: 1911.2 / 628.2 / 77.6 / 1960.3 px for img_6727297
+   (model_exactness.txt:6,10,14,18). Fix: the stored values are stable (k0 test); the
+   fitted f0 is not identifiable.
+
+B3 L231 "not pinned to a default". Report 3.5d says the fallback is exactly 35.0, and
+   24/80 images in the dense run had a degenerate focal — 20 clamped at 40 mm, 4 left
+   at the 35 default (sigma_v_precise.txt:121-124). Fix: give the 30% degenerate rate,
+   and note report 3.5d says the estimate is floored at 4.0 mm with no ceiling while
+   sigma_v_precise.txt:120 reports a 40 mm ceiling.
+
+B4 L394 "bespoke a-contrario line extraction [AGPL/Apache]". The wording is now right
+   (detector.txt:107 "[PROVEN] NOT stock LSD"), but the pill still names two licences
+   of *other* implementations, not Adobe's bespoke detector. Fix: drop the pill or
+   relabel it "port: OpenCV LSD, Apache-2.0".
+
+B5 L281-283 "the saturation is real, not an artefact of fitting". sigma_v_precise
+   caveat 1 attributes the large residual (0.475) to solver bimodality, and
+   sigma_v_branch.txt:34-36 says "the λ/(λ+1) SHAPE is only approximate. Do not
+   present the shape as exact". Fix: "approximately λ/(λ+1)".
+
+B6 L357-379 Guided: "the strongest mode" (L357), "at lower distortion than Full"
+   (L377), "scores better than Full anyway" (L434), "Strictly the strongest mode"
+   (L576). n=1 scene (guided_mode.txt:13-18); the advantage is 1.476 vs 1.486 p99
+   stretch (0.7%); Guided's crop is never measured, although crop is the cost the page
+   stresses elsewhere. Fix: "on one probe", and add the crop figure or say it is
+   unmeasured.
+
+B7 L379 "Guided does not use the perceptual objective at all". Inference from four
+   satisfied constraints on one scene, not a binary or behavioural proof. Fix: "shows
+   no sign of using it".
+
+B8 L338-342 "there is a mechanism: the solver enforces a hard minimum of two distinct
+   vanishing points". The gates are disassembly-proven; that they fire on abstainers
+   is inferred from a 100%-identity correlation, not observed. Fix: "the mechanism
+   exists; that it fires here is inferred".
+
+B9 L345-350 the single-wall result is at 6° yaw only. non_manhattan.txt:102-104:
+   "Carry the caveat: 6° is small ... the yaw channel should die — untested here."
+
+B10 L409 "Focal-length plausibility prior" as shipped. Report 3.5d and patent_map 5.6
+   say the opposite: "There is no prior weight ... Prior and geometric residual are
+   mutually exclusive, winner-take-all"; patent_map lists "954 c6 ... the product has
+   no prior weight at all". Fix: "focal plausibility floor/ceiling, no prior weight".
+
+B11 L406-409 the card is headed "Adobe-specific", but report 4 classes Perkins's-law as
+   "uncommon, borrowed from perception literature" and E_img / E_f as "uncommon"; all
+   four energy terms are published paper matter. Split the card.
+
+B12 L520 "8-DOF homography" and L527 "8 DOF overfit". The shipped solve is 5-parameter
+   (report 2.2: "H5 indicates the final homography solve is 5-parameter, not an
+   unconstrained 8-DOF projective fit"); the paper is 7 free params. Fix: "5-parameter
+   H over a 3D rotation (8 DOF in principle)".
+
+B13 L338 "The abstainers are photos that are already upright". Correlation, not
+   inspection: abstention.txt never examines an abstainer image. Soften.
+
+B14 L532-534 "the second matters far more for how the result looks". No measurement
+   ranks the two ingredients. Fix: "probably matters more".
+
+B15 L494 "beats Full vertically" / L498 "beats Full at every angle from 5 to 40". True
+   of the model, but "Full" here is a synthetic H, not Lightroom (see E1).
+
+=========================================================================
+C. STALE CONTENT (task 3)
+=========================================================================
+
+C1 Focal conversion — the diagonal hypot(24,36) conversion is still absent. L233 now
+   gives the correct 40.24 mm but never says where it comes from; L349 still uses the
+   old 17.5% against the old truth (A2). The 2.25% divergence from /36 (report
+   3.5d:324) is unmentioned. The evidence dl (L558-566) has no row for
+   sensor_constant.txt or focal_prior.txt.
+
+C2 L558-566 the evidence list omits the entire basis of §06: evidence/negpy_compare.txt
+   and negpy_compare_calc.py. Add both.
+
+C3 No NegPy revision pin. negpy_compare.txt:4 fixes the result to branch lab-redesign
+   @ 3436a891 and explains which commits do not matter; the page says only
+   "features/geometry/skew.py". Add the pin.
+
+FIXED during the audit, verified: σ_v is now unit-dependent with both CIs and n=80
+(L261-264) — but see A3; σ_yaw is 11.64 / 3.0% (L260-261); 12,883 replaces 14,277
+(L547, L562); "0.75-ratio / 1.5-gap margin" (L395, L340); "Two things the claims do not
+say" (L424); the guided digest trigger (L362-367); "line detection" instead of LSD
+(L161, L519); focal values and 40.24 / 3.2% (L232-233). Abstention 9.8 -> 14.0 had
+propagated, then regressed to 13.5 (A1). VP stage and 9,088,885 / 9,098,885 were
+already correct.
+
+=========================================================================
+D. INTERNAL CONSISTENCY AND REPORT CONTRADICTIONS (task 4)
+=========================================================================
+
+D1 L586-590 "all paper and binary claims are marked as such". `pill binary` is used
+   ZERO times; it appears only in the legend (L589). Untagged binary claims include the
+   whole L249-257 literal table, the slot table (L200-210), the 0.004° (L206) and the
+   301 MB scan (L564). Tag them.
+
+D2 L588 "All measured numbers are reproducible". 13.5% and 17.5% are in no evidence
+   file (A1, A2). negpy_compare_calc.py also cannot run as checked out: it needs the
+   Rust `negpy_core` extension, which is not built here (verified: AttributeError, no
+   attribute 'rotation_matrix').
+
+D3 L317-324 vs L369-376 the first mode table has a "crop kept" column; the Guided table
+   does not, so the Guided comparison omits the metric the page calls the cost of Full
+   (L331, L525). Add the column or state Guided's crop is unmeasured.
+
+D4 L334-342 vs L476-477 L334 says abstention is a hard geometric VP gate, but L476-477
+   calls Lightroom's abstention the same instinct as NegPy's "residual test rather than
+   a perceptual energy". A VP gate is not a residual test.
+
+D5 L525 "fails safe — a bad frame just gets rotated". The page's own new table (L496)
+   shows the live NegPy solver making verticals worse than untouched (2.891 vs 1.752),
+   and negpy_compare.txt:223-224 says a half-fitted frame is a normal outcome. Fix:
+   "usually fails safe; a half-fitted frame can be worse than untouched".
+
+D6 L525 "Cost of failure: can warp a good photo badly (Full crops 23%)". The only cell
+   the evidence calls WRONG is Auto at B_strong doing nothing (non_manhattan.txt:86,
+   140-142, frac 0.00, verticals worse after). Full's crop is the cost of Full, not the
+   failure mode. Cite the Auto no-op at 34°.
+
+D7 L527 "a camera photo — the film edge isn't in frame". The documented failure is
+   broader and not about the frame edge: no gate at all (slide in mount, trimmed
+   rebate, digital crop) (negpy_compare.txt:203-207).
+
+D8 L343-351 the non-Manhattan paragraph sits inside the red "Abstention" callout, and
+   its first block is bare text while the second is a <p> (L343). Move it to its own
+   callout; make the markup uniform.
+
+D9 Against the report: report 3.7/4.2 say 14.0% — page says 13.5% (A1). Report 2.2 says
+   5-parameter H — page says 8-DOF (B12). Report 5a / patent_map say no focal prior —
+   page lists one (B10). Report 3.5d says no focal ceiling — page is silent, evidence
+   says a 40 mm ceiling (B3).
+
+D10 L419 "active to 2033". The family expiry range is 2033-04-26 to 2033-06-25
+   (patent_map.txt:7). "to 2033" hides that the broadest claim runs five months past
+   the date the page calls the clean date. Fix: "expiries 2033-04-26 to 2033-06-25".
+
+D11 L208 "the one path with no corpus evidence" vs L576 "Strictly the strongest mode".
+   Both true, never reconciled (B6).
+
+D12 L554 "Solves need one Update click". True for Guided; the Auto/Full/Level/Vertical
+   runs needed no click at all (sigma_v_precise.txt:13-16 applies PerspectiveUpright
+   inside withWriteAccessDo). Fix: "Guided needs one Update click; the other modes do
+   not".
+
+=========================================================================
+E. PROVENANCE GAPS IN §06 (L480-507)
+=========================================================================
+
+E1 L492-493 "Lightroom Guided 0.00°" / "Lightroom Full 0.51°" read as product
+   measurements. They are not: the Guided row is "exact rectification" (an ideal H,
+   negpy_compare.txt:115) and the Full row is the report's model with damping
+   ratio-matched to scene A, "not a fresh run of Lightroom at 15/6"
+   (negpy_compare.txt:287-288). Fix: label both "model".
+
+E2 L498 "Uncapped it beats Full at every angle from 5 to 40". Model-vs-model on one
+   synthetic scene family. Say so.
+
+E3 L501-502 "The cost is corner loss". Not measured: "Nothing here measures crop loss
+   or stretch for NegPy — only line residual and quad error" (negpy_compare.txt:289-290).
+
+E4 L480-507 no caveat block. negpy_compare.txt:281-290 lists four: one scene family at
+   one focal, hard-edged fills, no grain/lens distortion/curl; roll 0 throughout; the
+   live-solver row is one crude render, not a corpus. Add them.
+
+E5 L504-506 "reaches 0.61/0.42 where Guided reaches 0.00/0.00". Guided's 0.00 is the
+   ideal rectification again, not the stored Guided transform (E1).
+
+=========================================================================
+F. LICENCE POSITION (task 5)
+=========================================================================
+
+The page does not claim the port is patent-free, and it carries the right skeleton —
+weights unclaimed, VP ordering only functional, behavioural risk named, Guided as
+design-around, "nothing clean before 2033-04-26", "not legal advice". Remaining gaps:
+
+F1 L434 "Guided clears all four claim 1s on its face". There are FIVE claim 1s, and US
+   9,582,855 c1 is one of them: the broadest, latest-expiring, apparatus-framed claim,
+   with the identical "human perception-based criteria" limitation
+   (patent_map.txt:111-118,130). Only 855 c11 is addressed (L435). Fix: "clears four of
+   the five claim 1s; 855 c1 and c11 remain".
+
+F2 L532-534 the closing recommendation names the K1 ≠ K0 re-projection as transferable
+   without saying it is claimed (460 c6/c13, 954 c5/c6; patent_map 5.8 "Do NOT design
+   around"). Fix: "and it is claimed — keep it".
+
+F3 L435 "ship Auto last" implies but never states the report's conclusion: "Shipping
+   Auto as well re-exposes 460/855" (patent_map.txt:428-430). Say it.
+
+F4 L530-537 §07's closing advice has no patent qualifier; the only "not legal advice"
+   is at L438, five sections earlier. Repeat one clause in the §07 callout.
+
+F5 L419 the patent paragraph omits that all five are Active, the per-patent claim 1
+   subject matter, and the Atlanta / second-orthogonal-frame point (885 c1/c12, 787 c1)
+   that patent_map calls the one patented-only element and a design-around (5.7). Add a
+   compact expiry/claim table.
+
+F6 L403 the `measured` pill marks the two-intrinsics line as measurement only. It is
+   also claimed, which is why it cannot be designed out. Add a "claimed" marker.
+
+F7 §06/§07 never mention patents, and negpy_compare.txt:196 asserts "No patent
+   exposure" for NegPy. The page omits the useful contrast: NegPy sits outside the
+   claims; the port does not.
+
+=========================================================================
+G. HTML VALIDITY AND ANCHORS (task 6)
+=========================================================================
+
+G1 L229, L299, L377, L498 `<caption>` sits after `</tbody>`. HTML requires caption to be
+   the table's first child; all four are invalid. `caption-side:bottom` (L77) already
+   handles the visual position — move each caption to immediately after `<table>`. All
+   four read as footnotes and would be better as a `<p class="note">` after the table.
+
+G2 L22-23 duplicate `a{...}` rule; the second silently overrides the first's border
+   colour. Merge.
+
+G3 L108 `.pill.m` defined, never used. L111 `.pill.binary` used only in the legend
+   (L589), never on a claim. Remove `.pill.m`; use `.pill.binary`.
+
+G4 L389 → L392/L401 heading level skipped (h2 to h4, no h3).
+
+G5 All `<th>` (L201, 221, 250, 293, 319, 370, 490, 516, 569) lack `scope`. Accessibility.
+
+G6 No `<main>` landmark; `nav.toc` has no `aria-label`. Add both.
+
+G7 L91-98 chart bars overflow. `.bar` is `height:100%` with `justify-content:flex-end`,
+   and `.fill` heights are percentages of the same 190px `.chart`, so `.val` and `.lab`
+   add on top: the 88% bar plus labels is ~195px in a 190px box and pushes past the
+   bottom border. Give the bar area its own fixed height and take the labels out of the
+   flex column.
+
+G8 L343-351 `<p>` opened inside `.callout` after a bare-text block; valid but
+   inconsistent with every other callout. Wrap the first block too.
+
+Clean: tags balanced (no unclosed or mismatched elements), no duplicate ids, all eight
+nav anchors resolve, no broken anchors, no raw ampersands, lang/title/meta description
+present, no images so no alt issues.
+
+=========================================================================
+FIX ORDER
+=========================================================================
+1. A1 (13.5%), A2 (17.5%), C1 (conversion), B10 (focal prior), B12 (8-DOF), F1 (four
+   claim 1s), B1/B2 (identifiability).
+2. A3-A9, B3-B9, D1-D7, F2-F4.
+3. Everything else, then the HTML pass G1-G8.

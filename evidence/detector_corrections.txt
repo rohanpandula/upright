@@ -1,0 +1,94 @@
+DETECTOR AUDIT — corrections to detector.txt and report section 3.5e
+==================================================================
+2026-10-28. Clean-room implementation; constants/algebra only, no Adobe code.
+Input: re/vp/x86.bin (the existing local extracted slice)
+SHA256: 006643fc0e5ad248e536087e923123adb53bd5930fac07075d5e64842d082041
+Addresses are offsets within that slice. Original evidence/report left intact.
+
+[PROVEN] The detector DOES calculate a binomial-tail NFA.
+-------------------------------------------------------
+0x22cb425..0x22cb42c multiplies the long side by itself twice: M^4 tests.
+0x22cb48a loads detector+0x30 (cos22.5); 0x22cb490 loads detector+0x34
+(0.125f), converts it to double at 0x22cb496 and forms 1-p at 0x22cb4a2..
+0x22cb4b5. This is a Bernoulli null probability, NOT interpolation.
+0x22cb535..0x22cb53b counts points n; 0x22cb5a0..0x22cb5d7 counts aligned k.
+0x22cb5e3 compares k to n, NOT to the earlier significance-bin minimum.
+0x22cb623..0x22cb68f sums C(n,j) * p^j * (1-p)^(n-j), j=k..n;
+0x22cb4e0 multiplies that tail by M^4.
+
+Thus NFA = M^4 * sum(j=k..n) C(n,j) (1/8)^j (7/8)^(n-j).
+The port computes its logarithm with lgamma/logaddexp, accepts log NFA < 0,
+and avoids the binary's intermediate integer-coefficient overflow. This is
+an actual tail probability, not the old density/count approximation.
+
+Reproduce:
+  python3.12 evidence/dsx.py re/vp/x86.bin 22cb41e 22cb79f
+This also contradicts the report's "no binomial NFA" description.
+
+[PROVEN] Refinement's float argument is 1.0f, NOT 1/2048.
+-------------------------------------------------------
+0x22d22a6 mov esi,10
+0x22d22ae movss xmm0,[0x2da37b4]
+0x22d22b6 call 0x22d0720
+0x22d073b movss [rbp-0xec],xmm0
+0x22d0830 movss xmm0,[rbp-0xec] -> helper 0x22d1850
+
+Bytes at 0x2da37b4: 00 00 80 3f 00 00 40 3f.
+Two float32 values: 1.0, 0.75. Reading EIGHT bytes as float64 gives
+0.0004882813655058271, close to 1/2048. MOVSS reads only FOUR bytes.
+The same width mistake occurs in detector.txt's constructor annotation:
+0x2da3770 is float32 {1.0,1.0}, not {0.0,1.0}; its combined float64 is
+0.007812501848093234, close to 1/128.
+The port uses the actual refine call values (10, 1.0). TLS support splitting
+remains re-derived; knowing the signature alone is not a complete algorithm.
+
+[PROVEN] Merge uses 6 px perpendicular, NOT 12.
+------------------------------------------------
+At 0x22d2c36 test r12,r12; js unsigned-conversion fallback.
+For the actual argument 6, the normal path is:
+  0x22d2c3b cvtsi2ss xmm0,r12
+  0x22d2c43 jmp 0x22d2c5e
+  0x22d2c5e movss [rbp-0x94],xmm0
+The addss at 0x22d2c5a belongs ONLY to converting a large unsigned integer,
+whose sign bit is set; it is not executed for 6. No doubling takes place.
+
+0x22d2dac rejects if endpoint perpendicular distance > 6.
+0x22d2db9..0x22d2dd2 rejects if candidate interval start - current start <= -10.
+0x22d2dd8..0x22d2df4 rejects if candidate interval end - current end >= +10.
+0x22d2dfa marks the absorbed candidate. The survivor is not extended here.
+This is containment with slack, NOT a rule for bridging arbitrary 10px gaps.
+The port implements those strict interval limits and keeps the fitted survivor.
+Its longest-first ordering / Euclidean projected intervals remain re-derived;
+the exact native interval rasterisation and traversal order are not established.
+
+[PROVEN] Bin rounding in the bytes is FLOOR, not nearest.
+-------------------------------------------------------
+0x22c7173 ROUNDSS xmm0,xmm0,9. Immediate 9 = rounding toward minus infinity
+with precision exceptions suppressed. The positive logarithm is floored.
+The formula gives 13 bins at 1000, 15 at 4000 (not the reported 16).
+
+The port deliberately retains the user's requested nearest-round formula and
+all 34 original tests unchanged (including 4000 -> 16). This is a documented
+compatibility choice, NOT a claim of binary equivalence. Float32 logarithms
+and arithmetic are used. Changing to floor would require resolving that
+explicit conflict with the existing acceptance test.
+
+[PROVEN values; roles NOT fully established] Camera parameter block
+------------------------------------------------------------------
+The 1/3600, 1/8100, 1/900, 0.16 literals are in this+0x478, a DIFFERENT object
+from the detector. They are retained as constants, not invented detector
+thresholds. Only the four-pixel resolution scale is used by the re-derived
+robust energy. The exact constructor uses (4/(M-1))^2, not (4/M)^2.
+1/8100 corresponds to (1/90 degree)^2 = (2/3 arcminute)^2, not 1.5 arcmin.
+The role of 0.16 remains unknown; no speculative ratio gate is introduced.
+
+LIMITS
+------
+Eight direction scans/cos22.5 follow the supplied specification. Gradient
+preprocessing, NMS, connected supports, quadratic subpixel localization, and
+TLS split/refit are independently implemented; they are not pixel-identical
+reverse engineering of every detector helper. Pass B's 320px curve payload
+is not part of the segments= seam and is not implemented. VP fitting is not
+rewritten here; its pre-existing RANSAC approximation remains, as distinguished
+from the shipped VP stage in vp_resolution.txt. No claim of complete Adobe
+objective or pixel equivalence is made.

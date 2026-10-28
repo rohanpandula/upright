@@ -1,0 +1,4 @@
+40-seed all-mode nonregression A_clean
+40-seed all-mode nonregression B_strong
+40-seed all-mode nonregression C_noisy
+40-seed all-mode nonregression D_roll

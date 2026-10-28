@@ -1,0 +1,243 @@
+{
+  "adobe": {
+    "variant": {
+      "photos": 256,
+      "errors": 0,
+      "auto": {
+        "n": 256,
+        "fit": 192,
+        "accepted": 34,
+        "candidate": {
+          "win": 78,
+          "lose": 114,
+          "tie": 64,
+          "invalid": 0,
+          "win_all_pct": 30.46875,
+          "win_decisive_pct": 40.625,
+          "error": {
+            "n": 256,
+            "mean": 4.356768056653926,
+            "median": 1.8421439276277753,
+            "p90": 9.985180650836226,
+            "p99": 35.957745288425116,
+            "max": 45.33129774541737,
+            "over1": 167,
+            "over5": 58,
+            "over20": 12
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 23,
+          "lose": 11,
+          "tie": 222,
+          "invalid": 0,
+          "win_all_pct": 8.984375,
+          "win_decisive_pct": 67.6470588235294,
+          "error": {
+            "n": 256,
+            "mean": 1.8480393818495195,
+            "median": 1.449436928738478,
+            "p90": 3.6009931091299228,
+            "p99": 8.379319979048649,
+            "max": 20.6880620974359,
+            "over1": 157,
+            "over5": 13,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      },
+      "full": {
+        "n": 256,
+        "fit": 158,
+        "accepted": 34,
+        "candidate": {
+          "win": 70,
+          "lose": 88,
+          "tie": 98,
+          "invalid": 0,
+          "win_all_pct": 27.34375,
+          "win_decisive_pct": 44.30379746835443,
+          "error": {
+            "n": 256,
+            "mean": 6.681526207397548,
+            "median": 3.6452726730428213,
+            "p90": 18.040432051337035,
+            "p99": 38.69134975706468,
+            "max": 43.53457154399156,
+            "over1": 203,
+            "over5": 101,
+            "over20": 20
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 26,
+          "lose": 8,
+          "tie": 222,
+          "invalid": 0,
+          "win_all_pct": 10.15625,
+          "win_decisive_pct": 76.47058823529412,
+          "error": {
+            "n": 256,
+            "mean": 4.331299798437652,
+            "median": 3.4278400235778395,
+            "p90": 9.427620836648046,
+            "p99": 18.50666741364599,
+            "max": 22.23468956683453,
+            "over1": 193,
+            "over5": 86,
+            "over20": 2
+          },
+          "delta_median": 0.0
+        }
+      }
+    },
+    "paired_raw": {
+      "photos": 256,
+      "errors": 0,
+      "auto": {
+        "n": 256,
+        "fit": 186,
+        "accepted": 20,
+        "candidate": {
+          "win": 64,
+          "lose": 122,
+          "tie": 70,
+          "invalid": 0,
+          "win_all_pct": 25.0,
+          "win_decisive_pct": 34.40860215053763,
+          "error": {
+            "n": 256,
+            "mean": 4.42823841838052,
+            "median": 2.0218391759798116,
+            "p90": 9.382689550230474,
+            "p99": 35.26785868501703,
+            "max": 40.102368185392386,
+            "over1": 184,
+            "over5": 61,
+            "over20": 13
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 11,
+          "lose": 9,
+          "tie": 236,
+          "invalid": 0,
+          "win_all_pct": 4.296875,
+          "win_decisive_pct": 55.0,
+          "error": {
+            "n": 256,
+            "mean": 1.8211848451487471,
+            "median": 1.466527909152817,
+            "p90": 3.4648058776818953,
+            "p99": 7.781551561599081,
+            "max": 20.6880620974359,
+            "over1": 164,
+            "over5": 12,
+            "over20": 1
+          },
+          "delta_median": 0.0
+        }
+      },
+      "full": {
+        "n": 256,
+        "fit": 143,
+        "accepted": 20,
+        "candidate": {
+          "win": 55,
+          "lose": 88,
+          "tie": 113,
+          "invalid": 0,
+          "win_all_pct": 21.484375,
+          "win_decisive_pct": 38.46153846153846,
+          "error": {
+            "n": 256,
+            "mean": 6.399458412563848,
+            "median": 3.590654840776018,
+            "p90": 13.843284446602748,
+            "p99": 32.89505002109051,
+            "max": 54.239922959953965,
+            "over1": 210,
+            "over5": 103,
+            "over20": 18
+          },
+          "delta_median": 0.0
+        },
+        "returned": {
+          "win": 15,
+          "lose": 5,
+          "tie": 236,
+          "invalid": 0,
+          "win_all_pct": 5.859375,
+          "win_decisive_pct": 75.0,
+          "error": {
+            "n": 256,
+            "mean": 4.322690529030861,
+            "median": 3.3345090056189566,
+            "p90": 9.562913976136048,
+            "p99": 18.50666741364599,
+            "max": 22.23468956683453,
+            "over1": 199,
+            "over5": 84,
+            "over20": 2
+          },
+          "delta_median": 0.0
+        }
+      }
+    },
+    "vs_raw": {
+      "auto": {
+        "candidate": {
+          "improve": 118,
+          "worsen": 92,
+          "tie": 46,
+          "invalid": 0,
+          "median_delta": 0.0
+        },
+        "returned": {
+          "improve": 24,
+          "worsen": 18,
+          "tie": 214,
+          "invalid": 0,
+          "median_delta": 0.0
+        }
+      },
+      "full": {
+        "candidate": {
+          "improve": 98,
+          "worsen": 85,
+          "tie": 73,
+          "invalid": 0,
+          "median_delta": 0.0
+        },
+        "returned": {
+          "improve": 25,
+          "worsen": 17,
+          "tie": 214,
+          "invalid": 0,
+          "median_delta": 0.0
+        }
+      }
+    },
+    "image_stats_median": {
+      "count": 533.0,
+      "length_q": [
+        13.024984183922694,
+        19.977650582878038,
+        44.68465706564214,
+        134.97331952197047
+      ],
+      "length_total": 15027.048945320299,
+      "long50": 42.0,
+      "long100": 10.0,
+      "mean": 107.94825989583333,
+      "std": 57.236508912632566,
+      "dark_fraction": 0.015139694579288026,
+      "clipped_fraction": 0.0010119791666666667,
+      "laplacian_std": 12.522590160369873
+    }
+  }
+}

@@ -1,0 +1,562 @@
+DOCUMENTATION / EVIDENCE AUDIT AFTER NINE CHANGE ROUNDS
+=======================================================
+Date: 2026-10-28 09:58 America/Los_Angeles
+Scope (audited, NOT edited):
+  port/README.md
+  evidence/port_status.txt
+  evidence/port_review.txt
+  lrplugin/uprightprobe.lrdevplugin/OPERATIONS.md
+Cross-checked against: port/upright_port.py, port/test*.py, lrplugin/**/*.lua,
+lrtest/TRACE.txt, lrtest/ImportSweep.lua.bak, and round1-12 evidence.
+
+PINNING NOTE — the brief says nine rounds; the tree is at twelve
+---------------------------------------------------------------
+The README was rewritten four times while this audit ran (08:18:59, 09:01:05,
+09:14:59, 09:42:09) and Rounds 10, 11 and 12 landed (round10/11/12.txt,
+test_round10.py). All README line numbers below refer to the **337-line version
+at 09:42:09**, the last one this audit could pin. The other three files did not
+change (port_status 04:25, port_review 04:41, OPERATIONS.md 00:09).
+Re-pin before acting:
+  wc -l port/README.md            # expect 337; if not, re-grep the anchors
+  stat -f "%Sm" port/README.md
+Anchors used: "lacks Adobe" (125), "| `SIGMA_V`" (140), "75 tests" (204),
+"## Limitations" (317), "Round 10 accepts" (333).
+
+VERDICT
+-------
+port_status.txt and port_review.txt are frozen pre-round snapshots (04:25 and
+04:41) that now contradict the shipped code in their headline verdicts, test
+counts, and their "open defect" / "not implemented" lists. They are three rounds
+behind: neither mentions Rounds 10, 11 or 12.
+
+README.md has improved during the audit — it now leads with the real-photo
+failure (14-20) and calls the port "a poor Adobe clone" — but it still contains
+one hard self-contradiction (#1: framing), a test count that was already stale
+when written (#2: 75 vs 77), a provenance table with three wrong evidence
+references and an overclaimed PROVEN row (#28-31), and no CHOICE row at all
+despite advertising the CHOICE tag (#25).
+
+OPERATIONS.md was stale before the audit began: it tells a reader to restore the
+plugin from a backup that is 154 diff lines behind the shipped file (#35), and
+its trace-format contract is already violated by the current TRACE.txt (#36).
+
+Severity: H = misleads a reader about capability/state, M = wrong evidence link
+or overclaim, L = precision/format.
+
+================================================================================
+A. CLAIMS SUPERSEDED BY ROUNDS 1-12  (task 1)
+================================================================================
+
+1. [H] port/README.md:125-126
+   "Full deliberately retains the port's more accurate rectification; Adobe leaves
+   about 0.36-0.49 deg vertical error on these scenes. The port also lacks Adobe's
+   output framing."
+   Framing shipped in Round 7 and is documented 80 lines earlier (45-50: "Output
+   framing is opt-in. `frame_output(H)` ..."). The sentence survived all four
+   rewrites.
+   FIX: "...The port reproduces Adobe's output framing as an opt-in step
+   (`framing=True`); Adobe applies it unconditionally. See round7.txt."
+
+2. [H] port/README.md:204
+   "75 tests across the port suite."
+   Actual: 77. test_round10.py (2 tests, added 08:46) postdates the sentence, and
+   the Tests section (197-209) never mentions the Round 10 gate tests or the
+   calibrated 1-degree scatter cap.
+   FIX: "77 tests", and add "the Round 10 gate calibration" to the coverage list.
+
+3. [H] evidence/port_status.txt:5
+   "Result: 47 tests, including all 34 original tests unchanged; OK, no warnings"
+   Actual 77 (port_review.txt:185 says 50).
+   FIX: "Result: 77 tests, including the original 34 unchanged; OK, no warnings."
+
+4. [H] evidence/port_status.txt:4
+   "Run:    cd port && python3.12 -m unittest test_port -v"
+   test_port.py alone is 56 tests; this command silently skips 21 tests across
+   test_round2/3/4/7/8/10.py, so the documented run can pass while a round
+   regression is red.
+   FIX: `cd port && python3.12 -m unittest discover -p 'test*.py' -v` (matches
+   README:201).
+
+5. [H] evidence/port_status.txt:71-73
+   "* Source K0 stays fixed: wrong focal can make the Manhattan rays nonorthogonal,
+   which no rotation/destination camera can fully rectify. This is not solely
+   'prior dominance' in the energy."
+   Round 2 added a source-focal check that refits a wrong prior (README:250-262,
+   round2.txt). K0 no longer simply "stays fixed"; it is validated against
+   perpendicular-family geometry and replaced when the discrepancy clears 5% and
+   3x the profiled four-pixel resolution. Guided and `shared_k` are the only
+   exceptions.
+   FIX: "K0 starts from the prior; Round 2 calibrates it against perpendicular
+   families. Guided/shared_k still trust the supplied focal. A prior that fails
+   both thresholds remains unrecoverable."
+
+6. [H] evidence/port_status.txt:66-68
+   "* The VP estimator is still the old RANSAC approximation; vp_resolution.txt
+   describes the distinct shipped stage. No claim that 2000 is a shipped RANSAC
+   iteration count, or sqrt(3) an Adobe inlier decision."
+   Directionally true but no longer the whole story: Round 1 changed ranking to
+   camera-centred rays (README:225-226) and Round 3 locked family identities and
+   refit on final supports (README:288-290), fixing the stale-VP horizon. Rounds
+   5 and 6 retained no production change (round5.txt:3-5, round6.txt:5-6).
+   FIX: "The VP estimator remains an approximation of the stage in
+   vp_resolution.txt, but ranking, family locking and post-assignment refit were
+   changed in Rounds 1 and 3."
+
+7. [H] evidence/port_status.txt:74-77
+   "* Broad real-photo corpus, new Lightroom runs and pixelwise detector output
+   were not checked."
+   Round 9 ran 300 real photos / 600 attempts; Round 10 ran 450 / 900 with the
+   gate fixed (round10.txt:4-5). Round 10's answer: 80/900 accepted, median
+   2.076% raw error.
+   FIX: Replace the absence with the result.
+
+8. [M] evidence/port_status.txt:69-70
+   "* Energy is not Adobe's evaluator. Cauchy is a measured clean-room choice;
+   real Perkins barrier, E_img, lens distortion, crop/output policy unported."
+   "Cauchy is a measured clean-room choice" is a tag collision: the code tags it
+   CHOICE (upright_port.py:646) and README:320 calls it "our choice". Also
+   "crop/output policy unported" is half-stale: framing and destination scaling
+   shipped in Rounds 7-8; only rendered crop selection is absent.
+   FIX: "Cauchy and its scale are our choice. Framing and sizing shipped in
+   Rounds 7-8; rendered crop selection is still unported."
+
+9. [H] evidence/port_review.txt:9-13, 27-33, 232-234, 365-375, 450-452
+   "The strongest open defect is a successful-looking, catastrophically wrong
+   D_roll solve at seed=4." ... "D_roll seed 4 is catastrophic and still reports
+   ok=True" ... "Open seed-4 failure, cheap direct reproduction" ... "The open
+   seed-4 and aspect-ratio findings are review results, not fixed assertions."
+   Closed in Round 1: ranking horizontal VPs from the image origin caused it;
+   camera-centred ray ranking gives 0.018/0.012 deg (README:225-226, round1.txt).
+   Advertised as open in four places, including a runnable repro block whose
+   expected output no longer reproduces.
+   FIX: Banner at the top — "SUPERSEDED IN PART: the seed-4 failure below is
+   fixed in Round 1; see round1.txt" — and mark 365-375 historical.
+
+10. [H] evidence/port_review.txt:185-186, 450-452, and 181
+    "Result: 50 tests pass." / "Final validation: ... 50 tests, OK (2.248s)." /
+    "Added regressions (original 47 tests retained)".
+    Actual 77.
+    FIX: Restate as 77, or date-stamp the counts "at time of review".
+
+11. [H] evidence/port_review.txt:275-278 (D8)
+    "The port has a default 1200px working side and no calibration stage, native
+    coarse curve payload/pass B, ..."
+    A calibration stage exists (Round 2, README:250-262).
+    FIX: Drop "no calibration stage"; the 320px payload and pass B remain absent.
+
+12. [M] evidence/port_review.txt:313-316 (E7)
+    "Metadata/geometry source switching, source-center estimation and native
+    camera fitting are not implemented here."
+    Source switching and a source-camera fit are implemented in Round 2. Source
+    centre estimation is still absent.
+    FIX: Keep only the source-centre and native-camera-fitting part.
+
+13. [H] evidence/port_review.txt:321-323 (E8)
+    "Existing Auto SIGMA_V=14.58deg/L0_V=3.56 also differ from matched.py's
+    13.33deg/2.64; pitch-versus-keystone units remain unresolved."
+    The port ships 13.33 deg / 2.64 (upright_port.py:96-98) and the units are
+    resolved to keystone, not camera pitch (README:112-113, sigma_v_precise.txt:104).
+    FIX: "Resolved in Round 4: units are keystone, not pitch; the port now uses
+    13.33 deg / 2.64."
+
+14. [M] evidence/port_review.txt:13, 388-390
+    "... it does not measure correspondence with Adobe's outputs." and
+    "Not checked: new Adobe runs, native per-stage outputs, real-photo holdout,
+    fork/shape/crop equivalence, lens distortion, or a calibrated false-alarm
+    proof. ... No frozen report, source-camera model, damping constants or VP
+    code was changed."
+    Rounds 4-8 measured clone distance (round8.txt:5: 33.266029% -> 0.587092%);
+    Rounds 9-10 ran real-photo holdouts. Round 1 changed VP code.
+    FIX: Reissue "not checked" as "checked since" with round references; drop the
+    "no VP code was changed" clause.
+
+15. [M] port/README.md:290
+    "regular panels may be easier than the fixtures; this is not a real-photo test."
+    True for the Round 2 held-out set, but with 14-20 and 333 in the document the
+    bare clause reads as if no real-photo test exists.
+    FIX: "This particular benchmark is not a real-photo test; see 14-20 and
+    Round 10."
+
+16. [L] port/README.md:190
+    "34 tests. Gradient preprocessing, tracing and support refinement remain"
+    "34" is now unverifiable from a 77-test suite and is repeated stale in
+    port_status.txt:47 with the 47 total.
+    FIX: "...compatibility with the original detector acceptance tests
+    (test_port.py)."
+
+17. [L] evidence/port_review.txt:5-7
+    "The frozen report was READ, not edited" / "The directory has no .git, so this
+    is a source/evidence review, not a git diff."
+    Still true; recorded so a later editor does not "correct" the snapshot's
+    historical measurements. No change needed beyond #9's banner.
+
+================================================================================
+B. CONFIDENCE EXCEEDING EVIDENCE / FIDELITY / PATENT  (tasks 2 and 5)
+================================================================================
+
+18. [H] port/README.md:3-5, 8-9, and evidence/port_status.txt:6
+    "A reference implementation ... written to be lifted into a permissively
+    licensed project." / "MIT licensed. No Adobe source code; only the algebra,
+    re-derived, plus numbers read out of or fitted against the shipped binary."
+    / "Licence: MIT, clean-room implementation; no Adobe source copied"
+    None of the four audited files contains the word "patent". patent_map.txt is
+    much weaker than the framing implies:
+      "There is no configuration in which this is free before 2033-04-26."
+      "It does not have a clean position on 855 c11 unless guided is the *only*
+       mode shipped. Shipping Auto as well re-exposes 460/855."
+    MIT grants copyright rights only, so "MIT licensed" + "lift into a permissive
+    project" reads as legal clearance the evidence does not support.
+    FIX: Add a bullet: "MIT covers copyright only. patent_map.txt finds a
+    defensible non-infringement position on three of five patents and an arguable
+    one on two more, but no configuration is patent-free before 2033-04-26;
+    guided-only is the narrowest exposure. Not legal advice."
+
+19. [H] port/README.md:197-209
+    "75 tests across the port suite. They cover ..."
+    port_review.txt:9-10 warns "Do not ... infer production reliability from 50
+    green tests". The Tests section carries no such caveat, and after Rounds 9-10
+    the gap is stark: 77 green tests coexist with 80/900 real-photo acceptance.
+    FIX: Append "Green means the synthetic contracts hold, not that real photos
+    are corrected; Round 10 accepts 80/900 (see 14-20)."
+
+20. [H] port/README.md:211-241 (Accuracy)
+    The section still leads with the synthetic 92% and closes "This remains a
+    synthetic-scene result" (line 238) with no pointer to the real-photo section.
+    It never states the 0.587% clone figure the port is judged on. Round 9:276 is
+    explicit that "the synthetic 0.587% headline must not be presented as
+    real-photo accuracy" — the README complies by omitting it entirely, which
+    under-reports the strongest synthetic result and leaves the section's headline
+    metric unquantified.
+    FIX: Add one sentence: "On the four cached scenes, opt-in framing+scale cuts
+    raw clone distance 33.266% -> 0.587% (round8.txt) — synthetic only; real
+    photos are at 2.076% median with 80/900 accepted (14-20, round10.txt)."
+
+21. [M] port/README.md:14-20 vs 211-241
+    Two different error metrics now sit in one document: the header quotes "% of
+    source diagonal" raw clone distance, the Accuracy section quotes axis
+    residuals in degrees. Nothing says they are incomparable, and "poor clone"
+    (14) vs the 92% headline (224) invite conflation.
+    FIX: In Accuracy, name the metric difference explicitly ("axis residuals, not
+    the header's raw clone distance").
+
+22. [M] port/README.md:60-61
+    "a 9.09% zoom discontinuity at the switch and division by zero on an exact
+    diamond."
+    Accurate (round9.txt:4, 99) but neither defect appears in Limitations
+    (317-338), and no guard is described. A reader of Limitations alone misses
+    both.
+    FIX: Promote both to Limitations and say whether `scale_output` raises or
+    returns inf on the diamond.
+
+23. [M] port/README.md:46-47
+    "It centres a 90% inner / 10% outer blend of the corrected quad's bounds,
+    matching the translation of all 16 active cached Adobe slots to stored
+    precision."
+    True for the 16 active slots, but round7.txt:85-87 records 318/320 slots
+    passing with two retained exceptions (V40S3 slots 2 and 4, max matrix change
+    ~0.070). "all 16" is right; the denominator and the exceptions are invisible.
+    FIX: "...matching all 16 active cached Adobe slots; 2 of 320 inactive slots
+    remain exceptions (round7.txt)."
+
+24. [L] port/README.md:10-12
+    "so you can see which parts are facts, which are fits, and which are straight
+    from the paper."
+    The gloss maps three of the four advertised tags. CHOICE — the tag that
+    matters most for invented parts — is unglossed, and no CHOICE row exists
+    (see #25-28).
+    FIX: "...which are facts, which are fits, which are from the paper, and which
+    the port invented."
+
+================================================================================
+C. PROVENANCE TAGS  (task 3)
+================================================================================
+
+25. [H] port/README.md:138-156 (whole table)
+    PROVEN, MEASURED, MEASURED/requested and PAPER rows exist; CHOICE rows are
+    zero. Every constant the port invented is absent from the table that claims to
+    expose inventions: the Cauchy loss, its 4/(maxdim-1) scale, and the 1.10
+    scale switch. The code already tags all three (upright_port.py:646 "CHOICE:
+    Cauchy and its scale" and :847 "CHOICE: one degree scatter cap"; :139-142
+    CHOICE for blur/percentile/max-side), so the README lags the source.
+    FIX: Add rows, e.g.
+      | Cauchy loss | `rho=s^2*log(1+(r/s)^2)` | CHOICE | port invention; port_review.txt rank 2 |
+      | `CAUCHY_SCALE` | `4/(maxdim-1)` | CHOICE (literal PROVEN, use invented) | literal from detector.txt 4.2; use in a loss is ours |
+      | scale switch | 1.10 | MEASURED threshold / CHOICE form | round8.txt:365-370 |
+
+26. [H] port/README.md:55
+    "This measured rule uses only the quad, without mode-specific constants."
+    "This measured rule" presents the two-branch 1.10 construction as recovered.
+    round8.txt:365-370 is careful: "Recovered policy: if s_cover/s_inner <= 1.10",
+    "The 1.10 coefficient is MEASURED, not claimed Adobe source", and "the sweep
+    was also inspected to identify/narrow the switch, so is NOT a blind holdout".
+    The threshold is measured; the piecewise shape is the port's.
+    FIX: "This fitted rule is the port's construction: the 1.10 threshold is
+    measured (round8.txt); the piecewise form and its use of only the quad are
+    ours. The supported switch interval is narrow ([1.099974, 1.100586) on the
+    sweep) and not a blind holdout."
+
+27. [M] port/README.md:192-194
+    "The angular literals `1/3600, 1/8100, 1/900`, `(4/(maxdim-1))**2` and `0.16`
+    belong to a separate camera parameter block; unknown roles are not invented as
+    detector gates."
+    Half-true and now self-contradictory: `(4/(maxdim-1))` IS used, as the Cauchy
+    scale in the energy (upright_port.py:648, 875), and the README never says so
+    here. "not invented as detector gates" is accurate but reads as "unused".
+    FIX: "...belong to a separate camera parameter block. Their roles are
+    unresolved and none is used as a detector gate; the port does reuse the
+    four-pixel `(4/(maxdim-1))` literal as the Cauchy scale, which is its own
+    choice."
+
+28. [H] port/README.md:144
+    "| `SIGMA_PITCH_GATE` | 22.10 deg | MEASURED | `evidence/abstention.txt` |"
+    abstention.txt contains no 22.10 and no gate value at all — it argues
+    abstention lives in the objective and that there is "no confidence gate"
+    (abstention.txt:33-34). The figure is a *requested* Round 4 constant
+    (round4.txt:156); sweep2_resolution.txt:19 fits 22.05 instead.
+    FIX: tag MEASURED/requested; source "round4.txt:156 (requested); sweep2 fits
+    22.05; not in abstention.txt".
+
+29. [M] port/README.md:142
+    "| `LAMBDA0_H` | 76.73 | MEASURED | `evidence/lambda_curve.txt` |"
+    lambda_curve.txt contains no 76.73 (it fits 1.686*exp(-t^2/(2*7.26^2))). The
+    value is in sweep2_resolution.txt:19 (L0h=76.73) and round4.txt:155.
+    FIX: source `evidence/sweep2_resolution.txt:19`.
+
+30. [M] port/README.md:146
+    "| `ROLL_LEVEL` | 0.87 | MEASURED | `evidence/lambda_curve.txt` |"
+    lambda_curve.txt contains no 0.87. The only trace is round4.txt:123, "fixed
+    0.87 roll is approximate" — described as fixed and approximate, not measured.
+    (The ROLL_AUTO row at 145 is correctly supported: lambda_curve.txt:27, n=5854.)
+    FIX: tag "fixed/approximate"; source round4.txt:123.
+
+31. [M] port/README.md:151
+    "| `RANSAC_ITERS` / `MIN_INLIERS` / `TAU` | 2000 / 3 / sqrt(3) | PROVEN |
+    `evidence/vp_clustering.txt` |"
+    Three overclaims in one row, and the citation does not carry them:
+    - 2000 is a *candidate cap*, not an iteration count (vp_clustering.txt:235
+      "max candidate VPs processed 2000"; vp_resolution.txt:26-27 "2000 is the
+      candidate cap ... not an iteration count").
+    - sqrt(3) is a *vote kernel* tau, not an inlier threshold
+      (vp_resolution.txt:27 "tau belongs to the vote kernel").
+    - 3 is a min-votes gate (vp_resolution.txt:13), not min inliers.
+    The constant names keep the wrong semantics; port_status.txt:67-68 states the
+    caveat that README drops.
+    FIX: tag "PROVEN value, different role"; rename or annotate
+    (`VP_CANDIDATE_CAP`, `MIN_VOTES`, `VOTE_TAU`); cite vp_resolution.txt and add
+    "the port uses these in its own approximation".
+
+32. [M] port/README.md:154 / upright_port.py:134
+    "| `REFINE_GAP_PX` / `REFINE_DISTANCE_PX` | 10 / 1.0 | PROVEN | ... |" and
+    `REFINE_PASSES = 99  # PROVEN`
+    The 1.0 float32 and the 10 argument are proven; 99 is the port's own cap on
+    its TLS split passes (port_review.txt:259) and is absent from the table.
+    FIX: add "99 is the port's own split cap" or move it out of PROVEN.
+
+33. [L] port/README.md:192 / upright_port.py:136
+    `CAMERA_TOLERANCE_SQ = 0.16  # PROVEN value; role UNRESOLVED`
+    0.16 appears in the prose but has no table row, so a reader checking the table
+    for "every constant" will not find it.
+    FIX: add a row tagged "PROVEN literal / role unresolved".
+
+34. [L] port/README.md:140-141
+    `SIGMA_V` comes from fit C while `L0_V` comes from fit A. Line 141 admits the
+    L0_V pair is "an approximation"; the SIGMA_V row is plain MEASURED, so the
+    mixed-fit provenance is only half-disclosed.
+    FIX: note in the SIGMA_V row that fit C's L0 is 2.474 while the shipped L0_V
+    comes from fit A.
+
+================================================================================
+D. OPERATIONS.md NO LONGER MATCHES THE PLUGIN  (task 4)
+================================================================================
+Baseline: `diff lrtest/ImportSweep.lua.bak lrplugin/uprightprobe.lrdevplugin/
+ImportSweep.lua` = 154 lines. The shipped file is newer than the .bak the doc
+calls authoritative.
+
+35. [H] lrplugin/uprightprobe.lrdevplugin/OPERATIONS.md:216-217
+    "That backup is the exact shipped file (correct `BASE`, syntax-checked)."
+    False. The shipped file has, and the .bak lacks: `getenv`/`removeFile` sandbox
+    wrappers (os.getenv and os.remove are absent in this Lua build), multi-window
+    AX lookup for Transform/Update/Upright, guided segments written in a separate
+    prior write, an identity-homography slot wipe, a digest-restamp early-out, and
+    a post-press commit sleep. Restoring from the .bak as instructed regresses all
+    of it, and with `os.getenv` returning nil every env var would break.
+    FIX: "The backup is historical (pre-sandbox-wrappers, pre-job-hardening).
+    Refresh it from the shipped file before relying on it, and record which date
+    it matches."
+
+36. [H] OPERATIONS.md:126
+    "TSV, tab-separated, header written once. **15 columns, fixed order:**"
+    The header is written only when TRACE.txt is empty (ImportSweep.lua:220-229
+    `traceHeaderIfNeeded` returns early if size > 0). lrtest/TRACE.txt is 809
+    lines, so the header has never been written and is absent. Its first 5 lines
+    are legacy non-TSV (`23:22:40  === digest retest ...`), which breaks both
+    recipes the doc gives at 133-136.
+    FIX: Say the header is written only for an empty trace; print the current
+    header line verbatim so a reader can add it; note that legacy non-TSV rows
+    precede the TSV region (or give `$1 ~ /^[0-9]{8}T/` as the filter).
+
+37. [M] OPERATIONS.md:135-136
+    "`run_id` is `<ISO8601>-<epoch>-<rand>`" / "Filter a run with
+    `awk -F'\t' '$1=="<run_id>"'`."
+    The format string is `%Y%m%dT%H%M%S` (ImportSweep.lua:106-107), e.g.
+    `20261028T081152-...` — basic format, not ISO 8601 with separators.
+    FIX: "`run_id` is `<YYYYmmddTHHMMSS>-<epoch%100000>-<4 digits>` (compact, not
+    separated ISO 8601)."
+
+38. [M] OPERATIONS.md:199-202 (section 7)
+    "It does not undo its own writes; the reset-to-0 at the start of each attempt
+    is the only normalisation."
+    Job flow also writes a 9-element identity matrix before every case
+    (ImportSweep.lua:1067) so a no-op solve is distinguishable from a stale result.
+    FIX: "It writes two normalisers: mode 0 at the start of each attempt, and an
+    identity homography into the transform slot before each job case. Nothing else
+    is undone."
+
+39. [H] OPERATIONS.md:199-202 vs ImportSweep.lua:1064-1067 and 1116-1117
+    The doc and the code comment both say "Wipe the slot this case will write",
+    but the wipe hardcodes `UprightTransform_5` while the solved test reads
+    `UprightTransform_' .. mode`. For modes 1-4 the wiped slot is not the slot
+    checked, so a stale transform from an earlier case of the same mode survives
+    and can satisfy `post[...] ~= IDENT9` when nothing solved.
+    FIX (doc + code): `{ ['UprightTransform_' .. mode] = IDENT9 }`, then update the
+    comment.
+
+40. [M] OPERATIONS.md:22-47 (section 1)
+    The job-flow description stops at "writes `results.txt`, and waits for a
+    `CLICKED` marker" plus the 6 s self-press. It omits, all present in code: the
+    `PRE`/`PRE_AUTO` rows appended to results.txt (1070, 1061), the identity wipe,
+    the 40 s click budget, the digest-restamp early-out (1087-1095) and the 2 s
+    commit sleep before read-back (1113-1114).
+    FIX: Document the job protocol as its own subsection: row types, budgets,
+    early-out, and what `PRE` rows are for.
+
+41. [M] OPERATIONS.md:82-89 (section 3)
+    "writes the target mode **plus 32 zeros** into the digest" — one write.
+    Guided now writes the segment vector first, sleeps, then writes mode+digest
+    (ImportSweep.lua:724-732), so the solver cannot read a half-populated list.
+    FIX: Add "for guided, the segment vector is written first, in mode 0, then the
+    mode+digest in a second write."
+
+42. [M] OPERATIONS.md:154
+    "`JOB_BEGIN` / `JOB_SETUP` / `JOB_ARMED` ..."
+    The `JOB_ARMED` row's `digest` column is hardcoded to `'zeroed'`
+    (ImportSweep.lua:1075-1078) with no read-back, unlike the sweep path's `arm()`
+    which verifies. The section 3 promise that a stale arm is always reported does
+    not hold in job mode.
+    FIX: Note that `digest=zeroed` on `JOB_ARMED` is asserted, not verified, and
+    that `digest=STALE` is sweep-only.
+
+43. [M] OPERATIONS.md:16-18
+    "`Init.lua` is **never executed** by Lightroom Classic. Only the menu item
+    runs."
+    Info.lua exposes **two** menu items — `Run Upright Probe (re-analyze)`
+    (RunProbe.lua) and `Import Sweep`. Neither RunProbe.lua nor the second item is
+    documented. Init.lua in fact contains a complete async sweep task writing
+    TRACE lines, and RunProbe.lua appends `HH:MM:SS  message` lines to the same
+    TRACE.txt — a third non-TSV writer.
+    FIX: Name both menu items, warn that RunProbe.lua writes non-TSV lines to
+    TRACE.txt, and qualify the Init.lua sentence ("not executed on plugin load on
+    this build" if that is the observed behaviour).
+
+44. [M] OPERATIONS.md:190-191
+    "Post-run: check `SUMMARY` (`failed=0` is the only clean result), then read
+    transforms out of the catalog as usual."
+    `SUMMARY` is emitted only by `runSweep` (ImportSweep.lua:1234); the job flow
+    ends at `JOB_END` and emits no summary and no `failed=` count.
+    FIX: "Sweep only: check `SUMMARY`. Job flow: check `results.txt`/`DONE` and the
+    `SOLVE_OK`/`JOB_TIMEOUT` rows; there is no summary."
+
+45. [L] OPERATIONS.md:7-8
+    "**Invariants — do not change:**" with the menu item as a single row.
+    With two items, "the menu item" is ambiguous at 16, 53 and 175.
+    FIX: "the **Import Sweep** menu item".
+
+46. [L] port/README.md (round history)
+    README cites rounds 1-4 and 7-12. Rounds 5 and 6 are absent entirely. Both are
+    genuinely no-change rounds (round5.txt:3-5 "NOT FIXED. No production change was
+    retained"; round6.txt:5-6 "No production behavior change is retained"), but a
+    reader cannot tell, and Round 5's un-fixed Auto over-correction is described as
+    open only inside round5.txt.
+    FIX: Add one line to the auto paragraph: "Rounds 5 and 6 were reverted /
+    retained nothing; the Auto over-correction on B_strong is still open
+    (round5.txt)."
+
+47. [M] port/README.md:31-35 vs 317-338
+    "Round 12 ... The final candidate did not close the oracle gap: Full RAW
+    median was 3.672% versus 3.664%, with worse tails. It remains an experiment;
+    production is unchanged."
+    Honest, and the numbers match round12.txt:4-5 (3.663819 -> 3.671977, oracle
+    0.932318). But the oracle gap (~0.93% achievable vs ~3.66% actual) is the
+    largest single accuracy headroom in the project, two consecutive rounds have
+    now failed to close it (11 and 12), and the Limitations section (317-338) never
+    mentions it. A reader of Limitations alone would not know the dominant
+    remaining error is VP/family selection rather than the listed items.
+    FIX: Add a Limitations bullet: "The dominant residual is VP/family selection:
+    an oracle selector reaches 0.93% where the port is at 3.66%; Rounds 11 and 12
+    both failed to close it (round11.txt, round12.txt)."
+
+VERIFIED CORRECT in OPERATIONS.md (no action): 15 columns and their order
+(205-207); lock fields run/agent/ts/iso and the 45 min stale window (259-299,
+LOCK_STALE_SEC); all 46 event names in the table exist in the code; the env-var
+table and defaults (UPRIGHT_DIRS=abstain, MODES=1,2, TIMEOUT=30,
+JOB=/tmp/uplim/job.txt, FLOW=auto); the job dir files ARMED/CLICKED/DONE/
+results.txt; the 6 s self-press; `TARGET_NIL ... after-source-reassert`; the
+`sweep <run_id>` collection name; the nm-copy claim at 17-18 (writes
+TRACE_NM.txt, takes no lock).
+
+================================================================================
+E. VERIFIED CLEAN — do not "fix" these
+================================================================================
+* README:14-20 real-photo numbers all match round10.txt:4-5 (2.075952, 7.979433,
+  17.418978, 81.961591, 628/179/5, 80/900). "Two accepted above 5%" matches
+  round10.txt:8.
+* README:18-19 "gate fixes resolution-dependent rejection, broad coverage
+  unsolved" matches round10.txt:3, 255.
+* README:204 "75 tests" was correct when written; only the Round 10 additions
+  (see #2) made it stale.
+* README:140 SIGMA_V 13.33 [9.94,22.72] matches sigma_v_precise.txt fit C, and
+  the same row says it replaces the old 14.58 deg pitch branch.
+* README:141 L0_V row is honest about the fit A / fit C mismatch.
+* README:145 ROLL_AUTO 0.928, n=5854 matches lambda_curve.txt:27 and its n line.
+* README:147-149 SENSOR_DIAGONAL_MM, DEFAULT_FOCAL_MM, FOCAL_CLAMP_MM resolve in
+  focal_prior.txt and match the code.
+* README:153 NFA_P 1/8 and maxdim**4 match detector_corrections.txt.
+* README:319-324 still labels the robust loss and length normalization "our
+  choice" and still discloses the E_eye normalized-angle gap; port_review.txt:
+  118-125 is therefore still open, not stale.
+* README:325-327 still says pixel equivalence is not established and states the
+  fallback's mixed-content limitation.
+* port_review.txt:118-130 (aspect-ratio E_eye, mixed dx/dy conventions) — open.
+* port_status.txt:40-49 detector corrections remain accurate.
+* port_status.txt:50-54 the 01_input synthetic/1400px correction is still right.
+
+================================================================================
+F. RE-VERIFICATION
+================================================================================
+  wc -l port/README.md                                            # 337 expected
+  cd port && python3.12 -m unittest discover -p 'test*.py' -v      # expect 77
+  diff lrtest/ImportSweep.lua.bak lrplugin/uprightprobe.lrdevplugin/ImportSweep.lua
+  head -3 lrtest/TRACE.txt                                         # no header
+  grep -n "lacks Adobe" port/README.md                             # #1
+  grep -n "tests across the port suite" port/README.md             # #2
+  grep -n "SIGMA_PITCH_GATE\|LAMBDA0_H\|ROLL_LEVEL\|RANSAC_ITERS" port/README.md  # #28-31
+  grep -in "CHOICE" port/README.md                                 # #25: 3 hits, none is a table row
+  grep -n "22.10" evidence/abstention.txt evidence/round4.txt      # #28, expect round4 only
+  grep -n "76.73\|0.87" evidence/lambda_curve.txt evidence/sweep2_resolution.txt  # #29-30
+  grep -in "patent" port/README.md port/LICENSE                    # #18, no hits
+
+================================================================================
+G. SUMMARY COUNTS
+================================================================================
+H: 20   M: 20   L: 7   Total: 47 unique (item 18 spans two files)
+Per file: README 1-2, 15-16, 18-34, 46-47 (23); port_status 3-8, 18 (7);
+port_review 9-14, 17 (7); OPERATIONS.md 35-45 (11, incl. one code bug at 39).
+23 + 7 + 7 + 11 = 48, minus the shared item 18 = 47.
+
+Highest-value fixes, in order: #1 (framing), #2 (77 tests), #18 (patent),
+#20 (0.587% + metric split), #25-28 (CHOICE tags + wrong refs), #35-36
+(restore/header), #39 (wipe slot), #47 (unstated oracle gap).
+
+If README keeps moving, the durable findings are the ones that do not depend on
+line numbers: #1, #2, #18, #25-34 (all re-locatable by grep) and every OPERATIONS.md
+item.

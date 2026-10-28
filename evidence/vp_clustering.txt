@@ -1,0 +1,366 @@
+VANISHING-POINT CLUSTERING, RANKING AND MANHATTAN-CONSISTENCY GATE
+==================================================================
+Scope: everything downstream of detected line segments in the `ura` Upright
+solver.  Binary: CameraRaw, x86_64 slice (file off 16384, size 156736560).
+All addresses below are *x86_64 slice vmaddrs*, which for __TEXT equal file
+offsets inside the extracted slice (__TEXT vmaddr = 0, fileoff = 0).
+
+Tag legend:  [P] = proof (instruction/constant quoted, reproducible)
+             [I] = inference (best reading of the data flow, not proven)
+             [?] = unresolved
+
+------------------------------------------------------------------
+0. HOW THE CODE WAS FOUND (so it can be re-walked)
+------------------------------------------------------------------
+[P] RTTI names survive for the `ura` namespace, 14 of them, at __TEXT,__const
+    0x8e6d27f .. 0x8e6d74x:
+      N3ura8LSDParamIdE  N3ura8VPSParamIdE  N3ura10CalibParamIdE
+      N3ura9HomoParamIdE N3ura18UprightTimerObjectE N3ura11UprightDataE
+    The typeinfo structs for the two named classes are at 0x90b8150 and
+    0x90b81d0 (name pointers at +8 = 0x85a7908 "N3ura11UprightDataE",
+    0x85a791c "N3ura18UprightTimerObjectE"; friendly names
+    "15cr_upright_data" at 0x85a78f6).  The vtables themselves are *not*
+    referenced with plain pointers from __DATA_CONST, so the class methods
+    were not recovered via vtable; the pipeline below was reached from the
+    trace-string block instead.
+
+[P] The decisive find is the solver's own trace/timer label block, a run of
+    NUL-terminated C strings at __TEXT,__cstring 0x8f853c2 .. 0x8f8578f.
+    These are emitted by a scoped-timer object (`UprightTimerObject`) and give
+    the exact stage names, in pipeline order:
+      0x8f85531 "upright_img initial resize"
+      0x8f8554c "upright_img line segment detection"
+      0x8f8556f "number of line segments = %u.\n"
+      0x8f8558e "upright_img calibration"
+      0x8f855a6 "upright_img VP"                 <-- my scope starts
+      0x8f855b5 "upright_img estimate_init_M"
+      0x8f855e6 "upright_img estimate_MKR"
+      0x8f85679 "upright_img opt_H5"
+      0x8f85692 "upright_img handle_degen_case"
+      0x8f85739 "VP computation."   0x8f8571d "Initial camera calibration."
+      0x8f85749 "line segment detection."  0x8f856fe "Optimizing camera calibration."
+      0x8f85761 "No horizon is detected."  0x8f85779 "Horizon detected."
+    Diagnostic strings in the same block: 0x8f8545b "number of V = %d\n",
+    0x8f85653 "Eval ratios = %.4f, %.4f, (%4f, %4f)\n", 0x8f8563d
+    "Estimated A (idx): [ ", 0x8f85638 "rot0", 0x8f85635 "k0",
+    0x8f85611 "Estimated M (idx): [", 0x8f856b0 "Horizon equation",
+    0x8f85433 "exist_M = ", 0x8f8543e "R with only M = ".
+
+[P] Function boundaries come from LC_FUNCTION_STARTS (77440 entries,
+    dataoff 155334448, size 117528).  Pipeline driver = 0x22ec970
+    (size 0x1410).  VP stage = 0x22d7cb0 (wrapper, prints "number of V") and
+    0x22d8f20 (the clustering kernel).  Vote kernel = 0x22ec470.
+    Per-VP score = 0x22d7680.  Triple selection + Manhattan test = 0x22d48d0
+    ("estimate_MKR").  Degenerate handler = 0x22ee110.
+
+------------------------------------------------------------------
+1. CANDIDATE VP FORMATION  — dual of each segment, one candidate per segment
+------------------------------------------------------------------
+[P] 0x22d7cb0 prologue: the object holds two parallel arrays of 3-vectors at
+    +0x40 (begin/end at +0x40/+0x48) and +0x58 (begin at +0x58, via rbx =
+    obj+0x58).  Element stride is 24 bytes = 3 doubles.
+    0x22d7df2-0x22d7e38, per index i:
+        xmm2 = A[i].x ; xmm3 = B[i].x
+        xmm4 = {A[i].y, A[i].z} ; xmm6 = {B[i].y, B[i].z}
+        cross = A[i] x B[i]        (explicit mulsd/subsd, both orders)
+        cand[i] = cross
+[P] 0x22d7e4f-0x22d7ed1, normalisation of the same slot:
+        n2 = |cross|^2
+        if n2 > 1e-12 (0x536d580) : cand[i] = cross / sqrt(n2)
+        else                      : cand[i] = cross unchanged (norm forced 1.0)
+    So each detected segment contributes exactly ONE candidate VP, equal to the
+    normalised line dual of that segment (the direction perpendicular to it).
+    There is no pairwise intersection enumeration and no angular histogram.
+
+[P] Candidate count is capped by params[+0x00] = 2000 (see §6): the outer
+    clustering loop runs i = 0 .. params[0]-1 (0x22d9067 cmp/jne against
+    [rbp-0x44], which was loaded from [params+0] at 0x22d8f88).
+
+[I] Because candidates are per-segment line duals, the "vote" test in §2 is
+    what turns a line dual into a VP: a candidate is only kept if enough other
+    segments are geometrically consistent with it.
+
+------------------------------------------------------------------
+2. VOTE KERNEL 0x22ec470 — signed perpendicular residual, clamped at 0
+------------------------------------------------------------------
+Args: rdi = out vector<double>, rsi = array A (segment endpoints, 3 doubles),
+rdx = array B (second endpoints), rcx = candidate VP v (3 doubles),
+xmm0 = clamp seed (callers pass 0.0).
+
+[P] Per k (0x22ec590-0x22ec62c):
+        M = 0.5*(A[k] + B[k])                       ; segment midpoint
+        c = v x M                                   ; 3-vector, both branches
+[P] 0x22ec631 call to libm stub 0x2c51174 with xmm0 = c.x, xmm1 = c.y
+    (atan2 of the two cross components) -> angular term.
+[P] 0x22ec64f-0x22ec69b:
+        s  = (v x M).z * A[k].z
+           + c.x * A[k].x + c.y * A[k].y
+        s  = |s|                                   ; andpd 0x32196f0 abs mask
+        s  = s / angle                             ; divsd xmm1, xmm0
+        s  = min(s, seed)                          ; minsd, seed == 0.0
+        out[k] = s
+[P] Degenerate guards: |v|^2 == 0 -> every out[k] = seed (0.0, 0x22ec517);
+    angle == 0 -> out[k] = seed (0x22ec636-0x22ec649).
+[I] The stored value is therefore <= 0.  |(v x M)·A| / angle is the distance
+    from the segment's supporting line to the VP divided by the angular
+    separation; the sign of the atan2 decides whether the pair "votes"
+    (negative) or not (0).  A more negative entry = a more strongly
+    consistent pair.  This is a per-(VP,segment) residual, not a boolean
+    inlier flag; there is NO explicit angular tolerance constant here.
+
+------------------------------------------------------------------
+3. MINIMUM VOTE COUNT  = 3
+------------------------------------------------------------------
+[P] 0x22d91e2-0x22d92bc: after filling vote list vec[i], the code counts
+    entries with value < 0 (ucomisd 0,val / seta, 0x22d94c0-0x22d94e8) into
+    eax, then:
+        0x22d92b5  mov rcx, [rbp+0x10]      ; rcx = params
+        0x22d92b9  cmp dword ptr [rcx+8], eax
+        0x22d92bc  jg  0x22d9060           ; skip candidate
+    i.e. keep candidate i only if  vote_count >= params[+8].
+[P] params[+8] is written as the immediate 3 by the param builder
+    (0x22ede22 `mov dword ptr [r14+8], 3`).
+=> A candidate VP needs at least 3 segments voting for it.  With < 3 it is
+   dropped outright.
+
+------------------------------------------------------------------
+4. CLUSTERING — greedy agglomerative on vote-SET Jaccard, threshold 1.0
+------------------------------------------------------------------
+[P] Accepted clusters are the prefix of the candidate list: for candidate i,
+    0x22d92d0-0x22d94f3 loops r11 = 0 .. i-1 over already-accepted clusters
+    and, per cluster, builds two counts over the vote lists vec[r11] and vec[i]:
+        0x22d94c0-0x22d94e8:  rcx += (vec[r11][k] < 0) | (vec[i][k] < 0)   union
+                              rax += (vec[r11][k] < 0) & (vec[i][k] < 0)   intersection
+[P] 0x22d931a-0x22d9364 converts both to double and divides:  ratio = isect/union
+    (Jaccard).  It is compared to a double at params[+0x10]:
+        0x22d92f8  movsd xmm4, [rax+0x10]
+        0x22d9360  ucomisd xmm1, xmm4
+        0x22d9380  jae 0x22d9562      ; merge
+    Merge iff Jaccard >= params[+0x10].
+[P] params[+0x10] is loaded as 1.0 from the constant block 0x8e6d200
+    (0x22ede2a movapd xmm0,[0x8e6d200]; 0x22ede32 movupd [r14+0x10],xmm0;
+    the first double of that block is 1.0, the second 0.95).
+=> The threshold is exactly 1.0, so clusters only merge when their vote sets
+   are IDENTICAL.  It is not a similarity radius; it de-duplicates candidates
+   that selected the same supporting segments.
+
+[P] Merge path 0x22d9562-0x22d9627:
+      - sums vec[r11] and vec[i] (0x22d9580 / 0x22d95b0),
+      - if sum(r11) <= sum(i) keep r11, else swap so that i's vote list
+        becomes the cluster's list (0x22d95bd ucomisd / jbe, then the pointer
+        swaps at 0x22d95c7-0x22d95f2),
+      - the union of the two vote lists replaces the cluster list and the
+        candidate's own direction is written over the cluster's VP slot
+        (0x22d9607-0x22d9621).
+    Net effect: the representative is the member with the smaller (more
+    negative, i.e. stronger) summed vote.
+[P] A candidate that matches no cluster appends a new cluster + its vote list
+    (0x22d94f8-0x22d955d).
+
+[P] After the loop a hard zero VP is always appended and its vote list
+    computed: 0x22d9632-0x22d96ca zeroes the 3 doubles, appends them to the
+    output VP vector, zeroes the vote slot, calls 0x22ec470 for it, and
+    resets the accepted counter.  This guarantees the VP array always has at
+    least one element (index numV-1 is always the zero vector).
+
+[P] 0x22d96fa-0x22d9821 transposes the vote lists into a dense double matrix
+    ("Mcell") at obj+0x100 with row stride obj+0x118 (= number of VPs) and
+    obj+0x120 = number of vote columns; dims are cached in obj+0x118/0x120/
+    0x128 and the temp vector<vector<double>> is freed at 0x22d9826.
+    The "  Mcell is " / " x 3x3." diagnostics are printed by the caller
+    (0x22d7f... / 0x22eccd1-0x22ecd8a).
+
+[I] This is the paper's "consistent-set" clustering in the dual, done as
+    greedy agglomeration with exact-set merging, not RANSAC and not an
+    angular histogram.
+
+------------------------------------------------------------------
+5. RANKING, AND THE MINIMUM-VP GATE
+------------------------------------------------------------------
+[P] 0x22d7fac-0x22d806d: the wrapper CLEARS an int vector at obj+0x138, then
+    reserves params[+4]+1 slots (0x22d7fd0 lea ecx,[rdx+1] with rdx =
+    [rbp-0x70] = params[+4] = 9, so 10 slots) and appends the index
+    (numV - 1) — i.e. the first hypothesis tried is the appended zero VP.
+[P] 0x22d8371-0x22d87c1 then walks candidate indices downward, appending an
+    index only while a dot product is non-zero:
+        0x22d83b8  rdx = local copy of Mcell
+        0x22d83bf  rsi = [obj+0x70]        ; per-VP weight vector (len = nVP)
+        0x22d83e9  xmm1 = +inf ; xmm0 = 0 ; r15 = 0
+        inner dot over 4-wide unrolled lanes, accumulating a running
+        min/max pair (0x22d8400 ucomisd / 0x22d8408 cmova r15,r11 /
+        0x22d840c maxsd / 0x22d8410 minsd)
+        0x22d84d0  ucomisd xmm3, 0 ; jnp 0x22d87c1   ; max == 0 -> stop
+        0x22d84f7  append r15d
+    r15 ends up holding the index of the minimum of the evaluated quantity.
+[I] So the list is a ranked hypothesis order over VP indices, newest/lowest
+    VP index first, up to params[+4]+1 = 10 entries, and it terminates as
+    soon as the score degenerates to 0.
+
+[P] *** MINIMUM-VP GATE ***  The caller of 0x22d7cb0 checks that list's size
+    immediately on return (0x22ecc63-0x22ecc77):
+        0x22ecc63  mov rax, [rbx+0x140]      ; end
+        0x22ecc6a  sub rax, [rbx+0x138]      ; begin   (4-byte elements)
+        0x22ecc71  cmp rax, 4
+        0x22ecc75  jne 0x22ecca5             ; >1 usable VP -> full solve
+        0x22ecc77  jmp 0x22ecff7             ; exactly 1 VP  -> degenerate
+    0x22ecca5 is the "Initial camera calibration." / estimate_init_M path
+    (0x22d3950), then estimate_MKR (0x22d48d0), then opt_H5 (0x22ed5dd).
+    0x22ecff7 is: if segments empty -> skip; else call handle_degen_case
+    (0x22ee110) and set r15b = 0 (0x22ed007 / 0x22ed00c), then fall to the
+    common exit 0x22edc2c.
+=> A full Manhattan solve needs at least TWO distinct VP hypotheses.  With
+   exactly one, the solver drops to the single-VP/horizon fallback.  Because
+   of the always-appended zero VP, numV >= 1 and index numV-1 is always valid.
+[P] handle_degen_case (0x22ee110) re-resizes the image to
+    640.0 / max(width,height) (0x22ee191 movss 0x44200000 = 640.0f, divss)
+    and re-runs detection, and it is the function that emits
+    "Horizon equation" (xref 0x22ee2bf) and "No horizon is detected."
+    (xref 0x22ee6ce).
+
+[P] A second gate runs before the optimiser: 0x22ecd9d `cmp rax, 0x18` on the
+    obj+0x150 vector; anything but exactly 3 ints (24 bytes) skips to
+    0x22ece73.  Then the three chosen VP directions are checked for
+    non-zero norm (0x22ecdc4-0x22ece6d, ucomisd against 0 on each of the
+    three rows); any zero -> 0x22ece73.
+
+------------------------------------------------------------------
+6. PARAMETER BLOCK (obj+0x468) — exact values
+------------------------------------------------------------------
+[P] The block is built by 0x22edd80, called from 0x22ecaa9 with rdi = obj and
+    xmm0 = (double) max(imageWidth, imageHeight) (0x22eca78-0x22ecaa2).
+    Payload written by `movabs rax, 0x9000007d0` at 0x22ede15 and
+    `mov dword ptr [r14+8], 3` at 0x22ede22, then 16 bytes copied from
+    0x8e6d200 at 0x22ede2a, then (4.0/scale)^2 at 0x22edeee-0x22edeff:
+
+      obj+0x468 + 0x00  int32   2000   max candidate VPs processed
+      obj+0x468 + 0x04  int32      9   extra hypotheses tried (list cap = 10)
+      obj+0x468 + 0x08  int32      3   MIN VOTES per VP
+      obj+0x468 + 0x10  double   1.0   Jaccard merge threshold (exact match)
+      obj+0x468 + 0x18  double  (4.0/maxDim)^2   area-relative tolerance
+                                (default 0.95 before the overwrite)
+
+[P] Sibling blocks created by the same builder (for completeness):
+      obj+0x458  16 bytes, zeroed
+      obj+0x478  0x68 bytes: +0x10 = 0.01, +0x18 = 0.5,
+                 +0x20 = 1/3600, +0x30 = 1/900, +0x38 = 0.16,
+                 +0x18 also receives (4.0/maxDim)^2 at 0x22edeff
+      obj+0x488  0x70 bytes: +0x10 = 15.0, +0x20 = 1.0,
+                 +0x38 = (1.0/maxDim)^2, +0x68 = 2.0
+    Constants live at __TEXT,__const 0x8e6d200 (1.0), 0x8e6d208 (0.95),
+    0x8e6d210 (0.01), 0x8e6d218 (0.5), 0x8e6d220 (1/3600),
+    0x8e6d230 (1/900), 0x8e6d238 (0.16), 0x8e6d240/0x8e6d248 (15.0),
+    0x8e6d250 (1.0).
+
+------------------------------------------------------------------
+7. TRIPLE SELECTION AND THE MANHATTAN-CONSISTENCY TEST
+------------------------------------------------------------------
+[P] 0x22d48d0 is the triple chooser ("estimate_MKR").  For each candidate VP
+    it calls the per-VP scorer 0x22d7680 (0x22d4a6a) and multiplies the
+    returned score by the sum of two doubles (0x22d4a7e-0x22d4a87).
+
+[P] Per-VP score 0x22d7680:
+      rdi = &Mcell column, rsi = vector<int> segment list, rdx = obj+0x70
+      (weights), rcx = obj+0x100 (matrix).  It returns
+        sum_j min(0, w_j * min_{i in list} Mcell[i][j])
+      (0x22d7720-0x22d7710: minsd chains, addsd into xmm0; early-out returns
+      0.0 when the column count is 0, 0x22d7814).  Both terms are negative,
+      so the triple product is positive.
+
+[P] The two best triple scores are kept and then tested at
+    0x22d6ee1-0x22d6f29:
+        0x22d6ee5  xmm0 = obj+0x2a0          ; BEST score
+        0x22d6eef  xmm1 = obj+0x2a8          ; RUNNER-UP score
+        0x22d6efd  xmm2 = xmm1 / xmm0        ; ratio
+        0x22d6f01  xmm0 = xmm0 - xmm1        ; absolute margin
+        0x22d6f05  xmm1 = 1.5                ; 0x2da5490
+        0x22d6f0d  cmpltpd xmm1, xmm0        ; margin > 1.5
+        0x22d6f12  xmm0 = 0.75               ; 0x2da36c0
+        0x22d6f1a  cmplepd xmm2, xmm0        ; ratio <= 0.75
+        0x22d6f1f  andpd                     ; BOTH must hold
+        0x22d6f29  mov byte ptr [r12+0x2b0], al
+    => Manhattan/ambiguity verdict is
+           (runner_up / best <= 0.75) AND (best - runner_up > 1.5)
+       stored as obj+0x2b0.
+
+[P] Orthogonality/non-degeneracy flags on the estimated rotation matrix
+    (columns at obj+0x198, obj+0x1b0, obj+0x1c8):
+        0x22d68bd-0x22d68c9  obj+0x1e0 = (|col0|^2 != 0)
+        0x22d6924-0x22d6928  obj+0x1e1 = (|col1|^2 != 0)
+        0x22d692e-0x22d6930  obj+0x1e2 = (|col2|^2 != 0)
+    (vectorised cmpneqpd + movmskpd; bit1 -> +0x1e1, bit0 -> +0x1e2.)
+
+[P] ACCEPTANCE GATE in the driver, 0x22ed4de-0x22ed5e0:
+        0x22ed4de  cmp byte [rbp-0x60], 0    ; caller mode byte
+        0x22ed4e2  je 0x22ed53a              ; mode 0 -> normal path
+        0x22ed4e4  (mode != 0) scale obj+0x3a0/0x1a8/0x1c0/0x1d8 by obj+0x28
+        0x22ed535  jmp 0x22edc2c             ; ...and bail
+        0x22ed53a  cmp byte [rbx+0x2b0], 0
+        0x22ed541  je 0x22ed572              ; ambiguous -> handle_degen_case
+        0x22ed543  cmp byte [rbx+0x1e1], 0
+        0x22ed54a  je 0x22ed572              ; degenerate col1 -> handle_degen_case
+        0x22ed54c  mov eax, [rbx+0x3f0]      ; degeneracy kind
+        0x22ed552  cmp eax, 3 ; je 0x22edaad ; -> 0x22ef100, bail
+        0x22ed55b  cmp eax, 2 ; je 0x22ed597 ; -> prime params, then opt_H5
+        0x22ed560  cmp eax, 1 ; jne 0x22ed5dd; -> 0x22eeb70, bail
+        0x22ed5dd  ... "upright_img opt_H5" (0x22ed5e0) full 5-parameter solve
+    So: mode 0 + consistency verdict + non-degenerate column 1 are all
+    required before the H5 optimiser runs; otherwise the single-VP/horizon
+    fallback is taken.  obj+0x3f0 selects which fallback (1, 2 or 3).
+[?] The writer of obj+0x3f0 was not located; only the reader 0x22ed54c and
+    the struct-copy at 0x22f00e6 were found in the upright region.
+
+[P] "Eval ratios" is printed at 0x22ed4cd reading obj+0x290, +0x298, +0x2a0,
+    +0x2a8 — i.e. two ratio fields and the two scores used above.
+
+------------------------------------------------------------------
+8. SUMMARY OF THE NUMBERS
+------------------------------------------------------------------
+  candidate VP per segment, line dual A[i] x B[i], normalised
+  near-zero guard |cross|^2 <= 1e-12                       [P]
+  candidate cap                     2000                   [P]
+  min votes per VP                  3                      [P]
+  cluster merge criterion           Jaccard(vote sets) >= 1.0 (identical) [P]
+  cluster representative            smaller summed residual [P]
+  hypothesis list length            params[4]+1 = 10       [P]
+  min usable VPs for a full solve   2 (1 -> degenerate path) [P]
+  triple ambiguity test             ratio <= 0.75 AND margin > 1.5 [P]
+  required non-degenerate matrix columns  col1 (+0x1e0/0x1e1/0x1e2 flags) [P]
+  horizon fallback resolution       640 / max(w,h)          [P]
+  area tolerances                   (4/maxDim)^2, (1/maxDim)^2 [P]
+
+No RANSAC iteration count and no angular bin count exist anywhere in this
+stage — the design is per-segment duals + exact-set agglomeration + a
+best-vs-runner-up margin test, which is why abstention is driven by geometry
+(the single-VP gate and the ambiguity test), not by a confidence threshold.
+
+[?] Not located: the writer of obj+0x3f0; the exact meaning of the two
+    obj+0x290/+0x298 ratios (printed but not used in the gate); the
+    obj+0x70 per-VP weight vector's origin and how it is filled.
+
+------------------------------------------------------------------
+9. REPRODUCTION
+------------------------------------------------------------------
+Slice: FAT header, arch 0 at 16384 size 156736560 (x86_64), arch 1 at
+156762112 size 144828400 (arm64e).  Work was done on the x86_64 slice, which
+has LC_DYLD_INFO_ONLY (no chained fixups), so data pointers are plain vmaddrs
+and __TEXT vmaddr == file offset.  No decryption needed.
+
+Opcode spot-checks used for the load-bearing claims:
+  0x22d92bc  0f8f…      jg   (min-vote skip)
+  0x22d9380  0f83…      jae  (Jaccard merge)
+  0x22d6f0d  66 0f c2 c8 01   cmpltpd 1.5 < margin
+  0x22d6f1a  66 0f c2 d0 02   cmplepd ratio <= 0.75
+  0x22ecc75 75         jne  (list size != 4 -> full solve)
+  0x22ecc77 e9         jmp  (list size == 4 -> degenerate)
+  0x22ed4de 80 7d a0 00 cmp byte [rbp-0x60],0
+  0x22ed4e2 74 56      je
+  0x22ede15 48 b8 d0 07 00 00 09 00 00 00  movabs 0x9000007d0
+  0x22ede22 41 c7 46 08 03 00 00 00       mov dword [r14+8], 3
+Constants: 0x2da5490 = 1.5, 0x2da36c0 = 0.75, 0x8e6d200 = 1.0,
+0x8e6d208 = 0.95, 0x536d580 = 1e-12.
+
+Helper scripts left in research/upright/re/vp/: xr.py (rip-relative xref
+scanner, 4-phase), callers.py (call-site finder), scanpat.py (per-function
+operand scanner), ann.py (capstone annotator that resolves rip-relative
+doubles/floats/strings and names call targets), funcstarts.json (LC_FUNCTION_
+STARTS, 77440 entries).

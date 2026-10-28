@@ -1,0 +1,357 @@
+FOCAL-LENGTH ESTIMATION, PLAUSIBILITY PRIOR AND CLAMP — FINDINGS
+================================================================
+Binary: /Applications/Adobe Lightroom Classic/Adobe Lightroom Classic.app/Contents/Frameworks/CameraRaw.lrtoolkit/Versions/A/CameraRaw
+Size 301,590,512. FAT, 2 slices (x86_64 @16384, arm64e @156762112).
+
+OFFSET CONVENTION
+  All offsets are given twice: "slice <off>" (thin x86_64 slice, == objdump
+  address space, because __TEXT fileoff is 0) and "FAT <off>" (absolute file
+  offset in the shipped FAT binary = slice + 16384). The FAT value is the one
+  to use with a hex editor on the real file. The existing energy_function.txt
+  uses FAT-style absolute offsets; this file follows that convention.
+  Work was done on `lipo -thin x86_64` (156,736,560 B); no file outside
+  evidence/ was modified.
+
+CONFIDENCE TAGS
+  [PROOF]      byte-exact instruction + operand resolved, or the constant is
+               read by the instruction shown. Reproducible from the offsets.
+  [INFERENCE]  structural reading of a proven instruction sequence; the
+               semantic label (which field is "the prior") is mine.
+  [COINCIDENCE] value present but no code reference tying it to focal.
+
+Everything below is x86_64. The arm64e slice is the same code; the twin
+constants exist at the mirrored offsets but were not needed.
+
+================================================================
+0. HEADLINE
+================================================================
+All four questions resolve, and three of them against the task's priors.
+
+1. DEFAULT / FALLBACK = 35.0 exactly, stored as a **float64** double
+   (bits 0x4041800000000000) in four independent places, including the
+   estimation-failure path. [PROOF]
+2. The plausible-range clamp is **[10.0, 1000.0]** — NOT a 35-centric
+   window. It is `max(10, min(f, 1000))` at 0x7a17ea-0x7a1806. [PROOF]
+   Critically it clamps the **metadata/prior** focal, and is *not* applied
+   to the geometric estimate. [PROOF]
+3. There is **no weighted prior term** in the estimator at all. Prior and
+   geometric estimate are mutually exclusive (winner-take-all on the
+   FocalMode switch), so "the prior weight" is not a number — it is
+   effectively infinite when metadata exists. [PROOF + INFERENCE]
+4. The pixel->mm conversion uses a **fixed full-frame 36 x 24 mm sensor**,
+   via its diagonal hypot(36,24) = 43.266615 mm. 36.0 confirmed; the short
+   edge 24.0 is the constant actually in the divide. [PROOF]
+
+================================================================
+1. THE 35.0 DEFAULT (question 1)
+================================================================
+The value 35.0 is a double, bit pattern 0x4041800000000000, emitted as
+`48 b8 00 00 00 00 00 80 41 40` (movabs $0x4041800000000000,%rax).
+The 8-byte LE image of 35.0 also sits as data at slice 0x321abb0.
+
+  slice 0x321abb0  FAT 52,554,672  raw 0000000000804140  = 35.0   [PROOF]
+        constant in a hand-written double block (see 5.2)
+
+Four movabs sites, all writing the focal field:
+
+  slice 0xb62da0  FAT 11,955,616   ctor: `movq %rax,0x28(%rdi)` at 0xb62daa
+                                   -> focal field default at object +0x28.
+                                   Same ctor sets +0x10 = 0.5,0.5 (centre
+                                   defaults, from 0x3219cc0) and +0x20 = 0
+                                   (FocalMode). [PROOF]
+  slice 0xb63c01  FAT 11,959,297   solver param block init: 35.0 -> the
+                                   param slot that is later overwritten with
+                                   the real focal at 0xb64050. [PROOF]
+  slice 0xb65c4d  FAT 11,967,565   settings DESERIALISER: 35.0 is written to
+                                   the focal temp at -0x198 BEFORE
+                                   "UprightFocalLength35mm" is read into the
+                                   same slot at 0xb65c95. Missing key =>
+                                   stays 35.0. [PROOF]
+  slice 0xb64279  FAT 11,960,953   THE ESTIMATION-FAILURE FALLBACK. [PROOF]
+
+Plus two direct assignments from the 35.0 constant (not movabs):
+  slice 0x7a16f1  FAT 8,017,649   `movsd 0x321abb0,%xmm0` then
+  slice 0x7a170c  FAT 8,017,676   `movsd %xmm0,-0xe40(%rbp)` -> focal := 35.0
+                                   on the metadata-missing / error paths. [PROOF]
+
+Reading: 35 is a triple-duty literal — constructor default, deserialiser
+default, and hard failure value. It is also the top of the plausible *prior*
+range in the Adobe UI sense (a 35 mm full-frame normal lens), which is why
+it is a safe fallback rather than a measured value.
+
+================================================================
+2. THE PLAUSIBILITY CLAMP [10, 1000] (question 2)
+================================================================
+One clamp, two instructions, both in the focal-preparation function at
+0x7a15c0.. (this function supplies the prior/metadata focal for the K
+matrix):
+
+  slice 0x7a17ea  FAT 8,017,898  movsd -0xe40(%rbp),%xmm1   ; xmm1 = focal
+  slice 0x7a17f2  FAT 8,017,906  minsd 0x321ac70(%rip),%xmm1 ; min(f,1000)
+  slice 0x7a17fa  FAT 8,017,914  movsd 0x2da2e18(%rip),%xmm0 ; xmm0 = 10.0
+  slice 0x7a1802  FAT 8,017,922  maxsd %xmm1,%xmm0           ; max(10,prev)
+  slice 0x7a1806  FAT 8,017,926  movsd %xmm0,-0xe70(%rbp)    ; clamped focal
+
+  bounds:
+    slice 0x2da2e18  FAT 47,869,464  raw 0000000000002440  = 10.0    [PROOF]
+    slice 0x321ac70  FAT 52,554,864  raw 0000000000408f40  = 1000.0  [PROOF]
+
+So the enforced 35mm-equivalent range is **10 .. 1000 mm** inclusive. Note
+the operand order: `maxsd %xmm1,%xmm0` with xmm0 preloaded 10.0 means the
+*lower* bound wins on NaN-free input, and the min runs first, so the clamp
+is order-safe.
+
+SCOPE — the important subtlety [PROOF]
+The clamp sits on the metadata/prior path only. The geometric estimate is
+computed at 0xb6424f (`divsd`) and consumed directly; it never re-enters
+0x7a17ea. Consequence: an EXIF focal is bounded to [10,1000] before use,
+but a *derived* focal is bounded only below (4.0, section 3) and can in
+principle exceed 1000. In practice a real lens cannot, so the asymmetry is
+invisible — but a port must not assume the estimate is ceilinged.
+
+Neighbouring value, for orientation (no focal xref): 0x321ac68 = 0.0025.
+
+================================================================
+3. THE PLAUSIBILITY FLOOR 4.0 AND THE 50 px GATE
+================================================================
+The estimator does not clamp the estimate — it *substitutes* the default
+when the estimate is implausible. Threshold 4.0 mm:
+
+  slice 0x2da51a8  FAT 47,878,568  raw 0000000000001040  = 4.0     [PROOF]
+
+  slice 0xb641b0  FAT 11,960,752  movsd -0x3cd8(%rbp),%xmm0   ; focal
+  slice 0xb641b8  FAT 11,960,760  movsd 0x2da51a8(%rip),%xmm1  ; 4.0
+  slice 0xb641c0  FAT 11,960,768  ucomisd %xmm0,%xmm1
+  slice 0xb641c4  FAT 11,960,772  ja 0xb64279                 ; 4.0 > f
+  slice 0xb6424f  FAT 11,960,911  movsd -0x3a30(%rbp),%xmm0   ; est (px)
+  slice 0xb64257  FAT 11,960,919  divsd -0x3ef0(%rbp),%xmm0   ; / px per mm
+  slice 0xb6425f  FAT 11,960,927  movsd %xmm0,-0x3cd8(%rbp)   ; store est
+  slice 0xb64267  FAT 11,960,935  movsd 0x2da51a8(%rip),%xmm1
+  slice 0xb6426f  FAT 11,960,943  ucomisd %xmm0,%xmm1
+  slice 0xb64273  FAT 11,960,947  jbe 0xb641ca                ; 4.0 <= est
+  slice 0xb64279  FAT 11,960,953  movabs $0x4041800000000000  ; else 35.0
+  slice 0xb64283  FAT 11,960,963  movq %rax,-0x3cd8(%rbp)
+  slice 0xb6428a  FAT 11,960,970  movb $0x1,%al
+  slice 0xb6428c  FAT 11,960,972  movq %rax,-0x3f00(%rbp)    ; "used default"
+                                                                flag = 1
+
+Both comparisons are unsigned-ordered forms, so a NaN focal takes the
+`jbe` / falls through and is **kept**, not replaced. The fallback sets a
+sticky boolean at -0x3f00, i.e. the caller can tell a measured 35 from a
+defaulted 35. [PROOF for the flag; INFERENCE for its downstream use]
+
+Second, independent plausibility gate on *pixel* focal from metadata:
+
+  slice 0x2da4698  FAT 47,875,736  raw 0000000000004940  = 50.0    [PROOF]
+  slice 0xb63ef3  FAT 11,960,051  ucomisd %xmm1,%xmm0 ; jbe 0xb6430d
+      -> if the metadata focal is < 50 px, -0x3cf0 is forced to 0.5 and the
+         r12 flag is cleared (0xb63efd-0xb63f10). [PROOF]
+
+So there are three escalating sanity rules. The first two *replace* the
+value rather than clamp it (<50 px -> distrust the scale; <4.0 mm -> 35.0);
+only the third is an actual clamp (outside [10,1000] -> clipped, section 2).
+
+================================================================
+4. PIXEL -> 35mm CONVERSION = FIXED 36 x 24 mm (question 4)
+================================================================
+The long edge is a hard-coded 36.0 and the short edge a hard-coded 24.0.
+They are consumed as a **diagonal** through hypot():
+
+  slice 0x2da55f0  FAT 47,879,664  raw 0000000000003840  = 24.0    [PROOF]
+  slice 0x321ac88  FAT 52,554,888  raw 0000000000004240  = 36.0    [PROOF]
+
+  slice 0xb63ff4  FAT 11,960,308  movl %r15d,%eax ; cvtsi2sd -> xmm0 (h px)
+  slice 0xb63fff  FAT 11,960,319  movl %r13d,%eax ; cvtsi2sd -> xmm1 (w px)
+  slice 0xb6400a  FAT 11,960,330  callq 0x2c51174 <_hypot>
+  slice 0xb6400f  FAT 11,960,335  movsd %xmm0,-0x3ef0(%rbp)  ; diag_px
+  slice 0xb64017  FAT 11,960,343  movsd 0x2da55f0(%rip),%xmm0 ; 24.0
+  slice 0xb6401f  FAT 11,960,351  movsd 0x321ac88(%rip),%xmm1 ; 36.0
+  slice 0xb64027  FAT 11,960,359  callq 0x2c51174 <_hypot>   ; 43.266615 mm
+  slice 0xb6402c  FAT 11,960,364  movsd -0x3ef0(%rbp),%xmm1
+  slice 0xb64034  FAT 11,960,372  divsd %xmm0,%xmm1          ; px per mm
+  slice 0xb64038  FAT 11,960,376  movsd %xmm1,-0x3ef0(%rbp)  ; SAVED scale
+  slice 0xb64044  FAT 11,960,388  movsd -0x3cd8(%rbp),%xmm0  ; focal (mm)
+  slice 0xb6404c  FAT 11,960,396  mulsd %xmm1,%xmm0          ; -> pixels
+  slice 0xb64050  FAT 11,960,400  movsd %xmm0,-0x3888(%rbp)  ; param
+
+hypot(36,24) = 43.266615305567875 — the full-frame diagonal. The image
+diagonal in pixels divided by it gives pixels-per-mm on the assumption the
+frame *is* 36x24. There is no sensor-size, crop-factor or EXIF-make lookup
+in this conversion: any camera is treated as full-frame. [PROOF for the
+constants and the arithmetic; INFERENCE that no sensor query exists, based
+on the two constants being immediate rather than loaded.]
+
+The same 24/36 pair recurs in a second function as a literal pair:
+  slice 0x144a00 FAT 1,346,048  movsd 24.0
+  slice 0x144a08 FAT 1,346,056  movsd 36.0
+  slice 0x144a10 FAT 1,346,064  callq <_hypot>  ; *0.5 (0x2da2e10)
+  slice 0x144a15 FAT 1,346,069  mulsd 0x2da2e10 = 0.5
+  slice 0x144a49 FAT 1,346,121  movsd 4.0 ; callq <_pow>   ; f^4
+  slice 0x144a7a FAT 1,346,170  movsd 6.0 ; callq <_pow>   ; f^6
+i.e. the diagonal also feeds a radial (f^4/f^6) polynomial. [PROOF]
+
+Useful negative: 36.0f/35.0f float32 forms exist (0x8e7720c / 0x8e77210,
+a 35.0f,36.0f pair) but are **unreferenced** — the live constants are the
+doubles above. [PROOF]
+
+================================================================
+5. THE PRIOR WEIGHT (question 3) — there isn't one
+================================================================
+5.1 The estimator's control flow is winner-take-all [PROOF]
+The focal source is selected by `UprightFocalMode` through a 4-entry jump
+table at slice 0xb65670 (FAT 11,966,064):
+
+  index 0 -> 0xb63e78  auto: metadata probe, else fall through
+  index 1 -> 0xb63f29  force focal := 0.0 and bl := 0  (estimate path)
+  index 2 -> 0xb63e88  read metadata directly
+  index 3 -> 0xb63f15  bl := 1; keep stored focal only if >= 4.0,
+                       else focal := 0 and bl := 0
+  (dispatch: 0xb63e58 cmpq $0x3 ; 0xb63e76 jmpq *%rax)
+
+Then, at the join:
+  slice 0xb641a8  testb %bl,%bl
+  slice 0xb641aa  je 0xb6424f        ; bl==0 -> GEOMETRIC ESTIMATE
+  slice 0xb641c4  ja 0xb64279        ; bl==1 -> metadata wins, or 35.0
+
+bl==1 (a metadata focal of at least 4.0 mm) short-circuits straight past
+0xb6424f. So when EXIF supplies a usable focal the estimate is **never
+computed**, and when it does not the estimate is used **raw**. There is no
+`(1-w)*geom + w*prior` anywhere between 0xb641a8 and 0xb64302. [PROOF]
+
+  PORTING IMPLICATION: a port should implement a discrete source
+  selector with the 4.0 floor and the [10,1000] clamp on the prior branch,
+  not a weighted prior residual. The "prior weight" is not tunable in this
+  build and cannot be fitted from behaviour — it is a switch, so any
+  attempt to fit a small w against the geometric residual will be fitting
+  noise from the branch rather than a real coefficient.
+
+5.2 No weight constant exists to recover [INFERENCE]
+The candidate-parameter double block is slice 0x321ab80..0x321ac90
+(FAT 52,554,624..52,554,896). It contains 35.0 (0x321abb0), 1000.0
+(0x321ac70), 36.0 (0x321ac88) and the 0.0025 at 0x321ac68, so it is the
+neighbourhood a focal weight *would* live in. Full dump of the block, for
+the record:
+
+  0x321ab88 0.98        0x321abc8 0.43      0x321ac08 0.404
+  0x321ab90 0.002       0x321abd0 0.2880859375     0x321ac10 7.5
+  0x321ab98 0.0015      0x321abd8 295       0x321ac18 -0.4
+  0x321aba0 -1.442695   0x321abe0 1024      0x321ac20 1.5
+  0x321aba8 -0.18       0x321abe8 -0.55     0x321ac28 0.5
+  0x321abb0 35.0        0x321abf0 0.2       0x321ac30 -7
+  0x321abb8 70          0x321abf8 120       0x321ac38 -inf
+  0x321abc0 0.08       0x321ac00 -120      0x321ac40 inf
+                                            0x321ac48 1.1428571
+                                            0x321ac50 0.6666667
+                                            0x321ac58 1.00003052
+                                            0x321ac60 0.00025
+                                            0x321ac68 0.0025
+                                            0x321ac70 1000.0
+                                            0x321ac78 0.18
+                                            0x321ac80 0.0005
+                                            0x321ac88 36.0
+                                            0x321ac90 0
+                                            0x321ac94 nan
+                                            0x321ac98 1.50661701109e-312
+                                            0x321aca0 0.0001
+
+0.18 and 0.0025 each appear twice (0.18 at 0x321aba8/-0.18 and 0x321ac78;
+0.0025 at 0x321ac68) and the block interleaves signed pairs (120/-120,
+0.2/-0.4, 7.5/-7, -inf/inf). That reads like a flat UI/params blob
+(default, min, max, step, epsilons) rather than a named weight table, which
+matches energy_function.txt §4's conclusion that term weights are compiled
+in as immediates. The only constants with a proven focal role are the ones
+tagged in section 7; the rest stay [COINCIDENCE] w.r.t. focal.
+
+Note -1.442695 = -1/ln 2 (a log2 conversion), 1.1428571 = 8/7 and
+0.6666667 = 2/3 — arithmetic helpers, not weights.
+
+5.3 What "heavily regularised" means here, concretely
+Not a large weight: the estimator is regularised by *distrust thresholds*
+(50 px, 4.0 mm) and by a fallback to the population mode (35 mm), and the
+prior branch is hard-gated to [10,1000]. Behaviourally the prior dominates
+completely whenever metadata exists, which is why the earlier corpus work
+saw focal estimates pinning near 35 on metadata-poor files.
+
+================================================================
+6. UPRIGHTDATA STRUCT AND SETTINGS KEYS (supporting)
+================================================================
+Key strings cluster at slice 0x8eb185f..0x8eb193b (FAT 149,641,311..149,641,619):
+  UprightCenterMode, UprightCenterNormX, UprightCenterNormY,
+  UprightFocalMode, UprightFocalLength35mm, UprightDependentDigest,
+  UprightPreview, UprightVersion, UprightTransformCount,
+  UprightTransform_%u, UprightGuidedDependentDigest,
+  UprightFourSegmentsCount, UprightFourSegments_%u
+
+  UprightFocalMode        slice 0x8eb1897  FAT 149,641,367  [PROOF]
+  UprightFocalLength35mm  slice 0x8eb18a8  FAT 149,641,384  [PROOF]
+
+Four xref clusters each (writer, differ, two readers):
+  0xa1157 / 0x12cade / 0xb65c98 / 0xb66202 (slice) for the focal key;
+  FAT 676,183 / 1,247,966 / 11,967,640 / 11,969,026.
+
+Deserialiser field map at 0xb65c31-0xb65cb8 [PROOF, offsets from struct base
+-0x98 for the centre block and -0x80 for the focal block]:
+  +0x00 CenterMode (u32)   +0x08 CenterNormX (f64)   +0x10 CenterNormY (f64)
+  +0x18 FocalMode (u32)    +0x20 FocalLength35mm (f64)   +0x30 Preview
+Centre defaults are 0.5,0.5 (movaps from 0x3219cc0 = {0.5,0.5}) and the
+focal default is the 35.0 of section 1. TransformCount is clamped to <= 16
+(0xb65d39 `cmpl $0x10` / 0xb65d41 `cmovb`), which is the only *other*
+clamp in the deserialiser. [PROOF]
+
+================================================================
+7. RANKED CONSTANT TABLE
+================================================================
+value      slice off     FAT off       role                              conf
+35.0       0x321abb0     52,554,672    default/fallback, also data       PROOF
+35.0       0xb62da0      11,955,616    ctor movabs                       PROOF
+35.0       0xb63c01      11,959,297    param-block init movabs           PROOF
+35.0       0xb65c4d      11,967,565    deserialiser default movabs       PROOF
+35.0       0xb64279      11,960,953    estimation-failure fallback       PROOF
+10.0       0x2da2e18     47,869,464    clamp MIN                         PROOF
+1000.0     0x321ac70     52,554,864    clamp MAX                         PROOF
+4.0        0x2da51a8     47,878,568    plausibility floor (mm)           PROOF
+50.0       0x2da4698     47,875,736    plausibility floor (px)           PROOF
+36.0       0x321ac88     52,554,888    sensor long edge, hypot arg       PROOF
+24.0       0x2da55f0     47,879,664    sensor short edge, hypot arg      PROOF
+0.5        0x2da2e10     47,869,456    diagonal halving                  PROOF
+0.5,0.5    0x3219cc0     52,550,848    centre default pair               PROOF
+0.0025     0x321ac68     52,554,856    unassigned neighbour              COINCIDENCE
+0.18       0x321ac78     52,554,872    unassigned neighbour              COINCIDENCE
+0.0005     0x321ac80     52,554,880    unassigned neighbour              COINCIDENCE
+
+================================================================
+8. FALSE LEADS
+================================================================
+- The four "settings" xref clusters are NOT a clamp site; 0xa1157 and
+  0x12cade are pure (de)serialisers and 0xb65c98/0xb66202 likewise. The
+  clamp is only at 0x7a17ea, in a different function ~3.9 MB lower.
+- 0x8eb58a8 is the wrong (FAT-relative) address for the focal string. The
+  objdump comment addresses are slice-relative; searching a FAT-offset
+  disassembly for them yields nothing. This cost a false start here and
+  will bite anyone repeating it.
+- 0x321abb0 has 40+ `movsd` xrefs across the binary; most are unrelated
+  modules using 35 as a plain number. Only 0x7a16f1/0x7a170c are proven
+  focal uses; 0x8fe8a3 divides by 35.0 and is only plausibly a 35 mm
+  normalisation.
+- 500.0 (0x2da5628) and 400.0 (0x85a7870) are NOT the focal ceiling. 500
+  is a global magic across ~10 modules; 400.0 is loaded once into a solver
+  param block (0xb63c30) beside 5e-05 (0x85a7860) and is almost certainly
+  an iteration cap, not a bound.
+- 10.0 also occurs as a float32 at 0x85a7850 used at 0xb61479, inside an
+  unrelated sqrt/normalise kernel. Not the clamp.
+- The Lua parameter schema (Resources/AgDevelopParams.lua) contains the
+  key names but is compiled bytecode and declares no min/max for the focal
+  — the range is not declarative, it is only in code.
+
+================================================================
+9. SUMMARY OF THE FOUR ANSWERS
+================================================================
+1. fallback focal       35.0 (f64), four sites incl. the <4.0 failure path
+2. enforced range       10.0 .. 1000.0, `max(10,min(f,1000))`, prior path
+                        only; estimate floored at 4.0 but not ceilinged
+3. prior vs residual    no weight — winner-take-all source switch on
+                        UprightFocalMode; prior fully dominates when a
+                        usable EXIF focal (>= 50 px, >= 4.0 mm) exists
+4. pixel->35mm          fixed full-frame 36 x 24 mm via hypot(36,24) =
+                        43.266615 mm diagonal; 36.0 confirmed, no sensor
+                        lookup

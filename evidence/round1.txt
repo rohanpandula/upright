@@ -1,0 +1,360 @@
+ROUND 1 — VP SELECTION FAILURE FIXED — 2026-10-28
+================================================
+Python 3.12.12, numpy 2.2.6, OpenCV 4.13.0. MIT. All work is inside
+research/upright/. No Adobe code or new production dependency was used.
+
+RESULT
+------
+D_roll seed 4: 5.626297 / 22.713280 deg, ok=True before;
+              0.018366 /  0.012466 deg, ok=True after.
+D_roll seeds 0..49 and A/B/C seeds 0..9: all 80 successful solves now have
+both independent ground-truth family errors <0.1 deg. Maximum after: 0.050251.
+All 50 existing tests remain green; expanded suite: 56 tests, all pass.
+The actual recorded bad optimizer output now returns ok=False and identity.
+
+1. ROOT CAUSE AND CONTROLLED EXPERIMENTS
+--------------------------------------
+This is a VP-stage family-selection bug exposed by the detector change.
+The detector outputs 711 D_roll segments, independently of the solver seed.
+The real vertical AND lateral horizontal families are present at seed 4.
+The failure is not loss of the real lateral family or inability to detect it.
+
+Ranked hypotheses tested after reproducing the exact public failure:
+(1) A spurious VP displaces the real lateral VP in family selection.
+(2) Assignment/refitting corrupts the true family's supports.
+(3) Correct families reach the wrong optimizer basin solely from a bad start.
+
+Seed-4 VPs in normalized image coordinates, with homogeneous third entry 1:
+  vertical:     ( 0.649187,  4.352951), 452 supports, weight 409.264265
+  real lateral: (15.146906, -1.322796), 157 supports, weight 248.585480
+  spurious H:   ( 0.622890, -0.002252),  19 supports, weight  19.322961
+The true vertical and lateral inlier arrays are EXACTLY the same at seeds
+0 and 4: 452 and 157 supports. Their fitted VP positions differ slightly.
+Hypothesis (2), corruption of those two support sets, is falsified here.
+
+The approximate RANSAC estimator does emit extra models. In seed 4 its ninth
+accepted hypothesis is near (0.628354,-0.007008). Its original vote mask has
+179 supports, 163 vertical. Nearest-model reassignment leaves ten supports,
+with a 5/5 orientation tie. The strict majority test picks horizontal on the
+tie. TLS uses the five horizontal supports [499,501,585,633,652], whose lengths
+are 25.52,25.12,20.81,18.37,17.51 px, then re-voting grows this to 19 supports.
+The first four have roughly 20..28 degree slopes, the last roughly -4.4 deg
+(modulo 180). This is a mixed accidental convergence, not the dominant wall
+family. These facts explain how the distractor enters the candidate list;
+they do not establish that each individual straight support is a false edge.
+See round1_vp_candidates.json for the initial accepted hypotheses.
+
+The decisive error is _base_solve's lateral selector:
+  OLD: abs(vp_x) / hypot(vp_x, vp_y)
+It measures from the image's TOP-LEFT origin, ignoring the principal point,
+aspect ratio and focal geometry. It therefore gives the weak distractor
+0.999993467 versus the real lateral family's 0.996208317. Family weight does
+not protect the real family: it is overwritten by this sort. The distractor
+becomes the X-axis family and the real lateral VP becomes the 'depth' VP in
+the horizon energy. The starting Euler angles become approximately
+(+4.387,+83.695,+27.080) deg; yaw is clipped to the optimizer's +68.755 deg
+bound. The failed solution remains at that yaw bound. The robust picture-frame
+loss suppresses large errors, allowing a finite, successful-looking result.
+
+One-variable interventions (same energy/optimizer/bounds unless stated):
+  condition                                      independent V / H deg
+  new supports, old selector, seed 0               0.013845 /  0.000620
+  new supports, old selector, seed 4               5.626297 / 22.713280
+  old frozen detector supports, seed 4             0.052250 /  0.105294
+  seed 4, same BAD families, start from good theta  0.013831 /  0.219494
+  seed 4, ONLY camera-ray selector changed          0.018366 /  0.012466
+A better start escapes the catastrophic basin but still optimizes the wrong
+family/horizon assignment and misses the requested accuracy. Initialization
+is a consequence/amplifier, not an adequate mechanism-level repair.
+
+The earlier rejected short-line trial is also reproducible: remove both proxy
+bin gates and use log(NFA)+log(2), producing 719 supports. On seed 9:
+  old selector: 4.551903 / 22.723167 deg
+  new selector: 0.027708 /  0.019023 deg
+That independent candidate-set perturbation exposes the same selector error.
+Its detector policy is reproduced only in the evidence probe and regression;
+it is not shipped as a detector change.
+
+2. REPAIR
+---------
+_base_solve now sorts horizontal families by:
+  abs(normalize(K0_inverse @ vp)[0])
+This ranks directions in the source camera, around its principal point, with
+pixel aspect/focal normalization and homogeneous handling of VPs at infinity.
+For seed 4 the real lateral scores 0.993077509; the distractor scores 0.102057432.
+The same corrected ordering supplies both initialization and family roles.
+There is no fixture/seed name, retry, hardcoded pose or truth in production.
+
+The production detector, NFA threshold, chains, refinement, RANSAC draws,
+assignment/refitting, loss, optimizer and camera/mode constants are unchanged.
+All four before/after detector arrays were checked exactly equal against
+round1_original_segments.npz. All 80 freshly measured BEFORE scores exactly
+match port_review_seeds.json. Historical review artifacts were preserved.
+
+The new ordering also changes A_clean seed 6's secondary horizontal/horizon
+choice; its primary lateral stays the same. That case changes from
+0.012703/0.025548 to 0.016601/0.019042 deg. Other than A6 and D4, all 80 seed
+scores are unchanged to 1e-8 deg. This is an intentional geometric ordering
+change, not a seed-specific fallback.
+
+3. QUALITY SIGNAL AND REJECTION POLICY
+-------------------------------------
+Before this fix, success checked structure availability and homography
+finiteness. No fit-quality gate existed. The scalar robust cost is inadequate:
+seed 0 costs 0.000330685; failed seed 4 costs only 0.001267882 (3.83x), despite
+its catastrophic external error. Cauchy's compressed residual is not an angular
+confidence measure.
+
+New _alignment_quality checks the UNDAMPED fitted homography against each
+selected observed family, without the Cauchy transformation:
+  line' = line @ H_inverse
+  d = normalize((-line'_y * width, line'_x * height))
+  raw vertical residual = abs(d_x); horizontal residual = abs(d_y)
+  m_v,m_h = medians weighted by SOURCE segment length within each family
+  s = 4 / (max(width,height)-1)
+  accept only finite medians with max(m_v,m_h) <= min(1,3*s)
+The residuals are sine-angle errors in isotropic pixels. The source-length
+median prevents many tiny chains from outweighing long structural supports;
+it also tolerates minority outliers that the fit deliberately treats robustly.
+
+Threshold justification: three times the existing four-pixel loss scale is
+an explicit CHOICE, not a recovered Adobe rule. At 1400x1000 it is 0.491464 deg.
+Among the 79 originally successful seed cases, the largest selected-family
+weighted median is 0.127109 deg. After the fix, all 80 are <=0.127334 deg,
+or <=0.777283*s. The four additional structure scenes have maxima <=0.162390
+deg, or <=0.991275*s. Thus the gate leaves roughly 3x headroom over the largest
+structure-control median without admitting the observed failure.
+
+On the ORIGINAL BAD seed-4 fit and its ORIGINAL selected families, medians
+are 2.707385 / 0.496885 deg, worst_scale=16.520512. The vertical signal is over
+21x the worst originally successful seed median. It fails the check on its
+own inputs, without a sibling solve or access to ground truth. The trial's
+bad seed-9 fit also fails. Replaying the recorded bad theta through the
+repaired public API rejects it in full/auto/level/vertical, with identity H,
+reason='poor undamped family alignment', and quality.passed=False.
+
+solve_ex exposes quality.family_median_deg, limit_deg, worst_scale, passed.
+On rejection, rotation/VP diagnostics remain inspectable while H stays identity.
+The gate runs before mode/override damping: intentional Auto/Level/Vertical
+undercorrection must not be mistaken for a failed geometric solve. Tests check
+both that distinction and rejection of a bad underlying fit in all four modes.
+Guided keeps its separate guide-residual diagnostics; off requires no fit.
+
+LIMIT: this is an internal alignment check, not a calibrated probability or
+a bound on camera error. A wrong but internally consistent pair can still pass.
+No truth-free check can guarantee every possible 20x ratio to a sibling's
+external error, particularly when the sibling's error is arbitrarily near zero.
+The evidence here establishes that the observed catastrophic solutions fail
+by a wide margin. Majority-corrupted families and real-photo calibration remain
+unverified. The 0.1-deg truth assertion belongs to the regression, not the gate.
+
+4. TESTS AND FULL BENCHMARK
+--------------------------
+Red first: the expanded D_roll sweep failed exactly at seed 4; the public bad-
+optimizer replay failed because ok was True in all four modes. Logs:
+round1_regression_red.txt and round1_quality_red.txt.
+
+Final validation:
+  python3.12 -m unittest discover -s port -p 'test*.py' -v
+    56 tests, OK (6.354s), including all original 50.
+  python3.12 -m pytest -q
+    56 passed (7.18s). Only an installed pytest-asyncio configuration warning.
+
+Added/expanded regressions:
+* Actual raster detector + solver: D_roll seeds 0..49; A/B/C seeds 0..9;
+  assert ok and both independent world-family scores <0.1 deg.
+* Actual recorded catastrophic theta rejected through public API in 4 modes.
+* Exact geometric fits pass confidence before intentional mode damping.
+* Raw-angle quality is invariant to swapped aspect ratio.
+* Quality median uses support length rather than chain count.
+* Reconstructed rejected detector trial, seed 9, now <0.1 deg in both families.
+
+Full accuracy benchmark (benchmark_accuracy.run and CLI) completed, all 12
+scene/pipeline rows successful. Default-seed outputs are EXACTLY unchanged
+before/after this round, including frozen OLD supports and wrong-focal control:
+
+  scene                            old-segment V/H      image V/H
+  A_clean                            0.089706/0.117399   0.018089/0.013658
+  B_strong                           0.039998/0.028218   0.050251/0.030752
+  C_noisy                            0.061515/0.384904   0.019954/0.022318
+  D_roll                             0.030676/0.096809   0.013845/0.000620
+  01_input_truth                     0.023264/0.038064   0.013563/0.061668
+  01_input_legacy_wrong_focal        0.205170/0.327228   0.189513/0.270213
+
+Full loss/scale/length benchmark: 10 variants x 6 rows x 3 detector pipelines
+= 180 attempted solves, no omitted rows. Candidate errors remain equal to the
+historical sensitivity results. round1_sensitivity.json records BOTH attempted
+candidate and public returned-H errors, plus ok/reason/quality. 179 pass; one
+new gate rejection: cauchy_0.5_mean / C_noisy / original detector. Its family
+medians are 0.248499 / 0.512280 deg (limit 0.491464); candidate truth errors
+0.036265 / 0.163448. It now returns identity, with external errors
+7.761314 / 2.661527. This is a conservative rejection, not an accuracy win;
+rejecting a correction does not itself make an already distorted input upright.
+Default loss/detector rows and every current-detector sensitivity row pass.
+The benchmark's --record-failures explicitly records these rejections rather
+than aborting or dropping them; strict default failure assertions remain.
+
+  variant                       current mean4   old-detector candidate mean4
+  cauchy_0.5_mean               0.021293        0.093861
+  cauchy_1_mean                 0.021186        0.106153
+  cauchy_2_mean                 0.024134        0.115660
+  huber_0.5_mean                0.021025        0.113106
+  huber_1_mean                  0.023693        0.118132
+  huber_2_mean                  0.029771        0.124680
+  least_squares_1_mean          0.054307        0.157217
+  cauchy_1_uniform              0.031369        0.102701
+  cauchy_1_half_mean            0.020068        0.106153
+  cauchy_1_double_mean          0.022481        0.106153
+
+Four additional structure controls, full/seed0/f=1600; scores unchanged:
+  NM_single_wall       0.001441/0.010093 deg; ok=True
+  NM_railing           0.068244/0.119535 deg; ok=True
+  NM_curves            0.042564/0.040543 deg; ok=True
+  NM_three_plane       0.009263/0.005367 deg; ok=True
+Their analytical visible-line counts exactly match the prior review. This
+continues to score straight axes, not curves, forks, crop or shape.
+
+Noise controls: identical counts to review summaries, 30 seeds at each size:
+   32px: mean=0.300000, max=1, nonempty=9/30
+   64px: mean=0.433333, max=2, nonempty=11/30
+  128px: mean=0.900000, max=4, nonempty=14/30
+  256px: mean=1.066667, max=4, nonempty=19/30
+
+5. BEFORE/AFTER PER SEED
+-----------------------
+Each entry is median absolute vertical / lateral-horizontal axis error in deg,
+measured on the independent projected world lines, not detector inliers.
+All BEFORE and AFTER rows below report ok=True; before D4 was a false success.
+The gate-replay rejections are separate from these repaired solves.
+
+A_clean
+ seed       before V / H          after V / H       after max raw median
+    0      0.018089/0.013658      0.018089/0.013658  0.116156
+    1      0.020188/0.023997      0.020188/0.023997  0.117025
+    2      0.020380/0.032661      0.020380/0.032661  0.117196
+    3      0.020425/0.027067      0.020425/0.027067  0.117234
+    4      0.021311/0.040681      0.021311/0.040681  0.116649
+    5      0.017600/0.037956      0.017600/0.037956  0.115702
+    6      0.012703/0.025548      0.016601/0.019042  0.114771
+    7      0.020187/0.023997      0.020187/0.023997  0.117017
+    8      0.018663/0.032094      0.018663/0.032094  0.116679
+    9      0.021399/0.031553      0.021399/0.031553  0.116562
+ maximum per family after: 0.021399/0.040681 deg
+
+B_strong
+ seed       before V / H          after V / H       after max raw median
+    0      0.050251/0.030752      0.050251/0.030752  0.127109
+    1      0.048487/0.006192      0.048487/0.006192  0.123183
+    2      0.048487/0.006192      0.048487/0.006192  0.123183
+    3      0.049025/0.017207      0.049025/0.017207  0.123960
+    4      0.048487/0.006192      0.048487/0.006192  0.123183
+    5      0.048487/0.006192      0.048487/0.006192  0.123183
+    6      0.049112/0.018813      0.049112/0.018813  0.124169
+    7      0.048487/0.006192      0.048487/0.006192  0.123183
+    8      0.049893/0.026277      0.049893/0.026277  0.126303
+    9      0.048487/0.006192      0.048487/0.006192  0.123183
+ maximum per family after: 0.050251/0.030752 deg
+
+C_noisy
+ seed       before V / H          after V / H       after max raw median
+    0      0.019954/0.022318      0.019954/0.022318  0.113763
+    1      0.021816/0.044566      0.021816/0.044566  0.112938
+    2      0.020424/0.025174      0.020424/0.025174  0.113442
+    3      0.020426/0.025177      0.020426/0.025177  0.113441
+    4      0.020749/0.027184      0.020749/0.027184  0.113146
+    5      0.020433/0.025180      0.020433/0.025180  0.113427
+    6      0.021596/0.032351      0.021596/0.032351  0.112716
+    7      0.018972/0.016333      0.018972/0.016333  0.112909
+    8      0.019012/0.046315      0.019012/0.046315  0.112984
+    9      0.019408/0.042366      0.019408/0.042366  0.113313
+ maximum per family after: 0.021816/0.046315 deg
+
+D_roll
+ seed       before V / H          after V / H       after max raw median
+    0      0.013845/0.000620      0.013845/0.000620  0.125566
+    1      0.013850/0.000619      0.013850/0.000619  0.125572
+    2      0.013846/0.000620      0.013846/0.000620  0.125567
+    3      0.013844/0.000620      0.013844/0.000620  0.125565
+    4     5.626297/22.713280      0.018366/0.012466  0.127334
+    5      0.013851/0.000617      0.013851/0.000617  0.125573
+    6      0.013850/0.000618      0.013850/0.000618  0.125572
+    7      0.013847/0.000619      0.013847/0.000619  0.125568
+    8      0.013845/0.000620      0.013845/0.000620  0.125566
+    9      0.013863/0.000611      0.013863/0.000611  0.125589
+   10      0.013854/0.000616      0.013854/0.000616  0.125577
+   11      0.013850/0.000619      0.013850/0.000619  0.125572
+   12      0.013853/0.000616      0.013853/0.000616  0.125576
+   13      0.013848/0.000620      0.013848/0.000620  0.125569
+   14      0.013863/0.000611      0.013863/0.000611  0.125589
+   15      0.013847/0.000619      0.013847/0.000619  0.125569
+   16      0.013850/0.000616      0.013850/0.000616  0.125574
+   17      0.013852/0.000617      0.013852/0.000617  0.125575
+   18      0.013853/0.000617      0.013853/0.000617  0.125576
+   19      0.013850/0.000618      0.013850/0.000618  0.125572
+   20      0.013851/0.000617      0.013851/0.000617  0.125574
+   21      0.013853/0.000616      0.013853/0.000616  0.125576
+   22      0.013847/0.000621      0.013847/0.000621  0.125568
+   23      0.013849/0.000618      0.013849/0.000618  0.125571
+   24      0.013853/0.000616      0.013853/0.000616  0.125576
+   25      0.013849/0.000618      0.013849/0.000618  0.125571
+   26      0.013850/0.000617      0.013850/0.000617  0.125573
+   27      0.013852/0.000617      0.013852/0.000617  0.125575
+   28      0.013848/0.000620      0.013848/0.000620  0.125569
+   29      0.013850/0.000617      0.013850/0.000617  0.125573
+   30      0.013854/0.000616      0.013854/0.000616  0.125577
+   31      0.013848/0.000619      0.013848/0.000619  0.125569
+   32      0.013847/0.000619      0.013847/0.000619  0.125569
+   33      0.014042/0.023793      0.014042/0.023793  0.126031
+   34      0.013853/0.000616      0.013853/0.000616  0.125577
+   35      0.013845/0.000620      0.013845/0.000620  0.125566
+   36      0.013848/0.000619      0.013848/0.000619  0.125570
+   37      0.013845/0.000620      0.013845/0.000620  0.125566
+   38      0.013846/0.000621      0.013846/0.000621  0.125567
+   39      0.013846/0.000620      0.013846/0.000620  0.125567
+   40      0.013590/0.020183      0.013590/0.020183  0.124983
+   41      0.013846/0.000621      0.013846/0.000621  0.125566
+   42      0.013852/0.000616      0.013852/0.000616  0.125575
+   43      0.013847/0.000619      0.013847/0.000619  0.125569
+   44      0.013852/0.000616      0.013852/0.000616  0.125575
+   45      0.013845/0.000620      0.013845/0.000620  0.125566
+   46      0.013846/0.000620      0.013846/0.000620  0.125567
+   47      0.013849/0.000618      0.013849/0.000618  0.125571
+   48      0.013850/0.000619      0.013850/0.000619  0.125572
+   49      0.013851/0.000619      0.013851/0.000619  0.125573
+ maximum per family after: 0.018366/0.023793 deg
+
+6. REPRODUCTION / FILES / REMAINING LIMITS
+-----------------------------------------
+From research/upright/:
+  python3.12 port/benchmark_round1.py --output evidence/round1_after.json
+  python3.12 evidence/round1_probe.py
+  python3.12 port/benchmark_accuracy.py
+  python3.12 port/benchmark_sensitivity.py --output evidence/round1_sensitivity.json --record-failures
+  python3.12 evidence/round1_extra.py
+  python3.12 -m pytest -q
+
+round1_before.json was recorded BEFORE production edits. It matches all 80
+historical seed rows exactly; it is not synthesized from the repaired solver.
+round1_original_segments.npz freezes the four detector arrays from that run.
+round1_after.json includes all seed errors and confidence diagnostics.
+round1_diagnosis.json holds optimizer starts/results, raw-family diagnostics,
+old-selector interventions and the rejected-trial comparison. The causal probe
+reconstructs only the old selector in the current solver; its 'axis' is the
+attempted candidate, 'returned_axis' and ok include the current quality gate.
+round1_vp_candidates.json captures the original accepted VP positions/counts.
+round1_sensitivity.json and round1_extra.json retain full numeric controls.
+The original port_review*.json/txt and accuracy baseline files were not edited.
+
+Changed files: upright_port.py (camera-ray ordering, raw alignment check,
+quality diagnostic and public rejection); test_port.py (regressions); README.md
+(current result and policy); benchmark_round1.py (seed/evidence runner);
+benchmark_sensitivity.py (separate output and explicit rejected-fit recording).
+Evidence probes are experiment-only and import no extra production dependency.
+
+No new Adobe/native output, real-photo holdout, or fork/shape/crop oracle was
+measured. The previously identified normalized-coordinate horizon residual and
+classification convention issues remain; neither explains this reproduced
+selector failure. Approximate RANSAC can still emit accidental/duplicate models.
+This fix prevents an image-origin distractor from displacing the real lateral
+ray and rejects the observed grossly misaligned fit. It does not establish
+Adobe equivalence or universal camera-estimation reliability.

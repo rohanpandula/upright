@@ -1,0 +1,141 @@
+INDEPENDENT VERIFICATION OF PORT ACCURACY CLAIMS — 2026-10-28
+=========================================================================
+Scope: read-only verification of port/upright_port.py. No port source edited.
+All metrics reimplemented from adobe_truth/*.lua + lrtest/in/*.tif and from
+heldout/*.npz, without importing port/benchmark_*.py. Scripts:
+  evidence/verify_metrics.py   (625-point metric, controls)
+  evidence/verify_seeds.py     (clean-process seed sweep, bad-fit replay)
+  evidence/verify_perturb.py   (held-out perturbations)
+Environment: python3.12.12, numpy 2.2.6, OpenCV 4.13.0, scipy 1.17.1 (offline
+RQ only). Port SHA verified during final run:
+f2a900d9e7640a5d47b38a1e61589ebbea316ace194aa0594e8c7badd6c52342
+(equals evidence/round12_before_port.py and reproduces round8 exactly). The port
+was edited concurrently between 09:22 and 09:37; a transient round12 prototype
+(sha 0111063a) scored 0.582340 instead of 0.587092. Numbers below are the stable
+f2a900 version.
+
+VERDICT SUMMARY
+  1. Metric numbers: CONFIRMED exactly (0.587092 and 0.403312), with two
+     important qualifications: 0.587 is an opt-in output policy, and 0.403 is
+     not a solver floor.
+  2. Metric gaming: YES, the output policy does essentially all the work.
+     The solver beats oracle-geometry + the same policy by only 2.4%.
+  3. Seed-4 fix: CONFIRMED from a clean process; seeds 10..49 also clean.
+  4. Held-out: generator pre-registered, but reused to tune round 3 and re-run
+     every later round; 0.0188 is post-hoc on that set, not a blind holdout.
+  5. Perturbations: HOLDS; worst 0.027 deg, zero failures.
+
+1. METRIC RE-DERIVATION
+The claimed metric is exactly reproducible. 625 fixed source samples
+(25x25 mgrid including corners), Euclidean RMS in pixels / hypot(w,h) * 100,
+optional per-attempt best translation + uniform scale ("shape"). Independent
+code reproduced every row tested and the headline mean:
+  unframed raw            33.266029 %   (matches round8 33.266029)
+  framing only             3.562255 %   (matches 3.562255)
+  framing + runtime scale  0.587092 %   (matches 0.587092)
+  shape lower bound        0.403312 %   (matches 0.403312)
+  best centre scale LB     0.430136 %   (matches 0.430136)
+  naive full-rectification 50.297451 %  (matches round4 50.297451)
+  naive shape LB           1.995733 %   (matches round4 1.995733)
+All 80 scene/mode/seed attempts accepted. The 0.587092 figure is therefore
+arithmetically correct. It is 45.6% above the 0.403312 shape bound and 36.5%
+above the 0.430136 centre-scale bound: the runtime scale rule leaves real error.
+Qualification A: 0.587 needs framing=True, scaling=True. Plain solve() scores
+33.27%. The number is a pipeline number, not a solver number.
+Qualification B: 0.403312 is the best translation+uniform-scale alignment of the
+port's OWN unframed H. It is a lower bound only for those two operations, not
+for a free homography, and it is computed from the same H it is compared with.
+Qualification C: only ~40 distinct H exist behind the 80 attempts (2-3 unique per
+5 seeds); the four "scenes" are two base poses (A=C, D=A+roll). Effective n ~40.
+Qualification D: the 10/90 framing weights and the 1.10 scale switch were fitted
+on these same 16 slots plus the 320 sweep slots (round8 itself says the sweep is
+"NOT a blind holdout"). The 0.587 and the 0.403 are in-sample.
+
+2. CONTROL: ADOBE POLICY APPLIED TO NAIVE FULL RECTIFICATION
+Naive = K(true R) K^-1 at the true 1600 px focal, H22 normalized, then Adobe's
+own framing then scale policy (same order as solve_ex), scored identically.
+  condition                                   mean raw %
+  naive, unframed                             50.2975
+  naive + framing only                         6.0106
+  naive + framing + Adobe scale policy         3.1071
+  naive + oracle scale (shape LB)              1.9957
+  port, framing only                           3.5623
+  port, framing + runtime scale                0.5871
+  port + perfect rotation (port K1, policy)    0.6009
+  naive mode-aware + true rotation + policy    0.5980
+The literal naive+policy control (3.1071) is 5.3x worse than the port, but that
+baseline is mode-blind: full rectification is the wrong target for auto/level/
+vertical. Per mode (port / naive+policy / oracle-rotation+policy):
+  auto      0.9224 / 3.2891 / 0.9331
+  full      0.1986 / 0.2103 / 0.2103
+  level     0.9692 / 4.3963 / 0.9848
+  vertical  0.2581 / 4.5329 / 0.2755
+With mode semantics and perfect rotation the control is 0.5980 vs the port's
+0.5871: the port is only 2.4% better than oracle geometry under the same policy.
+The policy alone accounts for 98.2% of the raw reduction (33.266 -> 0.587);
+geometry accounts for the rest. On full mode alone the port beats naive+policy
+by 5.9% (0.1986 vs 0.2103) and beats oracle-rotation+policy by 5.9% too.
+Conclusion: the headline advantage is the framing/scale policy plus mode
+semantics, not solver accuracy. The solver is at oracle level, no better.
+
+3. SEED-4 CATASTROPHE
+Fresh process, D_roll and A/B/C, full mode, 200 attempts, seeds 0..49:
+  scene    max V    max H   >0.1  rejected
+  A_clean  0.021023 0.029151   0    0
+  B_strong 0.048784 0.010856   0    0
+  C_noisy  0.021288 0.030458   0    0
+  D_roll   0.013866 0.001190   0    0
+D_roll seed 4 = 0.013721/0.001034 deg, ok=True. The recorded 5.626/22.713 deg
+catastrophe is gone; replaying the recorded bad optimizer theta through the
+public API returns ok=False, "poor undamped family alignment", and exact
+identity in all four modes. Seeds 10..49 are no worse than 0..9; no seed cliff.
+Seed 4 is no longer an outlier (B_strong max 0.0488 is worse).
+
+4. HELD-OUT PROVENANCE
+make_heldout_images.py and all 14 rasters were written 06:01:40-41; the first
+held-out score is 06:04:17 (round2_heldout.txt). The generator mtime is unchanged
+through round 9, so the camera matrix was pre-registered before scoring and not
+edited afterwards (no git history exists to prove content, only mtime).
+It was not a pristine holdout for later work:
+  - round 3 used H09, the round-2 worst (0.113444), to diagnose the stale-VP
+    bug; H09 is now 0.012236 and the 0.018802 worst is H11 instead.
+  - rounds 5, 6 and 9 re-run all 700 held-out attempts as a regression suite.
+  - the held-out focal +/-30% stress in round 2 was also run before that policy
+    was frozen.
+Reproduced exactly: 1400 scores (14 scenes x 50 seeds x V/H), mean 0.006206693,
+worst 0.018802 (H11), 0 failures, 0 over 0.1. The 0.0188 is real but is a
+post-hoc number on a reused 14-scene synthetic set.
+
+5. PERTURBATION ROBUSTNESS
+Held-out truth oracles fixed; detector re-run on every perturbed image; seeds
+0..4, 140 scores per variant. Units deg, all errors retained:
+  variant        mean      worst     >0.1  rejected
+  baseline       0.006216  0.018802   0     0
+  JPEG q75       0.007276  0.019793   0     0
+  blur sigma 0.8 0.006873  0.016489   0     0
+  contrast 0.85  0.006325  0.017781   0     0
+  contrast 1.20  0.006365  0.018398   0     0
+  resize 0.75x   0.010328  0.027044   0     0
+  resize 1.5x    0.005907  0.016671   0     0
+Accuracy degrades 1.66x in mean under 0.75x downscale and 1.17x under JPEG, but
+stays 3.7x inside the 0.1 deg gate with zero rejects. No overfitting cliff.
+
+6. "SCALE POLICY REPRODUCES ADOBE TO 1e-6"
+Refuted as a coefficient claim, confirmed as a raw-distance claim.
+Reconstructed native maps independently (RQ of P H K0, stored source focal,
+s_native = sqrt(fx fy)/f0). Scale-policy error over the 16 active slots:
+  max 9.882e-6, RMSE 4.975e-6, mean 3.363e-6  -> ~1e-5, not 1e-6.
+Resulting raw map distance: mean 1.083e-4 % = 1.083e-6 of the diagonal,
+max 3.078e-4 % = 3.078e-6. So "1e-6" is true only when quoted as a
+fraction-of-diagonal raw distance; the scale coefficient itself is 1e-5.
+The 16-slot table reproduced exactly, including the 10/90 framing matrix
+errors ~1e-10. V40S3 Full/Vertical still fail by 0.0466 scale (3.96% raw).
+The 16 slots are the same slots used to fit the rule, so this is fit quality.
+
+7. BOTTOM LINE
+The two numbers are arithmetically correct and reproducible. The honest framing
+is: "port + a policy fitted to Adobe reaches 0.587% in-sample, versus 0.403%
+if the same map is given the oracle scale; oracle-geometry + the same policy
+reaches 0.598%, so the solver contributes ~2% and the policy ~98%." The seed
+fix, held-out score and perturbation robustness all hold. The 1e-6 claim needs
+the units stated. The held-out set is frozen but no longer blind.

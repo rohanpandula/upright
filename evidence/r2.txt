@@ -1,0 +1,3 @@
+/Users/rohan/Projects/trichroma/research/upright/heldout/H01.png	FAIL	no item found	Not cropped: no photo edges were found against the background. A plain background that is darker or lighter than the photo helps.
+/Users/rohan/Projects/trichroma/research/upright/heldout/H02.png	FAIL	no item found	Not cropped: no photo edges were found against the background. A plain background that is darker or lighter than the photo helps.
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/D_roll.tif	OK	0.001070	0.001499	0.998215	0.997501	0.000000	3			white-lid,fill edges -,-,-,-		Check rotation: it looks like it needs a quarter turn to the left (from the sky, 55% sure).	0

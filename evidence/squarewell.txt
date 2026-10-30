@@ -1,0 +1,118 @@
+Squarewell (ThePictureOrg) 1.6.57 — comparison and transfer attempt
+====================================================================
+
+Inspected: /Users/rohan/Downloads/ThePictureOrg-Squarewell-Mac-1.6.57.zip
+Unpacked to /tmp/sq. The Lightroom plug-in ships its algorithm as readable Python
+(helper/autocrop.py, helper/autocrop_detect.py, helper/bgmodel.py) plus a bundled
+CPython 3.12 and rawpy. 238 MB. Licence forbids modification; irrelevant here.
+
+1. WHAT IT IS
+-------------
+Auto crop and straighten for digitising slides, prints, negatives and album pages.
+It finds ONE physical item on a contrasting surround and crops it away. The user
+guide mentions Upright once, in passing, as something Lightroom applies before the
+crop. Different problem from ours, not a worse version of it.
+
+2. GEOMETRY: ONE DEGREE OF FREEDOM
+----------------------------------
+finish() (autocrop_detect.py:1365) reduces four independently measured edges to
+((cx,cy),(width,height),angle) and to_lr() (:617) emits only Left/Top/Right/Bottom
+plus Angle. Across the whole helper there is no warpPerspective, no
+getPerspectiveTransform, and no write of Transform or PerspectiveUpright.
+cv2 usage is warpAffine and minAreaRect only.
+
+Consequence: a keystoned slide is cropped tight to its bounding rotated rectangle
+and never rectified. Squarewell cannot fix converging verticals at all.
+
+    Squarewell            1 DOF   (rotation + crop box)
+    NegPy                 3 DOF   (rotation + 2 keystone)
+    this port             8 DOF   (homography)
+    Lightroom Upright     8 DOF + perceptual damping
+
+3. EMPIRICAL, ON OUR MATERIAL
+-----------------------------
+Bundled interpreter, `autocrop.py --list ... --out ...`, defaults, --no-orient
+except where noted. Angle is the straighten angle in degrees.
+
+    lrtest/in/A_clean.tif   OK  full frame  angle 0.000000
+    lrtest/in/B_strong.tif  OK  full frame  angle 0.000000
+    lrtest/in/C_noisy.tif   OK  full frame  angle 0.000000
+    lrtest/in/D_roll.tif    OK  full frame  angle 0.000000   <- has a known 3 deg roll
+    heldout/H01.png         FAIL "no item found"
+    heldout/H02.png         FAIL "no item found"
+
+With --orient on, D_roll is given turn=3 and still angle 0.000000. So on a 3D scene
+it returns identity and misses a 3 deg roll entirely; on real photographs it fails
+outright.
+
+In its own domain it is excellent. H01 pasted on black at a true 7 deg:
+
+    OK  angle -6.989566  crop 0.184179 0.261582 0.815179 0.737388  fit 1.00/0.97
+
+0.011 deg from truth, tight crop. The domain constraint, not the geometry, is what
+it has.
+
+4. ORACLE RE-BASELINE (paired, same 39 images)
+----------------------------------------------
+The round-11 oracle arm was stale: its _classify patch used a 2-arg lambda and
+_classify had since gained (w,h), so every call raised TypeError. Fixed in
+evidence/round11_probe.py:168 to take *a. Re-ran.
+
+    baseline  full candidate median   4.0843   (n=18 paired)
+    oracle    full candidate median   0.8353   (n=18 paired)
+    oracle better on 14, worse on 3
+
+Confirms round 11: family selection is a ~5x ceiling and the dominant defect.
+
+5. TRANSFER ATTEMPT A — their stretch confirmation. FAILED, no change.
+----------------------------------------------------------------------
+They measure each edge in 16 stretches along the side and require a rise to hold
+and to land on a steady level (autocrop_detect.py:689 cross(), :743 tighten()).
+Ported as: sample gradient along 9 points of each segment's middle 80%, divide by
+the frame's 90th-percentile gradient, drop below a threshold.
+
+    k=0.00 0.10 0.18 0.28   all byte-identical, n=18 med 4.0843
+
+Reason: our detector already refines on the gradient, so every emitted segment has
+support. Support percentiles on a sample frame were [1%:0.718, 50%:1.498], i.e. the
+weakest segment is still 72% of the reference. The filter has nothing to remove.
+Their test works for them because a 1-D profile search can land on a glow or a
+fabric fold; a TLS-refined segment cannot.
+
+6. TRANSFER ATTEMPT B — length-weighted margin classification + VP re-estimation. WORSE.
+-----------------------------------------------------------------------------------------
+_classify assigns a whole family by unweighted majority with no margin. Made it
+length-weighted with a margin, then also re-estimated each family's VP from its
+merged members (which is what the oracle actually does).
+
+    margin 0.10/0.20, weighted or not, labels only:  identical, 4.0843
+    labels + VP re-estimation:  n=15  new 6.5121  base 3.8625  better 5  worse 8
+                                accepted only 3
+
+Consistent with round 12: re-splitting the detector's own VPs does not help,
+because the VPs themselves are wrong. Relabelling segments around a wrong VP gives
+a wrong VP.
+
+7. WHAT IS ACTUALLY WORTH TAKING
+--------------------------------
+Not tested, and the one with real promise:
+
+  batch consensus (autocrop_detect.py:1375 batch_adjust). Photos from one holder
+  agree on where an edge sits; where most of a batch agrees, a photo whose own pick
+  disagrees but which has another clear candidate near the agreed place adopts it.
+  Our corpus is shoots, so the same consensus could pool family assignment or focal
+  across a shoot instead of deciding per frame. Round-sized job, not a patch.
+
+Smaller, real:
+
+  - log2 linear light for the detector (they do this throughout; we use gray)
+  - "touch": a side running off the frame is left as is instead of searched for
+  - explicit per-failure reason strings, as ours already has
+
+8. LICENSING
+------------
+Their licence forbids modification. Nothing above is copied; the two attempts are
+reimplementations of described behaviour. The port stays MIT.
+
+Evidence: /tmp/sq/results.txt, /tmp/sq/r2.txt, /tmp/sq/r3.txt,
+evidence/round11_oracle_40.jsonl, evidence/round11_paired_baseline.jsonl

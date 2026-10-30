@@ -1,0 +1,5 @@
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/*.png	FAIL	[Errno 2] No such file or directory: '/Users/rohan/Projects/trichroma/research/upright/lrtest/in/*.png'	Not cropped: something went wrong with this photo. Create an error log to send it to us.
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/A_clean.tif	OK	0.001070	0.001499	0.998215	0.997501	0.000000	0			white-lid,fill,document edges -,-,-,-			0
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/B_strong.tif	OK	0.001070	0.001499	0.998215	0.997501	0.000000	0			white-lid,fill edges -,-,-,-			0
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/C_noisy.tif	OK	0.001070	0.001499	0.998215	0.997501	0.000000	0			white-lid,fill,document edges -,-,-,-			0
+/Users/rohan/Projects/trichroma/research/upright/lrtest/in/D_roll.tif	OK	0.001070	0.001499	0.998215	0.997501	0.000000	0			white-lid,fill edges -,-,-,-			0

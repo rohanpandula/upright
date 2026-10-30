@@ -165,7 +165,7 @@ def oracle_measure(r):
             return dict(image_id=r['image_id'],variant='oracle_labels',error='insufficient oracle axis supports',family_counts=list(map(len,indices)))
         def vps(*args,**kwargs):
             return [dict(vp=up._family_vp(seg[idx]/[w,h,w,h])*[w,h,1],inliers=idx) for idx in indices]
-        with patch.object(up,'estimate_vanishing_points',side_effect=vps),patch.object(up,'_classify',side_effect=lambda v,s:(v[0],v[1:])):
+        with patch.object(up,'estimate_vanishing_points',side_effect=vps),patch.object(up,'_classify',side_effect=lambda v,s,*a:(v[0],v[1:])):
             rows=solve_rows(r,seg,Q)
         return dict(image_id=r['image_id'],path=r['path'],variant='oracle_labels',info={'family_counts':list(map(len,indices))},rows=rows)
     except Exception as exc:return dict(image_id=r['image_id'],variant='oracle_labels',error=repr(exc))

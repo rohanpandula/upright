@@ -248,3 +248,25 @@ across all 1,055 families examined and the threshold never flips. Size does not
 predict the label (P(V) 0.464/0.413/0.444/0.491 by quartile); it predicts
 admission. This is why attempts 1-8, which all meddled with the label decision,
 measured as nothing.
+
+12. AN ADOPTION CONTRACT ON A LABEL-FREE DEFECT ALSO FAILS
+===========================================================
+The port has no adoption contract: a confident wrong homography can overwrite a
+good identity. The obvious guard is to compare the candidate and the identity on a
+label-free measure and adopt only on a win. Built the measure as the mean
+post-warp deviation of the inlier segments from the nearer image axis, and tested
+margins on the 10 photos the 5.0 gate accepts:
+
+  margin   accepted   returned   beats
+  accept all   10      2.4144      7
+  0.00          7      3.6464      4
+  0.02          3      4.3518      1
+  0.05          3      4.3518      1
+
+Strictly monotone in the wrong direction: the more the contract rejects, the worse
+it gets. So the axis-deviation defect does not track truth on this material - three
+of the ten have a better defect AND a worse ground-truth residual, and the ones the
+contract throws out are the good ones. With the gate at 5.0 the correct policy is
+simply to accept. That is now six independent label-free statistics that fail to
+discriminate: gradient support, length margin, post-warp axis deviation,
+endpoint concentration, span coverage and cross-strip step.

@@ -532,6 +532,14 @@ def estimate_vanishing_points(
     ``f ~ max(w, h)`` until a real focal is recovered later
     (evidence/detector.txt section 6, vp_clustering.txt section 6).
 
+    WARNING: pass PIXELS, not normalised coordinates.  ``tau`` is floored at
+    0.2 % of the long side, so a normalised call leaves residuals around 1.4
+    against a gate of sqrt(3) and every segment becomes an inlier of every
+    candidate.  All candidates then tie on weight, the first absorbs the frame,
+    dedup rejects the rest, and the caller receives exactly ONE family whose
+    majority vote deletes the other orientation.  It fails quietly: 120 of 120
+    photos returned one family that way (evidence/squarewell.txt section 11).
+
     Candidates are generated from every pair and scored on all segments, not on
     a shrinking live set.  A segment can be a plausible inlier of two families
     (a forward-pointing line often passes within the gate of the vertical VP),

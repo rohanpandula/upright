@@ -210,3 +210,41 @@ A robust Theil-Sen refit of the vanishing points was a wash as specified (3.2439
 has a natural 4-8 degree spread, so a 3*median gate lands at 17.7 degrees and is
 inert. But its sensitivity run with a FIXED 1.5 degree gate lifted acceptance 4 -> 10,
 independently reproducing the finding above: acceptance, not residual, is what moves.
+
+11. DIAGNOSIS — WHY SO MANY PHOTOS HAVE NO VERTICAL FAMILY
+===========================================================
+Delegated a pure diagnosis over 120 photos. Two independent defects, both real,
+neither fixed by the obvious lever.
+
+A. THE UNITS TRAP. estimate_vanishing_points is written in pixels: tau is floored
+at 0.002*max(w,h) and clamped, and solve_ex correctly passes pixels. Called with
+normalised segments instead, residuals sit near 1.4 against a gate of sqrt(3) and
+a clamp of ~12, so EVERY segment is an inlier of EVERY candidate. All candidates
+tie on weight, the first absorbs the whole frame (frame_inlier_frac 1.000 in
+120/120), the IoU dedup rejects every later one, and exactly ONE family comes back.
+is_vertical then degenerates to a frame-wide majority vote and the following line
+deletes the minority orientation - a median 200 vertical segments per photo,
+12,879 in total. _classify reads back only the frame-wide share, so it sees
+max 0.292 and answers None. 51 of the 65 no-vertical cases are this artefact.
+
+B. THE CANDIDATE CAP. On the correct pixel path 17 of 120 still fail, and all 17
+sit exactly on MAX_VP_CANDIDATES = 9 with nine near-parallel horizontal splits.
+The vertical family exists but ranks 10th-20th by weight; raising the cap to 20
+recovers 14 of 17 and to 40 recovers 17 of 17.
+
+RAISING THE CAP DOES NOT HELP THE SCORE, THOUGH. On the 22 paired photos with the
+gate at 5.0: cap 9 gives returned 2.6275, cap 20 gives 3.4659, cap 40 gives 3.3184
+(identity 3.4479). Acceptance rises 10 -> 12 but the median worsens, because the
+recovered families are outranked for a reason and the gate then admits them. The
+recovered families are size 19-71 against a typical 105-355, so they are thin.
+
+CONCLUSION: the cap is a real ceiling on recall but not on accuracy. Keep 9. The
+one thing worth shipping from this is the units warning, now in the docstring,
+because the failure is silent and returns a plausible single family.
+
+Also established: _classify's 0.5 test decides nothing at all. After the minority
+deletion every family is orientation-pure, so mean(dy>dx) is exactly 0.0 or 1.0
+across all 1,055 families examined and the threshold never flips. Size does not
+predict the label (P(V) 0.464/0.413/0.444/0.491 by quartile); it predicts
+admission. This is why attempts 1-8, which all meddled with the label decision,
+measured as nothing.

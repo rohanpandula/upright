@@ -576,3 +576,43 @@ exactly the frames where a starved gate hurts. Anything measured only there will
 overstate itself. Future work should quote a corpus number alongside the paired one
 from the start, and the paired number should be labelled as a solvable-subset figure
 wherever it appears.
+
+24. THE LAST TWO — PREDICTION-GUIDED WINDOW AND ANISOTROPIC RESIDUAL
+====================================================================
+A. PREDICTION-GUIDED WINDOW. Keep a segment only if the gradient inside a window
+predicted from the segment itself agrees in at least 5 of 6 stretches. Run against a
+plain global gradient threshold at matched retention so the comparison is fair, over
+33 photos, returned semantics, identity 3.4656:
+
+  variant     returned   beats   worse
+  baseline    2.9614     11      4
+  win8        3.2903     11      1
+  glob8       3.2538     10      1
+  win15       3.4656      7      1
+  glob25      2.9394      8      0
+  win40       3.3198      7      3
+
+The baseline wins outright and no window variant beats it; the one apparent
+improvement, glob25 at 2.9394, pays for it by losing three beats (11 -> 8). Null, and
+the plain global control beats the predicted window at four of the five floors, so the
+prediction is not doing the work the idea assumed.
+
+B. ANISOTROPIC RESIDUAL. Judge a segment mostly on its angular agreement with the
+family and barely on where along the family it sits, at ratios 1, 2, 4 and 8, scored on
+`candidate`:
+
+  ratio   n    median   accepted
+  base    18   4.0843   10
+  1       18   4.0843   10
+  2       14   3.3927    9
+  4       16   5.0571    9
+  8       14   7.6801    6
+
+Ratio 1 is byte-identical to the baseline, which says the weighting only starts to
+bite at 2 and then degrades. Ratio 2 has the best median but loses 4 photos to
+non-fits, so it is not a clean gain. Null.
+
+Both workers died before writing verdicts; these are scored from their raw output.
+
+TALLY: nineteen attempts, one shipped change, and that one is a coverage trade rather
+than an accuracy win.

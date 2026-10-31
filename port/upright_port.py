@@ -949,7 +949,13 @@ def _alignment_quality(H, seg_v, seg_h, w, h):
         margins.append(3.72 * median(np.abs(angles-centre)) / math.sqrt(effective_n))
     scale = 4.0 / max(1, max(w, h) - 1)
     median_deg = np.degrees(np.arcsin(np.clip(medians, 0, 1)))
-    limit_deg = 1.0
+    # MEASURED: 5.0 degrees, not 1.0. On a calibration/holdout split (25 and 27
+    # solvable frames) 1.0 accepts 9 and 4 and leaves the holdout median at
+    # 3.0150 against an identity of 3.5205; 5.0 accepts 16 and 16 and takes the
+    # holdout to 2.3482. The plateau runs 5.0-8.0 on both splits and accept-all
+    # collapses to 4.78, so the guard still does work, it was just four degrees
+    # too tight. evidence/squarewell.txt section 10.
+    limit_deg = 5.0
     bounds = np.abs(signed_medians) + margins
     # Precise families keep the .1-degree guard; photographic scatter supplies
     # a noise budget rather than making uncertainty alone reject every fit.

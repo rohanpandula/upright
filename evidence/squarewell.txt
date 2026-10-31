@@ -162,3 +162,51 @@ CONSEQUENCE FOR THE PORT
 Do not change the classifier. Keep estimate_vanishing_points and _classify as they are.
 Work on the gate and on the output policy. Attempts 1-8 are all reverted; nothing in
 port/ was modified.
+
+10. THE ONE THING THAT WORKED — THE REJECTION GATE WAS FOUR DEGREES TOO TIGHT
+==============================================================================
+Found by asking a subagent to audit the gate rather than to improve the solver.
+It tabulated all 58 rejections across 78 rows: every single row had reason 'ok',
+so 100% were pure quality-gate rejections. 38 of the 58 rejected a candidate that
+was BETTER than doing nothing, 33 of those by more than a whole percentage point.
+Only 20 were genuinely protective, and the gate simultaneously admitted 4 fits
+worse than identity. It was mis-set, not conservative.
+
+The binding constant was limit_deg = 1.0 on the family median residual. Sweep on a
+calibration/holdout split (55 and 80 photos, 25 and 27 solvable):
+
+  limit   cal acc  cal returned   val acc  val returned
+  1.0      9/25    2.4807          4/27    3.0150
+  3.0     13/25    2.3504          9/27    3.0150
+  4.0     15/25    2.3504         12/27    2.7455
+  5.0     16/25    2.3504         16/27    2.3482
+  6.0     17/25    2.3504         16/27    2.3482
+  8.0     18/25    2.4807         16/27    2.3482
+  all     25/25    4.9376         27/27    4.7789
+
+Identity is 2.3504 on calibration and 3.5205 on holdout. So 5.0 degrees is neutral
+on calibration and takes the holdout 33% below identity, with 12 beats against 4.
+The plateau is 5.0-8.0 on both splits and accepting everything collapses to 4.78,
+so the guard still does work. Shipped 5.0.
+
+The bias guard, which the audit named as the killer, turned out to be inert: from
+0.1 to 0.5 degrees changed not one decision, because the test is
+`(bounds <= 0.1) | (bounds < median_deg)` and the second branch dominates once
+scatter is loose. Its "2x headroom" claim was also measured only on already-accepted
+rows, which is why it looked like dead weight when it was in fact the binding term.
+
+End-to-end through solve_rows on the 22 paired photos: returned 3.4479 -> 2.6275,
+better 4, worse 2, acceptance 4 -> 10. 103 tests pass; test_round10 pins the new
+constant and adds a 3-degree-passes / 12-degree-fails regression.
+
+This also explains attempts 1-8. Every one of them attacked the segment set, but the
+gate was throwing away two thirds of the fits before the segment set mattered.
+A tighter detector on a starved gate measures as nothing.
+
+CONCURRENTLY CONFIRMED, same direction, not shipped
+---------------------------------------------------
+A robust Theil-Sen refit of the vanishing points was a wash as specified (3.2439 vs
+3.1716, 7 better / 7 worse, acceptance unchanged at 4) because the angular residual
+has a natural 4-8 degree spread, so a 3*median gate lands at 17.7 degrees and is
+inert. But its sensitivity run with a FIXED 1.5 degree gate lifted acceptance 4 -> 10,
+independently reproducing the finding above: acceptance, not residual, is what moves.

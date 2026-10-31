@@ -32,11 +32,24 @@ class TestRound10(unittest.TestCase):
         for w,h in ((1200,800),(4800,3200),(12000,8000)):
             q=up._alignment_quality(np.eye(3),vertical,horizontal,w,h)
             self.assertTrue(q['passed'],q)
-            self.assertEqual(q['limit_deg'],1.)
+            self.assertEqual(q['limit_deg'],5.)
             decisions.append(q)
         for q in decisions[1:]:
             for key in ('family_median_deg','family_signed_median_deg','family_median_margin_deg'):
                 np.testing.assert_allclose(q[key],decisions[0][key],atol=1e-12)
 
-
-if __name__=='__main__':unittest.main()
+    def test_quality_admits_photographic_scatter_but_not_smear(self):
+        # MEASURED: the 1.0-degree cap rejected two thirds of the real fits that
+        # beat doing nothing (evidence/squarewell.txt section 10). 3 degrees must
+        # pass; a 12-degree smear must still fail.
+        rng=np.random.default_rng(4)
+        def fam(deg,vertical):
+            e=np.radians(rng.uniform(-deg,deg,200)); base=np.arange(200)*3.0
+            if vertical:
+                return np.column_stack([base, np.zeros(200),
+                                        base+400*np.sin(e), 400*np.cos(e)])
+            return np.column_stack([np.zeros(200), base,
+                                    400*np.cos(e), base+400*np.sin(e)])
+        for deg,expect in ((3.0,True),(12.0,False)):
+            q=up._alignment_quality(np.eye(3),fam(deg,True),fam(deg,False),1200,800)
+            self.assertEqual(q['passed'],expect,(deg,q))

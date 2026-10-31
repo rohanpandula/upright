@@ -384,3 +384,51 @@ Acceptance rises monotonically with the cap and the median falls monotonically, 
 the beat count flat at 7. So the families the cap is currently excluding are
 systematically worse than the ones it admits - they are outranked for a reason. The
 cap is a genuine recall ceiling and not an accuracy one. Keep 9.
+
+18. WHY SO MANY CLASSIFIER EXPERIMENTS MEASURED AS EXACTLY NOTHING
+==================================================================
+`_base_solve` re-sorts the horizontal families by `lateral` (port/upright_port.py:1052)
+immediately after `_classify` returns them. So the order `_classify` produces is
+discarded, and only two things survive it: which family was chosen as the vertical, and
+the membership of each family.
+
+Five of the attempts in sections 9 and 14 re-ranked horizontals by weight (the
+length-weighted margin, both min-support vote variants, demote-don't-relabel, and
+peel's consumption order). For the horizontal half of every one of those, the re-rank
+was a no-op by construction. That is a large part of why so many results were exactly
+0 better and 0 worse rather than mixed.
+
+Coverage scoring (section 19) is the clean illustration: it is the best-motivated
+statistic tried, it has the right SIGN (Spearman -0.37 against error, versus -0.21 for
+count), and it still measured as null because it only ever moved the vertical and the
+horizontal half was dead on arrival.
+
+A comment now sits at the sort so the next editor sees it before spending a day on it.
+
+19. COVERAGE-OF-SPAN SCORING — NULL, AND IT SHOWS THE SIGNAL IS REAL BUT TINY
+============================================================================
+Score each family by the share of its own span that is actually covered by on-line
+inliers, so 20 short collinear pieces score like one long segment and a corner cluster
+cannot fake full coverage. Also tried at 0.25x the inlier gate, and as weight*coverage^2.
+
+  variant                n   median   better  worse  accepted  vertical swaps
+  control (weight)      18   4.0843   0       0      4         0
+  coverage rank         16   5.2537   2       3      3         5
+  coverage, 0.25x tau   17   4.3060   0       1      4         1
+  weight*coverage^2     17   3.8625   1       0      4         1
+
+Coverage rank loses and the soft form is neutral. Four reasons, all measured:
+1. Near-tautological. Inlier admission already uses the same tau, so on_line == count
+   for all 189 families and the residual half of the metric never fires. It measures
+   clumping, not off-line scatter. 52% of families clear the 0.88 floor anyway.
+2. No mass term. 3416356 prefers 43 inliers at 0.993 over 130 at 0.935 and goes
+   1.65 -> 28.15, while the one big win, 3362498, is 40.7 -> 8.3 on a +0.011 gap.
+3. Horizontal re-ranking is unreachable (section 18), so only the vertical moves, and
+   both lost frames die with "crosses the projective horizon" from a near-horizontal
+   family installed as the vertical.
+4. weight*coverage^2 is dominated by weight (coverage ~0.9, squared ~0.81) and changes
+   one photo. Neutral by construction, not on merit.
+
+If ever revisited, gate it: coverage may only break a near-tie below 0.05 and the
+candidate must carry a minimum share of the winner's weight, or the 43-versus-130
+failure returns.

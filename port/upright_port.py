@@ -1049,6 +1049,12 @@ def _base_solve(seg_n, w, h, f0, weights, mode, seed, shared_k=False):
     def lateral(v):
         return abs(_normalize(K0i @ v["vp"])[0])
 
+    # NOTE for anyone editing _classify: this re-sort DISCARDS the order in which
+    # _classify returned the horizontals, so re-ranking horizontals there (by
+    # weight, coverage, length, anything) is a no-op on the result. Only the
+    # vertical choice and the family MEMBERSHIP survive. Five separate experiments
+    # re-ordered horizontals by weight and measured exactly nothing for that reason
+    # (evidence/squarewell.txt section 18).
     horizontal.sort(key=lateral, reverse=True)
     # Lock the RANSAC family identities before refining their final supports.
     # Refining weak unused intersections first can change the lateral ranking.

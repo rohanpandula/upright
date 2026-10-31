@@ -123,7 +123,11 @@ over the UI. Prefer one at a time.
 
 ## 5. Trace format
 
-TSV, tab-separated, header written once. **15 columns, fixed order:**
+TSV, tab-separated, **15 columns, fixed order.** The header row is written only
+when the trace file is empty (`traceHeaderIfNeeded`, `ImportSweep.lua:216-228`,
+called once before `RUN_START`). An existing non-empty trace never gets one, so
+the current `lrtest/TRACE.txt` has **no** header row. Add it by hand if you want
+it — the exact row is:
 
 ```
 run_id  ts  agent  event  image  mode  attempt  target  solved  digest  f35  panel  filter  alert  detail
@@ -131,6 +135,10 @@ run_id  ts  agent  event  image  mode  attempt  target  solved  digest  f35  pan
 
 `-` means empty. Tabs/newlines inside values are flattened to spaces. Read it
 with `awk -F'\t'` or `csv.DictReader(delimiter='\t')`.
+
+The first five lines of `TRACE.txt` are older `RunProbe.lua` output
+(`23:22:40  === digest retest …`), not TSV, so neither recipe above parses the
+file from line 1. Select TSV rows with `$1 ~ /^[0-9]{8}T/`.
 
 `run_id` is `<ISO8601>-<epoch>-<rand>`; `agent` is `$UPRIGHT_AGENT` or `$USER`.
 Filter a run with `awk -F'\t' '$1=="<run_id>"'`.

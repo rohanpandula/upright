@@ -270,3 +270,16 @@ contract throws out are the good ones. With the gate at 5.0 the correct policy i
 simply to accept. That is now six independent label-free statistics that fail to
 discriminate: gradient support, length margin, post-warp axis deviation,
 endpoint concentration, span coverage and cross-strip step.
+
+13. THE GATE FIX HOLDS IN BOTH MODES
+====================================
+Section 10 measured mode 'full'. Re-measured with mode 'auto', the mode a user
+actually gets:
+
+  mode   new      old      identity   better  worse  accepted
+  auto   1.4562   1.8087   1.6949     4       2      10
+  full   2.6275   3.4479   3.4479     4       2      10
+
+Both modes improve on their own old value and both now sit below identity, with the
+same 4-better / 2-worse and the same acceptance of 10. The effect is not
+mode-specific, so it is the gate and not an interaction with the damping path.

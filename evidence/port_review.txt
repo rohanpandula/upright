@@ -29,8 +29,10 @@ marked. What has moved:
 Scope: research/upright/port, detector + energy changes behind the 92% claim,
 and the requested short-line repair. Python 3.12; MIT; numpy/OpenCV production
 dependencies unchanged. No Adobe source copied. The frozen report was READ,
-not edited: ../UPRIGHT-REVERSE-ENGINEERING.md, especially sections 3.5e and 3.6.
-The directory has no .git, so this is a source/evidence review, not a git diff.
+not edited: docs/REPORT.md, especially sections 3.5e and 3.6 (it was
+`../UPRIGHT-REVERSE-ENGINEERING.md` when written; the file has since moved and
+been renamed, and both sections still exist).
+`port/` has no `.git`, so this is a source/evidence review, not a git diff.
 
 Verdict: a useful approximation with known divergences. Do not call it a
 faithful reimplementation or infer production reliability from green tests (103
@@ -208,7 +210,7 @@ scenes. The rejected trial is preserved in port_review_trial_seed_comparison.jso
 solely to substantiate detector/VP sensitivity. Preserving the old candidate
 policy is a compatibility decision, not a claim that its bin proxy is exact.
 
-Added regressions (original 47 tests retained):
+Added regressions (original 47 tests retained at the time; 103 tests now):
 * short line at all five requested sizes, horizontal and transposed vertical;
 * 64px negative NFA control;
 * D_roll at seeds 0 and 9, to reject the regression seen during the repair.
@@ -260,9 +262,10 @@ Generalization checks beyond this loss table:
   are still synthetic and share a 15deg/6deg pose and renderer. Their independent
   straight-line scores are listed below. They are not a new real-photo holdout,
   nor a measurement of curved-feature preservation.
-* Seed sweep: A/B/C seeds 0..9, D_roll seeds 0..49. D_roll seed 4 is catastrophic
-  and still reports ok=True; every other tested D_roll seed stays below 0.1deg
-  in both families. This one observed failure is not a statistical rate claim.
+* Seed sweep: A/B/C seeds 0..9, D_roll seeds 0..49. D_roll seed 4 was catastrophic
+  and still reported ok=True; every other tested D_roll seed stayed below 0.1deg
+  in both families. Round 1 fixed seed 4 to 0.018/0.012, so the sweep is now
+  uniformly below 0.1deg. One observed failure is not a statistical rate claim.
 
 4. WHAT THE FROZEN REPORT MUST DISTINGUISH OR CORRECT
 ====================================================
@@ -362,7 +365,7 @@ E8. Mode-specific scalar weights and adaptive schedules are chosen approximation
 E9. Bounded finite-difference Levenberg-Marquardt is our optimizer. No native
     constrained evaluator/gradient, barrier, retry logic or convergence/status
     test is recovered. ok=True means a finite homography was returned, not
-    reliable correction, as D_roll seed 4 demonstrates.
+    reliable correction, as D_roll seed 4 demonstrated before round 1 fixed it.
 E10. The section's 0.49/0.38, 0.96/0.31 etc. are older matched.py convergence
      scores/crop measurements. The new 92.3% uses mean absolute AXIS scores
      from independent truth, eight family medians on four TIFFs; the fifth scene
@@ -382,8 +385,9 @@ This port is a good clean-room approximation with known divergences. It has
 correct two-camera algebra and useful default-seed accuracy on a narrow synthetic
 benchmark, but its detector, VP selection, robust objective, normalization,
 fallback and optimizer are independently chosen algorithms, and major native
-constraints/stages are absent. A catastrophic seed-dependent solve and confirmed
-aspect-ratio errors rule out calling it a faithful reimplementation. The robust
+constraints/stages are absent. Confirmed aspect-ratio errors rule out calling it
+a faithful reimplementation, and the seed-dependent solve is no longer an
+argument against it since round 1 closed seed 4. The robust
 gain survives reasonable loss/scale perturbations on these fixtures; that is
 evidence of local usefulness, not evidence of Adobe equivalence or broad accuracy.
 

@@ -152,6 +152,7 @@
   <a href="#novel">What is new</a>
   <a href="#port">The port</a>
   <a href="#evidence">Evidence</a>
+  <a href="#squarewell">A competitor</a>
   <a href="#negpy">NegPy</a>
 </div></nav>
 
@@ -523,7 +524,7 @@ s  = leftover scale factor</div>
         backup path and a never-written TSV header in <code>OPERATIONS.md</code>, and
         <code>port_status.txt</code> / <code>port_review.txt</code>, which still call the fixed
         seed-4 failure the top open defect. Fixed from the fuzz pass: F1 (horizon crossing),
-        F2 (1×1 frames), F3 (wide-frame classification) and the 45° divide-by-zero. 102 tests
+        F2 (1×1 frames), F3 (wide-frame classification) and the 45° divide-by-zero. 103 tests
         pass.
       </p>
     </div>
@@ -594,9 +595,44 @@ s  = leftover scale factor</div>
   </div>
 </section>
 
+<section id="squarewell">
+  <div class="wrap">
+    <div class="num">08 — A COMPETITOR</div>
+    <h2>What we took from Squarewell</h2>
+    <p>
+      Squarewell is an auto-crop and straighten tool for digitising slides and prints. It ships
+      its algorithm as readable Python, so we read all of it and tried to move the ideas across.
+      One thing to know first: it has a single degree of freedom. It rotates and it draws a
+      box. There is no <code>warpPerspective</code> anywhere in the helper, so it cannot fix a
+      converging vertical at all, which makes it a good source of technique and a poor source of
+      geometry. On our own material it returns the frame unchanged and misses a known 3° roll.
+    </p>
+    <p>
+      We ported twelve mechanisms. Eleven of them did nothing or made it worse. That is not a
+      wasted exercise, because the failure had a shape: every one of the eleven edited the
+      <em>segments</em>, and the segment set was never the problem.
+    </p>
+    <p>
+      The twelfth was a threshold. Our acceptance gate capped the family residual at 1.0° and
+      rejected fourteen of eighteen photographs that could be fitted. An audit of the
+      fifty-eight rejections found thirty-eight of them had thrown away a fit that was better
+      than doing nothing. Moving the cap to 5.0° takes the held-out set a third of the way below
+      doing nothing and lifts acceptance from four to ten, in both modes. It is the only change
+      from this whole exercise that survived.
+    </p>
+    <p>
+      Two smaller things came out of it as well. The candidate cap turned out to be a limit on
+      recall but not on accuracy, and the function that finds vanishing points fails silently if
+      you hand it normalised coordinates instead of pixels, because its gate is measured in
+      pixels and everything then looks like an inlier. Both are now written down where the next
+      person will hit them.
+    </p>
+  </div>
+</section>
+
 <section id="negpy" class="alt">
   <div class="wrap">
-    <div class="num">08 — THE OTHER TOOL</div>
+    <div class="num">09 — THE OTHER TOOL</div>
     <h2>How NegPy squares a scan</h2>
     <p>
       NegPy solves a different problem and should not be judged as a worse Upright. Upright

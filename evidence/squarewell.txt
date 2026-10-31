@@ -368,3 +368,19 @@ cv2 5.0.0 changes detect_segments output and moves scores by about 2 points; 4.1
 reproduces the frozen baseline to 1e-6. CI installed opencv-python-headless unpinned,
 so a 5.0 release would silently move every number in this file. Both CI jobs and both
 README install lines are now pinned to <5.
+
+17. THE CANDIDATE CAP, SETTLED CLEANLY
+======================================
+Section 11 measured the cap with a changing denominator. Redone on all 22 paired
+photos with the gate at 5.0 and the identity as the fallback so nothing is filtered:
+
+  cap   returned   identity   accepted   beats
+  9     2.6275     3.4479     10         7
+  14    3.3184     3.4479     11         7
+  20    3.4659     3.4479     12         7
+  40    3.3184     3.4479     12         8
+
+Acceptance rises monotonically with the cap and the median falls monotonically, with
+the beat count flat at 7. So the families the cap is currently excluding are
+systematically worse than the ones it admits - they are outranked for a reason. The
+cap is a genuine recall ceiling and not an accuracy one. Keep 9.

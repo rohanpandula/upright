@@ -311,3 +311,60 @@ before the tolerance means anything.
 Any future tolerance work must start at 5-10 degrees and prune only the three
 families the solver actually uses. Peel re-partitions the same families and never
 touches family selection, which the 0.8353 oracle says is the ceiling.
+
+15. TWO-PASS RETRY — NULL, AND THE SEED IS THE WRONG KNOB
+=========================================================
+The app retries a weak detection with different settings and adopts the retry only
+on a stated STRICT win, never on a tie and never for an "irregular" answer. Ported
+three comparators (first ok, gentler warp, lower residual) plus two ungated variants.
+
+As literally specified the scheme is an exact no-op: under the oracle-label patches
+estimate_vanishing_points is replaced, so seeds 1-3 return a bit-identical H and all
+three rules change nothing. Only on the real RANSAC path does the seed move the fit,
+and there the rules fail for their own reasons:
+
+  arm                       median   better  worse  accepted
+  plain control             4.3580   3       5      7
+  retry, first ok           4.9476   5       7      11
+  retry, gentler warp       4.3580   4       5      8
+  retry, lower residual     5.2844   4       6      9
+  ungated retry, gentler    3.2824   5       5      8
+  ungated retry, residual   3.6131   5       6      9
+
+"Gentler warp" is structurally self-defeating: a failed attempt returns the identity,
+whose displacement is exactly 0 px, so no retry can ever be gentler. Ties lose. The
+lower-residual arm is worst because residuals are ~4e-5 and nearly tied.
+
+Re-measured the best arm (ungated, gentler) against the CURRENT port rather than the
+frozen baseline, since the gate has since moved to 5.0: it returns 4.0160 against an
+identity of 3.4479 and the current port's 2.6275. So it is worse than doing nothing.
+It accepts 18 of 22 and rescues 8, but the rescues are mostly poor. Not shipped.
+
+16. INDEPENDENT MORPHOLOGICAL SECOND EXTRACTOR — NULL
+=====================================================
+Blackhat at max(15, 0.012*long)|1, threshold 25..pg+25, MORPH_OPEN with a 1xL line
+kernel at 0.06*short, keep only runs >= 6% of the frame. Tested as intersection,
+union and veto, each also against a shuffled-mask control at matched lengths and
+angles, and with horizontal-only and both-orientation variants.
+
+  variant            median   better  worse  accepted  median segments
+  baseline           4.0843   -       -      4         500.5
+  A intersect both   7.0765   7       11     1         34.5
+  B union both       4.9058   9       7      10        590.5
+  C veto both        5.7521   10      7      6         72.5
+  B' union h only    2.9705   9       5      8         630.5
+  control B" scramble 2.8569  11      4      11        590.5
+
+Intersection wipes the set out (5.6% of segments survive, 13 of 18 fall to
+"insufficient line structure"). Veto removes 87% and is beaten by its own shuffled
+control. Union's apparent gain is segment count, not morphology: it loses to a
+scrambled-line control at identical lengths and angles. The 6% length floor is 49 px
+at 1200x800 and the recipe was written for full-width axis-aligned page gaps; only 12%
+of segments get even one confirmed sample, so agreement carries no information.
+
+REPRODUCIBILITY TRAP FOUND IN PASSING
+--------------------------------------
+cv2 5.0.0 changes detect_segments output and moves scores by about 2 points; 4.10.0
+reproduces the frozen baseline to 1e-6. CI installed opencv-python-headless unpinned,
+so a 5.0 release would silently move every number in this file. Both CI jobs and both
+README install lines are now pinned to <5.

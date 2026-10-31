@@ -1,12 +1,45 @@
-upright_port -- port status (2026-10-28)
-======================================
+upright_port -- port status (2026-10-30; supersedes the 2026-10-28 text)
+=======================================================================
 Python: python3.12 (numpy + cv2 only)
-Run:    cd port && python3.12 -m unittest test_port -v
-Result: 47 tests, including all 34 original tests unchanged; OK, no warnings
-Licence: MIT, clean-room implementation; no Adobe source copied
+Run:    cd port && python3.12 -m pytest -q
+Result: 103 passed
+Size:   port/upright_port.py, 1463 lines, one file, no build step
+Licence: MIT -- copyright only, not patent; see port/README.md "Licence and patents"
 
-ACCURACY GAP
-------------
+CURRENT STATE
+-------------
+Still a poor Adobe clone. 450 Adobe-corrected real photographs / 900 Auto+Full
+attempts with framing+scale ON: 80 accepted (8.89%), median 2.075952% of the
+source diagonal, p90 7.979433%, p99 17.418978%, maximum 81.961591%; counts above
+1/5/20% are 628/179/5. The other 91% return identity, and two accepted attempts
+exceed 5%. Restoring non-identity output does not establish usable equivalence.
+Protocol, splits and controls: round10.txt.
+
+The rejection gate was the binding defect, not the solver. limit_deg is now 5.0
+(upright_port.py:966), not 1.0. On a calibration/holdout split, 1.0 accepted 9/25
+and 4/27 and left the holdout median at 3.0150 against an identity 3.5205; 5.0
+accepts 16/25 and 16/27 and takes it to 2.3482. End-to-end on 22 paired photos:
+returned 3.4479 -> 2.6275, better 4, worse 2, acceptance 4 -> 10. The plateau is
+5.0-8.0 on both splits and accept-all collapses to 4.78, so the guard still does
+work. squarewell.txt section 10; test_round10 pins the constant and adds a
+3-degree-passes / 12-degree-fails regression.
+
+Family selection, not detection, is the dominant remaining error. Adobe-assisted
+axis labels on the same RAW detections cut ungated Full median 3.664% -> 0.932%,
+including 26 identity fallbacks (round11.txt). Round 12 built a VP/Mahalanobis
+selector and closed none of that gap (3.6720% vs 3.6640%, worse tails); production
+was restored byte-for-byte (round12.txt). Round 13 fixed Auto damping by changing
+the data instead of the form: 12,075 real Adobe pairs give a hump-shaped pitch
+response, and the shipped 12-knot table (AUTO_PITCH_GAIN = 1.20) moves Auto
+unframed mean 32.35% -> 27.76% and B_strong 42.37% -> 24.08% at a 2% D_roll cost
+(auto_corpus.txt). F1, F2, F3 and the 45-degree crash are fixed; F4-F13 are open.
+
+Test suite: 103 tests in 7 files -- test_port 56, test_round2 7, test_round3 8,
+test_round4 5, test_round7 12, test_round8 12, test_round10 3. Green means the
+synthetic and gate contracts hold, not that real photographs are corrected.
+
+ACCURACY GAP (synthetic fixtures)
+---------------------------------
 Full, independent ground-truth axis residuals (vertical / horizontal degrees):
                  before             after
 A_clean          0.406 / 0.163      0.018 / 0.014
@@ -19,11 +52,15 @@ Four-TIFF mean: 0.274 -> 0.021 deg (92% lower).
 Energy alone on FROZEN OLD segments: 0.274 -> 0.106 deg (61% lower).
 B_strong energy alone: 0.390 / 0.187 -> 0.040 / 0.028 deg.
 Reproduce: cd port && python3.12 benchmark_accuracy.py
+These are five related synthetic scenes with a known focal. The opt-in
+framing+scale clone score (33.266% -> 0.587% on four cached slots) is also
+synthetic; 98% of it is output policy, not solver. Never quote either as
+real-photo accuracy.
 Protocol, limitations, baseline homographies/segments: accuracy_gap.txt,
 accuracy_baseline.json, accuracy_after.json, accuracy_baseline_segments.npz.
 
-CHANGES
--------
+CHANGES (detector + energy, round 1 of this port)
+-------------------------------------------------
 * Detector: real log-space binomial NFA, M^4 tests and p=1/8; eight fixed
   direction scans / cos22.5; float32 long-side bin formula; no 8px minimum
   or density heuristic; quadratic subpixel edge localization; bounded support
@@ -34,8 +71,11 @@ CHANGES
   Remove the spurious soft Perkins penalty on arbitrary two-line crossings;
   real three-ray fork detection is not implemented.
 * Keep solve(segments=...) as the detector seam; tested with OpenCV LSD.
-* No changes to camera algebra, source camera, guided solve, measured damping
-  functions or mode semantics. Existing model/round-trip/guided tests unchanged.
+* No changes to camera algebra, guided solve or mode semantics. Existing
+  model/round-trip/guided tests unchanged.
+* Since then: round 1 ranking from camera-centred rays (fixes seed 4), round 2
+  source-focal calibration, round 3 family locking + post-assignment VP refit,
+  rounds 7-8 opt-in framing and destination scaling, round 10 the 5.0 gate.
 
 EVIDENCE CORRECTIONS -- see detector_corrections.txt for raw addresses
 --------------------------------------------------------------------
@@ -45,8 +85,8 @@ EVIDENCE CORRECTIONS -- see detector_corrections.txt for raw addresses
   Interval endpoints must be within strict -10/+10 containment slack; it does
   not bridge arbitrary 10px gaps.
 * ROUNDSS immediate 9 floors native significance bins, giving 15 at 4000.
-  The port retains the requested nearest-round rule (16 at 4000) so all 34
-  original tests remain unchanged. This is an explicit compatibility mismatch.
+  The port retains the requested nearest-round rule (16 at 4000) so the
+  original acceptance tests remain unchanged. Compatibility mismatch, explicit.
 * 01_input.png is synthetic (demo_synthetic.py), not a hard real photograph;
   true focal=1400px. The older status used 1200px. Preserve that old diagnostic
   on exactly its original inliers: 0.437/0.224 -> 0.190/0.270 with the new
@@ -56,22 +96,29 @@ EVIDENCE CORRECTIONS -- see detector_corrections.txt for raw addresses
   measured exactly zero. Port axis errors and report convergence differ as metrics.
 
 LIMITATIONS / WHAT REMAINS
--------------------------
+--------------------------
 * Exact Adobe pixel parity is NOT established: preprocessing, tracing and TLS
   support refinement remain re-derived. Signature constants alone do not fully
   specify their helpers. The coarse 320px curve payload is not implemented.
 * Camera tolerance literals (1/3600,1/8100,1/900,0.16) are retained as facts,
   not repurposed into invented detector gates. Their entire downstream use
   remains unresolved. Resolution scale is (4/(maxdim-1))^2.
-* The VP estimator is still the old RANSAC approximation; vp_resolution.txt
-  describes the distinct shipped stage. No claim that 2000 is a shipped RANSAC
-  iteration count, or sqrt(3) an Adobe inlier decision.
-* Energy is not Adobe's evaluator. Cauchy is a measured clean-room choice;
-  real Perkins barrier, E_img, lens distortion, crop/output policy unported.
-* Source K0 stays fixed: wrong focal can make the Manhattan rays nonorthogonal,
-  which no rotation/destination camera can fully rectify. This is not solely
-  "prior dominance" in the energy.
-* Broad real-photo corpus, new Lightroom runs and pixelwise detector output
-  were not checked. New tests cover NFA math/underflow/rejection, directions,
-  short lines, merge boundaries, unsorted gaps, refinement, scale, LSD seam,
-  pixel-angle loss and bundled accuracy on both old and new detections.
+* The VP estimator remains an approximation of the stage in vp_resolution.txt,
+  but ranking (round 1), family locking and post-assignment refit (round 3)
+  were changed. No claim that 2000 is a shipped RANSAC iteration count, or
+  sqrt(3) an Adobe inlier decision.
+* Energy is not Adobe's evaluator. Cauchy and its scale are our CHOICE; the
+  real Perkins barrier, E_img and lens distortion are unported. Framing and
+  destination scaling shipped in rounds 7-8; rendered crop selection is still
+  absent.
+* K0 starts from the prior; round 2 calibrates it against perpendicular-family
+  geometry and replaces it past 5% and 3x the profiled four-pixel resolution.
+  Guided and shared_k trust the supplied focal. A prior failing both thresholds
+  remains unrecoverable, and the free K1 cannot fix every wrong K0.
+* Rounds 9-10 ran 300 and 450 real photographs (600 and 900 attempts); rounds
+  11-13 ran RAW, oracle and corpus diagnostics. Still absent: native per-stage
+  output, pixelwise detector oracle, fork/shape/crop equivalence, lens
+  distortion, a calibrated false-alarm proof, and any Adobe solve of this port.
+* Tests cover NFA math/underflow/rejection, directions, short lines, merge
+  boundaries, unsorted gaps, refinement, scale, LSD seam, pixel-angle loss,
+  bundled accuracy, real supports at two resolutions and the gate constants.

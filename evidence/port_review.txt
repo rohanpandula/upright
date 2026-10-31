@@ -1,5 +1,31 @@
 ADVERSARIAL PORT REVIEW — 2026-10-28
 ===================================
+STATUS BANNER (2026-10-30) — read before the review below
+=========================================================
+This review is a snapshot of the 2026-10-28 state. Kept as written, except where
+marked. What has moved:
+
+* CLOSED — seed 4. The D_roll seed-4 failure in rank 1, the seed-sweep table and
+  the repro block is fixed: ranking horizontal VPs from the image origin caused
+  it, and ranking camera-centred rays gives 0.018 / 0.012 deg. D_roll seeds 0-49
+  and A/B/C seeds 0-9 are now all below 0.1 deg. The repro block still runs but
+  no longer reproduces the numbers it prints.
+* CHANGED — gate. limit_deg is 5.0, not 1.0 (upright_port.py:966). The 1.0 cap
+  was four degrees too tight and rejected two thirds of the fits that beat
+  identity; 5.0 took end-to-end acceptance 4 -> 10 on 22 paired photos and the
+  holdout median 3.0150 -> 2.3482 against an identity 3.5205 (squarewell.txt
+  section 10).
+* CHANGED — counts. 103 tests pass, in 7 files, not 50 in 1. upright_port.py is
+  1463 lines. `cd port && python3.12 -m pytest -q`.
+* CHANGED — real photos. Rounds 9-13 ran 300 and 450 real photographs, RAW
+  decode controls, an Adobe-assisted oracle and a 12,075-pair corpus. The
+  "Not checked" list at the end is superseded by the status file.
+* STILL STANDS — both aspect-ratio items in section 1. Re-checked 2026-10-30:
+  E_eye still normalizes [-l_y, l_x] directly, and _classify still uses
+  normalized dx/dy. Only E_pic uses pixel angles. Rank 8's wording overstates it.
+* STILL STANDS — section 4 in full (the report discrepancy ledger), and the
+  loss/scale sensitivity conclusions in section 3.
+=========================================================
 Scope: research/upright/port, detector + energy changes behind the 92% claim,
 and the requested short-line repair. Python 3.12; MIT; numpy/OpenCV production
 dependencies unchanged. No Adobe source copied. The frozen report was READ,

@@ -445,3 +445,26 @@ So the -0.37 correlation is real but too weak to act on, exactly as the coverage
 worker said (median top-two gap 0.024, 10 of 13 contested frames below 0.05). Coverage
 would have to be used as a tie-break only, and a tie-break this narrow needs a much
 larger sample before it is worth a code path.
+
+20. THE EARLIER ATTEMPTS RE-RUN AT THE FIXED GATE
+=================================================
+Sections 9, 14 and 19 were all measured while the gate sat at 1.0 and rejected 14 of
+18 good photos, so their nulls could have been the gate rather than the idea. Re-run
+at 5.0, scored on `returned` over all 22 with the identity as fallback:
+
+  variant       returned   identity   accepted   beats   worse
+  control       2.6275     3.4479     10         7       3
+  margin 0.05   2.6275     3.4479     10         7       3
+  margin 0.15   2.6275     3.4479     10         7       3
+  demote 0.3    3.4479     3.4479      1         1       0
+  demote 1.0    3.1023     3.4479      2         2       0
+
+Byte-identical for the margin and worse for demote, so the gate was not the confound
+and these are now confirmed dead rather than merely untested. The margin result is
+fully explained by section 18: a margin test only ever re-orders families, and with
+the horizontals re-sorted downstream only a change in the VERTICAL can show, which a
+margin of this size never causes. Demote loses acceptance catastrophically because it
+shrinks every family, and at 0.3 degrees it starves them to nothing (accepted 1).
+
+Standing conclusion: at the current operating point nothing that edits the segment set
+or the family ordering helps. The gate was the only live lever and it has been pulled.

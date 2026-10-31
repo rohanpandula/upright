@@ -596,7 +596,7 @@ The §3.6 callout summarises where the port stands; this section is the record b
 
 **Round 14 stopped improving the solver and audited the gate that was throwing its fits away.** Squarewell (ThePictureOrg 1.6.57) is auto-crop and straighten for digitising slides and prints: one degree of freedom, rotation plus a crop box, no `warpPerspective` anywhere in the helper, so it cannot fix converging verticals at all. It ships its algorithm as readable Python, which is why it was worth reading. On our material it returns identity on all four cached scenes and misses a known 3° roll even with `--orient`; on the held-out frames it fails outright with "no item found". In its own domain it is excellent — a slide on black at a true 7° comes back at 6.989566°, 0.011° from truth — so the constraint is the domain, not the geometry.
 
-Eight mechanisms were ported anyway, each measured paired against `round11_paired_baseline.jsonl` on the same image ids, scoring `candidate.raw_rms_pct` for `full`. Baseline median 4.0843 (n = 18), oracle ceiling 0.8353. A variant that merely reproduces 4.0843 changed nothing, which is itself the result:
+Eight mechanisms were ported first, and eleven more followed; all nineteen are recorded in `squarewell.txt`., each measured paired against `round11_paired_baseline.jsonl` on the same image ids, scoring `candidate.raw_rms_pct` for `full`. Baseline median 4.0843 (n = 18), oracle ceiling 0.8353. A variant that merely reproduces 4.0843 changed nothing, which is itself the result:
 
 | # | attempt | outcome |
 |---|---|---|

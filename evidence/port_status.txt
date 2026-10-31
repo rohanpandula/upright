@@ -24,6 +24,15 @@ returned 3.4479 -> 2.6275, better 4, worse 2, acceptance 4 -> 10. The plateau is
 work. squarewell.txt section 10; test_round10 pins the constant and adds a
 3-degree-passes / 12-degree-fails regression.
 
+CORRECTION at corpus scale (squarewell.txt section 22): those 22 photos are the
+solvable subset, so the accuracy gain does not transfer. Over 774 attempts on 450
+photos the returned median is flat, 2.1911 at 1.0 against 2.2036 at 5.0, while
+acceptance goes 9.6% -> 35.7% and worse-than-identity rises 15 -> 112. Every limit
+stays below identity on both splits (identity 2.4331 calibration / 2.1587
+validation). The gate fix is a COVERAGE win, not an accuracy win. 5.0 is retained
+because coverage was the standing complaint, but quote 2.6275 as a solvable-subset
+number and never as a corpus result.
+
 Family selection, not detection, is the dominant remaining error. Adobe-assisted
 axis labels on the same RAW detections cut ungated Full median 3.664% -> 0.932%,
 including 26 identity fallbacks (round11.txt). Round 12 built a VP/Mahalanobis

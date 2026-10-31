@@ -643,7 +643,18 @@ End-to-end through `solve_rows` on the 22 paired photos: returned 3.4479 → 2.6
 | auto | 1.4562 | 1.8087 | 1.6949 | 4 | 2 | 10 |
 | full | 2.6275 | 3.4479 | 3.4479 | 4 | 2 | 10 |
 
-Both modes improve on their own old value and both now sit below identity, with the same 4-better / 2-worse split and the same acceptance of 10, so the effect is the gate and not an interaction with the damping path. The 10 of 22 is the paired set; the 450-photo corpus was not re-run, so the 8.9% coverage figure stands.
+Both modes improve on their own old value and both now sit below identity, with the same 4-better / 2-worse split and the same acceptance of 10, so the effect is the gate and not an interaction with the damping path.
+
+**But the 22-photo set is the solvable subset, which is exactly where a starved gate hurts most, and the win does not transfer.** Re-run over 774 attempts on 450 photographs, with identity as the fallback:
+
+| limit | accepted | rate | returned | worse than identity | better |
+|---|---|---|---|---|---|
+| 1.0 | 74/774 | 9.6 % | 2.1911 | 15 | 56 |
+| 3.0 | 218/774 | 28.2 % | 2.1371 | 73 | 139 |
+| **5.0** | **276/774** | **35.7 %** | 2.2036 | 112 | 157 |
+| 8.0 | 302/774 | 39.0 % | 2.2036 | 131 | 164 |
+
+Identity is 2.4331 on calibration and 2.1587 on validation. Every limit stays below identity on both splits, so the gate never makes the port worse than doing nothing. But the returned median is flat — 2.1911 at 1.0 against 2.2036 at 5.0, a 0.6 % regression — while acceptance nearly quadruples. Calibration is identical at both limits and validation is 0.3 % worse. **So the honest claim is coverage, not accuracy.** 5.0° is still the right trade because coverage was the standing complaint — 8.9 % acceptance had already been called a poor clone, and round 10 had fought this same gate for that reason — but the 3.4479 → 2.6275 figure is a solvable-subset number and must be labelled as one.
 
 **The diagnosis is the useful part, and it explains all of the above.** `estimate_vanishing_points` is written in pixels: `tau` is floored at `0.002·max(w,h)`. Called with normalised segments, residuals sit near 1.4 against a gate of `√3` and a clamp of ~12, so every segment is an inlier of every candidate, all candidates tie on weight, the first absorbs the whole frame (`frame_inlier_frac` 1.000 in 120 of 120), the IoU dedup rejects every later one, and exactly one family comes back. `is_vertical` then degenerates to a frame-wide majority vote and the following line deletes the minority orientation — a median 200 vertical segments per photo, 12,879 in total. `_classify` reads back only the frame-wide share, sees a maximum of 0.292 and answers `None`. 51 of the 65 no-vertical cases are this artefact. The failure is silent and returns a plausible single family; the docstring now warns.
 

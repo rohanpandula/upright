@@ -33,10 +33,12 @@ not edited: ../UPRIGHT-REVERSE-ENGINEERING.md, especially sections 3.5e and 3.6.
 The directory has no .git, so this is a source/evidence review, not a git diff.
 
 Verdict: a useful approximation with known divergences. Do not call it a
-faithful reimplementation or infer production reliability from 50 green tests.
-The strongest open defect is a successful-looking, catastrophically wrong
-D_roll solve at seed=4. The 92% result measures default-seed accuracy on related
-synthetic scenes; it does not measure correspondence with Adobe's outputs.
+faithful reimplementation or infer production reliability from green tests (103
+now, 50 when written; 80/900 real attempts accepted since). The strongest open
+defect is family selection, not detection. The successful-looking,
+catastrophically wrong D_roll solve at seed=4 is fixed (round 1). The 92% result
+measures default-seed accuracy on related synthetic scenes; it does not measure
+correspondence with Adobe's outputs.
 
 1. WHAT I AM LEAST CONFIDENT IN, RANKED
 ======================================
@@ -54,6 +56,8 @@ its claimed scope. Existing VP/solver weaknesses are distinguished from changes.
    with ok=True. With the frozen OLD detector segments and the same NEW energy,
    that seed gives 0.052250 / 0.105294. Default new-detector seed 0 instead gives
    0.013845 / 0.000620. These are not all equivalent detector improvements.
+   FIXED in round 1: ranking the horizontal family from camera-centred rays
+   instead of the top-left origin gives 0.018 / 0.012 deg at that seed.
    Overturn: oracle segment outputs, or new raster families / seed or ordering
    changes that substantially worsen accuracy. The seed counterexample already
    overturns any blanket claim of reliable improvement.
@@ -208,8 +212,9 @@ Added regressions (original 47 tests retained):
 * short line at all five requested sizes, horizontal and transposed vertical;
 * 64px negative NFA control;
 * D_roll at seeds 0 and 9, to reject the regression seen during the repair.
-Result: 50 tests pass. The broader seed sweep's existing seed-4 failure remains
-OPEN. There is no passing regression assertion pretending that case is fixed.
+Result: 50 tests passed at the time of review; 103 pass now. The broader seed
+sweep's seed-4 failure was still OPEN when this was written; round 1 closed it
+and the regression now pins it. No assertion ever pretended that case was fixed.
 
 3. LOSS / SCALE / LENGTH SENSITIVITY
 ====================================
@@ -298,10 +303,12 @@ D6. Mean-normalized lengths were observed in a detector weight block. Their use
 D7. The camera tolerance is (4/(M-1))^2, not (4/M)^2. Other tolerance literals
     belong to a separate camera block, not invented detector gates. Assigning
     its four-pixel scale to a Cauchy loss is not a recovered native operation.
-D8. The port has a default 1200px working side and no calibration stage, native
-    coarse curve payload/pass B, estimate_MKR sequence, opt_H5 barrier stage or
-    handle_degen_case retry pipeline. Those named report stages are not present
-    just because the public API returns a homography.
+D8. The port has a default 1200px working side and no native coarse curve
+    payload/pass B, estimate_MKR sequence, opt_H5 barrier stage or
+    handle_degen_case retry pipeline. It does now have a source-focal calibration
+    stage (round 2), so "no calibration stage" is no longer true. Those other
+    named report stages are still not present just because the public API returns
+    a homography.
 
 Section 3.5e, VP (unchanged approximate implementation, not newly recovered):
 D9. Native is explicitly NOT pair RANSAC in the report. Port samples segment
@@ -336,17 +343,22 @@ E5. Source lengths divided by their global mean and the total segment count
 E6. The arbitrary two-line-intersection pseudo-Perkins penalty was removed.
     No detected three-ray forks, Perkins inequality, log barrier or interior-point
     optimization replaces it. E_img/curved-edge anisotropy is also absent.
-E7. Destination focal residual (f1/f0-1)^2 remains, with SOURCE K0 fixed. This
-    is distinct from a recovered source-focal selector/prior. Metadata/geometry
-    source switching, source-center estimation and native camera fitting are
-    not implemented here. The free K1 center/focal cannot fix every wrong K0.
+E7. Destination focal residual (f1/f0-1)^2 remains, and the source focal starts
+    from the prior. This is distinct from a recovered source-focal selector.
+    Round 2 has since added a calibration that refits K0 from perpendicular
+    families once the discrepancy clears 5% and 3x the profiled four-pixel
+    resolution, plus metadata/geometry source switching. Source-center estimation
+    and native camera fitting are still absent. The free K1 center/focal cannot
+    fix every wrong K0, and a prior failing both thresholds stays unrecoverable.
 E8. Mode-specific scalar weights and adaptive schedules are chosen approximations
     and are still used INSIDE separate per-mode solves, then rotation damping
     is applied. Do not infer a shared cached full solve across modes from the
     section 3.6 description (or the stronger measurement in section 3.5h).
-    Existing Auto SIGMA_V=14.58deg/L0_V=3.56 also differ from matched.py's
-    13.33deg/2.64; pitch-versus-keystone units remain unresolved. This review did
-    not tune damping or claim to resolve the units.
+    Existing Auto SIGMA_V=14.58deg/L0_V=3.56 also differed from matched.py's
+    13.33deg/2.64 when this was written. Resolved in round 4: the units are
+    keystone, not camera pitch, and the port now ships 13.33deg / 2.64. Round 13
+    further replaced the monotone Auto response with a 12-knot measured curve.
+    This review did not tune damping or claim to resolve the units.
 E9. Bounded finite-difference Levenberg-Marquardt is our optimizer. No native
     constrained evaluator/gradient, barrier, retry logic or convergence/status
     test is recovered. ok=True means a finite homography was returned, not
@@ -378,7 +390,8 @@ evidence of local usefulness, not evidence of Adobe equivalence or broad accurac
 REPRODUCTION / ARTIFACTS
 =========================
 From research/upright/:
-  (cd port && python3.12 -m unittest test_port -v)
+  (cd port && python3.12 -m pytest -q)                 # 103 tests, all 7 files
+  (cd port && python3.12 -m unittest test_port -v)     # 56, this review's file
   python3.12 port/benchmark_sensitivity.py
 
 The benchmark script only writes port_review_sensitivity.json, never the frozen
@@ -388,7 +401,7 @@ JSON records every scene and both families for every loss/scale/length variant,
 with original/pre-review/final detector outputs. All solves in that experiment
 must report ok; any failure aborts rather than silently dropping a scene.
 
-Open seed-4 failure, cheap direct reproduction:
+Historical seed-4 repro (fixed in round 1; the printed values are the old ones):
   import sys, cv2
   sys.path.insert(0, 'port')
   import upright_port as u, benchmark_accuracy as b
@@ -411,9 +424,11 @@ Other evidence:
     each of 32/64/128/256, detect_segments defaults; counts include both passes.
   port_review_pre_fix_accuracy.json: untouched historical 92% output snapshot.
 
-Not checked: new Adobe runs, native per-stage outputs, real-photo holdout,
-fork/shape/crop equivalence, lens distortion, or a calibrated false-alarm proof.
-No frozen report, source-camera model, damping constants or VP code was changed.
+Not checked at time of review; checked since, in rounds 1-13: new Adobe runs
+(rounds 4-8 clone distance, round 11 oracle), a real-photo holdout (rounds 9-10,
+300 and 450 photographs), VP code (rounds 1 and 3) and the source-camera model
+(round 2). Still unchecked: native per-stage outputs, fork/shape/crop equivalence,
+lens distortion, and a calibrated false-alarm proof.
 
 NUMERIC APPENDIX
 ================
@@ -473,6 +488,8 @@ B_strong          10           0        0.050251/0.030752
 C_noisy           10           1        0.021816/0.044566
 D_roll            50           4       5.626297/22.713280
 
-Final validation: python3.12 -m unittest test_port -v: 50 tests, OK (2.248s).
-All 34 original tests and the 13 prior additions remain; this review adds 3.
-The open seed-4 and aspect-ratio findings are review results, not fixed assertions.
+Final validation at time of review: python3.12 -m unittest test_port -v:
+50 tests, OK (2.248s). All 34 original tests and the 13 prior additions remained;
+this review added 3. Now: `cd port && python3.12 -m pytest -q` -> 103 passed,
+7 files, 59s. The aspect-ratio findings remain review results, not fixed
+assertions; the seed-4 one is closed.

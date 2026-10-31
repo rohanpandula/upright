@@ -468,3 +468,24 @@ shrinks every family, and at 0.3 degrees it starves them to nothing (accepted 1)
 
 Standing conclusion: at the current operating point nothing that edits the segment set
 or the family ordering helps. The gate was the only live lever and it has been pulled.
+
+21. A SCALED BIAS RULE ALSO LOSES — THE CURRENT ONE IS ALREADY BEST
+====================================================================
+The three accepted-but-worse results all carry high signed bias (0.57, 0.65, 0.77,
+1.47, 2.69 degrees) AND moderate scatter (0.96 to 4.40), so the bias guard looks like
+the right thing to tighten after all. Replaced the `(bounds <= 0.1) | (bounds <
+median_deg)` test with `bounds <= max(0.1, k*median_deg)` and swept k at the 5.0 cap:
+
+  k      accepted   returned   beats
+  off    10         3.9143     7
+  2.0     9         3.9143     6
+  1.5     9         3.9143     6
+  1.0     3         5.2538     2
+  0.75    1         4.8925     1
+  0.5     1         4.8925     1
+
+Monotone in the wrong direction again: any scaling below the current rule costs more
+than it saves, and at k=1.0 acceptance collapses to 3. So the OR with a fixed 0.1 floor
+is already the best of the family and section 10's plain cap move is the whole win.
+The three bad accepts stay in. n=18 here (only frames with both a candidate and an
+identity), identity 4.8925, current 3.9143 on that subset.

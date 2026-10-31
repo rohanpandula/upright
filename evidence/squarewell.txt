@@ -116,3 +116,49 @@ reimplementations of described behaviour. The port stays MIT.
 
 Evidence: /tmp/sq/results.txt, /tmp/sq/r2.txt, /tmp/sq/r3.txt,
 evidence/round11_oracle_40.jsonl, evidence/round11_paired_baseline.jsonl
+
+9. FULL TRANSFER SWEEP — EIGHT ATTEMPTS, ALL NEUTRAL OR WORSE
+=============================================================
+Every attempt below was measured paired against evidence/round11_paired_baseline.jsonl
+on the same image ids, scoring rows[1]['candidate']['raw_rms_pct'] for mode full.
+Baseline is 4.0843 median (n=18); the oracle ceiling is 0.8353. A variant that merely
+reproduces 4.0843 changed nothing, which is itself the result.
+
+  #  attempt                                                  outcome
+  1  per-segment gradient support filter, 4 thresholds         identical (4.0843)
+  2  length-weighted family margin, 2 margins, 2 weightings    identical (4.0843)
+  3  labels + VP re-estimation                                 6.5121, worse, acc 3
+  4  batch consensus over shoot directories (10 groups)        5.5373, worse, acc 2
+  5  joint VP-pair enumeration and global assignment           5.2381, worse, acc 3
+  6  prune-and-recheck hill-climb on post-warp axis deviation  2.6489 vs 1.6434 (n=4)
+  7  demote-don't-relabel per family, 0.3/1.0/2.5 deg          7.94 / 5.17 / 5.76, worse
+  8  boundary step corroboration (cross-strip vs within-strip)  5.48 / 6.30 / 7.97, worse
+
+Attempt 1 sanity-checked to byte-identical output at alpha=0.0, so the harness is sound.
+
+WHY THEY FAIL — the mechanism, not bad luck
+--------------------------------------------
+Attempts 2 and 8 change the *label* or the *member set* and produce identical or worse
+results because the classifier's decision is almost never the thing that flips. Attempts
+3, 4, 5, 7 all re-derive the vanishing points and all get worse: the port's VPs are
+better than anything re-derived from the same segments, because estimate_vanishing_points
+runs a multi-model RANSAC over segment pairs with a disjoint re-assignment, and every one
+of my re-derivations is a cruder second guess at the same data.
+
+The decisive observation is the acceptance count: the baseline accepts 4 of 18. The
+variant attempts mostly *reduce* it. So the port is starved, not polluted. Filtering
+segments removes inliers the solver needs before it can pass its own gate; the detector
+already returns ~517 segments, so segment count was never the shortage.
+
+THE REAL QUESTION
+-----------------
+Not "which segments are wrong" but "why does _alignment_quality reject 14 of 18 good
+photos". On the 18 paired cases the candidate beats identity on 10 and loses on 8, with
+medians of 4.0843 against 4.8925 — so there is a real but thin edge available, and the
+gate is throwing most of it away. That is where the work belongs.
+
+CONSEQUENCE FOR THE PORT
+------------------------
+Do not change the classifier. Keep estimate_vanishing_points and _classify as they are.
+Work on the gate and on the output policy. Attempts 1-8 are all reverted; nothing in
+port/ was modified.

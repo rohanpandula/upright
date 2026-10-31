@@ -432,3 +432,16 @@ Coverage rank loses and the soft form is neutral. Four reasons, all measured:
 If ever revisited, gate it: coverage may only break a near-tie below 0.05 and the
 candidate must carry a minimum share of the winner's weight, or the 43-versus-130
 failure returns.
+
+19a. COVERAGE RESTRICTED TO THE REACHABLE HALF — STILL NULL
+===========================================================
+Since section 18 shows only the vertical choice survives, coverage was retried as a
+VERTICAL-ONLY rank, leaving the horizontals in the weight order the downstream sort
+would impose anyway. This is the fairest form of the idea and it still loses: 2.7546
+against the current 2.6275, identity 3.4479, accepted 9 against 10, 6 beats and 3
+regressions.
+
+So the -0.37 correlation is real but too weak to act on, exactly as the coverage
+worker said (median top-two gap 0.024, 10 of 13 contested frames below 0.05). Coverage
+would have to be used as a tie-break only, and a tie-break this narrow needs a much
+larger sample before it is worth a code path.

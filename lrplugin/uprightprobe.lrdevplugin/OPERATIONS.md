@@ -222,9 +222,32 @@ here rather than from a `/tmp/uplim` copy**:
 cp lrtest/ImportSweep.lua.bak lrplugin/uprightprobe.lrdevplugin/ImportSweep.lua
 ```
 
-That backup is the exact shipped file (correct `BASE`, syntax-checked). Older
-copies in `/tmp/uplim/ImportSweep.orig.lua` and `/tmp/sweeptest/` predate job
-mode and are for history only.
+That backup is **historical, not current**. Both files carry the same `BASE` and
+both pass `luac -p`, so the backup still loads — but `diff` against the shipped
+file is **160 lines**, and restoring it drops everything added since: the
+`getenv`/`removeFile` sandbox wrappers (`os.getenv` and `os.remove` do not exist
+in this Lua build, so without the wrappers every env var reads nil), multi-window
+AX lookup for Transform/Update/Upright, the identity-homography slot wipe, guided
+segments written in a separate prior write, and the digest-restamp early-out.
+Excerpt, `.bak` on the left:
+
+```
+28a29,43
+> -- os.getenv is absent in the LR Lua sandbox on this build; wrap it.
+> local function getenv(k)
+>     local ok, v = pcall(function() return os.getenv(k) end)
+>     if ok then return v end
+>     return nil
+> end
+45c60
+< local JOB = os.getenv('UPRIGHT_JOB') or '/tmp/uplim/job.txt'
+---
+> local JOB = getenv('UPRIGHT_JOB') or '/tmp/uplim/job.txt'
+```
+
+Refresh the backup from the shipped file before relying on it, and record the
+date it matches. Older copies in `/tmp/uplim/ImportSweep.orig.lua` and
+`/tmp/sweeptest/` predate job mode and are for history only.
 
 If two agents must run at once, stagger them: the lock serialises trace writes
 but not UI focus, and AX presses from one run can land in the other's dialog.

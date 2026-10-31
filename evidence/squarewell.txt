@@ -529,3 +529,50 @@ the solvable-subset number it is.
 Note the metric: raw_rms_pct against the cached Adobe transform, so it is an
 accuracy measure only where a transform exists. 774 attempts over 450 photos means
 both modes are counted.
+
+23. THREE MORE NULLS FROM THE INTERRUPTED BATCH, AND THE RECURRING LESSON
+==========================================================================
+All eight workers died together in a provider outage. Three had written partial
+artifacts that are still scoreable; the fourth (subset search) died on an array bug
+after one image and is not.
+
+A. GLOBAL ROLL NUISANCE FIT. Estimate the frame's global roll robustly over all
+segments, then judge each family's signed bias relative to that field instead of
+against zero. At the current 5.0 cap: 3.1023 against the 2.6275 baseline, accepted 8
+against 10, 6 beats 2 regressions. At 1.0 it is exactly identical to the baseline
+(3.4479, accepted 4), so the roll term changes nothing there. Loses at 5.0, neutral
+at 1.0. Null.
+
+B. QUAD PLAUSIBILITY GATE. Map the frame corners through the candidate and reject a
+quad that is implausibly sized or degenerate. Note the app's windows do not transfer
+directly: its output is a crop, so its accepted areas run 0.10-0.85 of the frame,
+while ours is a FRAMED warp and its accepted areas run 0.91 to 1.74, all above 1 in
+most cases. Placed on our own distribution the idea looks good on the 18 solvable
+photos - a cap at 1.15-1.30 rejects exactly the two worst results and moves 3.9143 to
+3.1716 with the beat count unchanged at 7. But it does not survive scale. On 200
+validation photos (58 solvable, identity 3.7091):
+
+  cap      accepted   returned   beats   worse
+  none     32         2.9184     18      13
+  1.10     19         3.3407     12      6
+  1.15     25         3.0264     15      9
+  1.20     26         3.1630     15      10
+  1.25     29         2.9184     17      11
+  1.35     29         2.9184     17      11
+  1.50     30         2.9184     18      11
+
+Nothing beats no cap, and 1.10-1.20 are worse. 1.35-1.50 is exactly neutral with two
+fewer damaging accepts, so it is a harmless tie-break at best. Null.
+
+C. SUBSET SEARCH over the six worst-fitting segments. Died on an inhomogeneous-array
+bug after the first image; not scored. Untested, not refuted.
+
+THE RECURRING LESSON, NOW MEASURED THREE TIMES
+-----------------------------------------------
+The gate fix, the quad cap and the adoption contract all look strong on the paired
+solvable photos and then evaporate or invert at corpus scale (sections 12, 22, 23B).
+The paired set is the intersection where a candidate exists, so it is biased towards
+exactly the frames where a starved gate hurts. Anything measured only there will
+overstate itself. Future work should quote a corpus number alongside the paired one
+from the start, and the paired number should be labelled as a solvable-subset figure
+wherever it appears.

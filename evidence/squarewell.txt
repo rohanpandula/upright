@@ -489,3 +489,43 @@ than it saves, and at k=1.0 acceptance collapses to 3. So the OR with a fixed 0.
 is already the best of the family and section 10's plain cap move is the whole win.
 The three bad accepts stay in. n=18 here (only frames with both a candidate and an
 identity), identity 4.8925, current 3.9143 on that subset.
+
+22. CORPUS-SCALE VALIDATION — THE GATE FIX IS COVERAGE, NOT ACCURACY
+=====================================================================
+Section 10 measured 22 paired photos. Those 22 are the SOLVABLE subset, which is
+exactly where a starved gate hurts most, so the 3.4479 -> 2.6275 win does not
+transfer to the whole corpus. Re-run over 774 attempts on 450 photos, returned =
+identity on rejection, four limits in one pass:
+
+  limit   attempts   accepted   rate    returned   worse   better
+  1.0     774         74        9.6%    2.1911      15      56
+  3.0     774        218       28.2%    2.1371      73     139
+  5.0     774        276       35.7%    2.2036     112     157
+  8.0     774        302       39.0%    2.2036     131     164
+
+Identity medians are 2.4331 on calibration and 2.1587 on validation. Every limit
+stays BELOW identity on both splits, so the gate is not making the port worse than
+doing nothing at any of them. But the returned median is essentially flat: 1.0 gives
+2.1911 and 5.0 gives 2.2036, a 0.6% regression, while acceptance nearly quadruples
+(9.6% -> 35.7%). The worse-than-identity count rises from 15 to 112 and the better
+count from 56 to 157, so the net direction is a wash in quality and a large gain in
+coverage.
+
+  split         limit 1                    limit 5
+  calibration   36/254, 2.3778, w10       104/254, 2.3778, w41
+  validation    38/520, 2.0812, w5        172/520, 2.0882, w71
+
+Calibration is identical at both limits (2.3778) and validation is 0.3% worse at
+5.0 (2.0812 -> 2.0882). So the correct claim is: 5.0 triples coverage and leaves
+accuracy flat, and it does not deliver the accuracy gain the 22-photo set suggested.
+
+IS 5.0 STILL RIGHT? Yes, on the project's own stated problem. Coverage was the
+complaint - 8.9% acceptance was called a poor clone, and round 10 had already
+fought the gate once for that reason. Going from 9.6% to 35.7% while remaining
+below identity on both splits is the right trade. But the report and site must say
+"coverage" and not "accuracy", and the 3.4479 -> 2.6275 figure must be labelled as
+the solvable-subset number it is.
+
+Note the metric: raw_rms_pct against the cached Adobe transform, so it is an
+accuracy measure only where a transform exists. 774 attempts over 450 photos means
+both modes are counted.

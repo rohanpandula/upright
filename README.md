@@ -61,7 +61,7 @@ captures none of that. [CONTRIBUTING.md](CONTRIBUTING.md) covers it in detail.
 ## Install
 
 ```bash
-python3 -m pip install numpy opencv-python-headless<5
+python3 -m pip install numpy 'opencv-python-headless<5'
 ```
 
 The port needs only numpy and OpenCV, and CI enforces that by running the port's own tests with
@@ -69,7 +69,7 @@ nothing else installed. Three of the test files also reach the older prototype i
 `upright_core.py`, which uses scipy and Pillow, so the full suite needs those too:
 
 ```bash
-python3 -m pip install numpy opencv-python-headless<5 scipy pillow pytest
+python3 -m pip install numpy 'opencv-python-headless<5' scipy pillow pytest
 ```
 
 ## Usage

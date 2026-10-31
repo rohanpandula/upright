@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install numpy opencv-python-headless<5 pytest
+      - run: pip install numpy 'opencv-python-headless<5' pytest
       - run: python -m pytest -q test_port.py test_round2.py test_round3.py test_round10.py
         working-directory: port
 
@@ -25,6 +25,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install numpy opencv-python-headless<5 scipy pillow pytest
+      - run: pip install numpy 'opencv-python-headless<5' scipy pillow pytest
       - run: python -m pytest -q
         working-directory: port

@@ -283,3 +283,31 @@ actually gets:
 Both modes improve on their own old value and both now sit below identity, with the
 same 4-better / 2-worse and the same acceptance of 10. The effect is not
 mode-specific, so it is the gate and not an interaction with the damping path.
+
+14. PEEL ASSIGNMENT — NULL, AND IT NAMES THE REAL CEILING
+========================================================
+Escalating tolerance with consumption (take each family at the tightest tolerance
+where it is clean, remove its members, then relax for the next family) so one family
+cannot absorb another's segments. Ten schedules tested, including vertical-first
+ordering and pure consumption.
+
+Best case a wash: 10 deg start / x1.5 gives 2.4714 against 2.4807, 4 better 6 worse,
+5 accepted against 4. Worst case a catastrophic outlier (6736916, 2.04 -> 48.6 at a
+5 deg start). The mandated 0.5 deg start and 1.0 deg start look better in absolute
+median (3.6066, 3.8327) but that is selection - they fail to fit 9 and 8 of the 18,
+and the cases they keep are the easy ones, so their paired baseline on the survivors
+is only 1.6546 and 2.0676 with 1 accepted.
+
+THE ROOT CAUSE, MEASURED, AND IT MATTERS MORE THAN THE RESULT
+--------------------------------------------------------------
+Our families are not parallel line sets, they are convergent bundles. The angular
+spread of a family about its own median direction has a median of 5-30 degrees
+(observed 12.9, 17.4, 35.8, 4.2), while the RANSAC inlier gate is 1.7 PIXELS. A
+0.5 or 1.0 degree window keeps 2-5 of 115-227 members, and the 3-inlier floor then
+kills the rest of the frame. The film app's tight start works because its sides are
+genuinely parallel; a vanishing-point family converges, so it needs 5-10 degrees
+before the tolerance means anything.
+
+Any future tolerance work must start at 5-10 degrees and prune only the three
+families the solver actually uses. Peel re-partitions the same families and never
+touches family selection, which the 0.8353 oracle says is the ceiling.
